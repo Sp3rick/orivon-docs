@@ -12,4 +12,4 @@ Orivon has multiple community channels which you connect with, join to the one r
 
 - [**Docs Github**]() *contribute to this documentation and propose adds or changes*
 
-- [**Telegram**](t.me/OrivonBrowser) *Telegram group for general support and discussions*
+- [**Telegram**](https://t.me/OrivonBrowser) *Telegram group for general support and discussions*
