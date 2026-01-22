@@ -1,0 +1,8 @@
+{
+  "label": "Implementations",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Implementation details of various Orivon features"
+  }
+}

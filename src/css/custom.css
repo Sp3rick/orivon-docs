@@ -1,0 +1,65 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Light mode variables */
+:root {
+  --ifm-color-primary: #5a3ec0; /* Primary color used for buttons, links, and highlights */
+  --ifm-color-primary-dark: #4b35a8; /* Darker shade for hover states or borders */
+  --ifm-color-primary-darker: #402d90; /* Even darker shade for accents */
+  --ifm-color-primary-darkest: #332470; /* Darkest shade for strong contrast elements */
+  --ifm-color-primary-light: #6a4ddb; /* Lighter shade for backgrounds or subtle highlights */
+  --ifm-color-primary-lighter: #7b5cf2; /* Even lighter shade for softer accents */
+  --ifm-color-primary-lightest: #8c6cfb; /* Lightest shade for very subtle elements */
+  --ifm-code-font-size: 95%; /* Font size for code blocks */
+  --docusaurus-highlighted-code-line-bg: rgba(90, 62, 192, 0.1); /* Background for highlighted lines in code */
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #8c6cfb; /* Primary color for dark mode */
+  --ifm-color-primary-dark: #7b5cf2; /* Darker shade for hover states or borders */
+  --ifm-color-primary-darker: #6a4ddb; /* Even darker shade for accents */
+  --ifm-color-primary-darkest: #5a3ec0; /* Darkest shade for strong contrast elements */
+  --ifm-color-primary-light: #9b7aff; /* Lighter shade for backgrounds or subtle highlights */
+  --ifm-color-primary-lighter: #ab88ff; /* Even lighter shade for softer accents */
+  --ifm-color-primary-lightest: #bb96ff; /* Lightest shade for very subtle elements */
+  --docusaurus-highlighted-code-line-bg: rgba(140, 108, 251, 0.3); /* Background for highlighted code lines in dark mode */
+}
+
+
+
+/* Dark mode customizations */
+[data-theme='dark'] {
+  /* Navbar */
+  .navbar {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  /* Footer */
+  /*.footer {
+    background-color: #111111;
+    color: #cccccc;
+  }*/
+
+  /* Main page sections */
+  .main-wrapper {
+    background-color: #1a1a1a;
+    color: #eeeeee;
+  }
+
+  /* Buttons */
+  /*.button {
+    background-color: #25c2a0;
+    color: #121212;
+  }*/
+
+  /* Highlighted code line */
+  /*.theme-light .highlight-line,
+  .theme-dark .highlight-line {
+    background-color: rgba(255, 255, 255, 0.1);
+  }*/
+}
