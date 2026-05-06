@@ -31,7 +31,7 @@ Example:
 
 The number serves for versioning, so that Domain owners can have multiple DDOC Hashes and update their sites across time without causing DDOC to fail
 
-#### Script for site owners
+#### SCRIPT FOR SITE OWNERS
 
 Who owns a Static Export (or builded) website will be able to add support of DDOC by simply running a script
 

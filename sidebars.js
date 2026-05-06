@@ -44,7 +44,7 @@ const sidebars = {
         {
           type: 'doc',
           id: 'dao-plan',
-          label: 'DAO Structure & Plan',
+          label: 'DAO Plan & Rewards',
         },
         {
           type: 'doc',

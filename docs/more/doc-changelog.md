@@ -51,3 +51,10 @@ Here you will find a list of updates that are made to this documentation across 
 - *Modified nomination from The Orivon Project to Orivon Foundation*
 - *Added Implementation references to the Technical Design*
 - *Improved many other pages*
+
+*6 May 2026 by [sp3rick](https://github.com/Sp3rick):*
+- *Renamed **DAO Structure** & Plan to [**DAO Plan & Rewards**](/docs/dao-plan)*
+- *Improved [**Get Involved**](/docs/involving)*
+- *Improved [**Roadmap**](/docs/roadmap)*
+- *Improved [**DAO Plan & Rewards**](/docs/dao-plan)*
+- *Improved many other pages*

@@ -35,7 +35,7 @@ These featuring will be offered in different ways:
 
 New ways may be added in the future
 
-#### Price influencing factors
+#### PRICE INFLUENCING FACTORS
 
 Then there are some factors influencing the price of the Sponsor and it’s priority versus other bidders
 
