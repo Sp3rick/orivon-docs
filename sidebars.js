@@ -53,6 +53,11 @@ const sidebars = {
         },
         {
           type: 'doc',
+          id: 'growth-contribution',
+          label: 'Growth Contribution'
+        },
+        {
+          type: 'doc',
           id: 'internal-docs',
           label: 'Internal Docs'
         },
