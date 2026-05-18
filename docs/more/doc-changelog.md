@@ -58,3 +58,6 @@ Here you will find a list of updates that are made to this documentation across 
 - *Improved [**Roadmap**](/docs/roadmap)*
 - *Improved [**DAO Plan & Rewards**](/docs/dao-plan)*
 - *Improved many other pages*
+
+*18 May 2026 by [sp3rick](https://github.com/Sp3rick):*
+- *Added [**Growth contribution**](/docs/growth-contribution)*
