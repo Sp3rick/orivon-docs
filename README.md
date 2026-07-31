@@ -10,7 +10,7 @@ You can open an issue or a pull request to propose changes, which are always hig
 
 Anyway we advise to discuss these before in our [Discord](https://discord.gg/DuRg87MvgD) server on #technical-chat
 
-### Guidelines
+### Guidelines 
 
 When you write your contribution, especially when you are contributing into the Technical Design, for most decisions you take, keep a note of the reasons and explanation for each decision you make.
 
