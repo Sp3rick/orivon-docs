@@ -1,0 +1,101 @@
+---
+title: "Tutorials"
+description: "Guided learning paths for Orivon: build a wallet, create providers, use permissions and work with events, step by step."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 30
+tags: ["developers", "tutorials"]
+keywords: "tutorials, guided learning, wallet, provider, permissions, events"
+---
+
+Tutorials are guided paths that take you from a blank directory to a working
+system. Unlike [examples](/docs/developers/examples), which show finished
+projects, tutorials explain every step as they go, so you understand not just
+what to type but why.
+
+<Callout type="info" title="Who are the tutorials for?">
+  Tutorials assume you have a working [development environment](/docs/developers/development-environment)
+  and have done the [quick start](/docs/developers/quick-start) at least once.
+  Each tutorial lists its prerequisites.
+</Callout>
+
+## The tutorial library
+
+<CardGrid columns={2}>
+  <Card title="Building a Wallet" href="/docs/developers/tutorials/building-a-wallet">
+    Create, secure, restore and use an Orivon wallet, from empty directory to
+    signing your first transaction.
+  </Card>
+  <Card title="Creating a DNS Provider" href="/docs/developers/tutorials/creating-a-dns-provider">
+    Build a name resolver on the Orivon network, publish your provider, and
+    answer lookups.
+  </Card>
+  <Card title="Creating a Storage Provider" href="/docs/developers/tutorials/creating-a-storage-provider">
+    Implement a storage provider that pins content, verifies integrity, and
+    charges for capacity.
+  </Card>
+  <Card title="Building a Network Provider" href="/docs/developers/tutorials/building-a-network-provider">
+    Relay peer traffic, manage connections, and publish routing metrics.
+  </Card>
+  <Card title="Using Permissions" href="/docs/developers/tutorials/using-permissions">
+    Understand grants, requests and scopes by building a module with a
+    realistic permission surface.
+  </Card>
+  <Card title="Working with Events" href="/docs/developers/tutorials/working-with-events">
+    Publish, subscribe, and reason about event delivery in a reactive module.
+  </Card>
+</CardGrid>
+
+## How a tutorial is structured
+
+Every tutorial shares a common shape, so you always know where you are:
+
+<Steps>
+  <Step title="Prerequisites">
+    What you need before starting, and what you should have done.
+  </Step>
+  <Step title="Setup">
+    Scaffolding the project and the manifest.
+  </Step>
+  <Step title="Core code">
+    The main implementation, explained block by block.
+  </Step>
+  <Step title="Integration">
+    Wiring permissions, events and configuration.
+  </Step>
+  <Step title="Run it">
+    Building, running and exercising the result.
+  </Step>
+  <Step title="Extend">
+    Suggested next steps and common variations.
+  </Step>
+</Steps>
+
+## Suggested order
+
+If you are new to the platform, follow this order. Each tutorial builds on
+concepts from the previous ones:
+
+<CheckList
+  items={[
+    'Building a wallet: the identity foundation.',
+    'Using permissions: how authorization works.',
+    'Working with events: how packages communicate.',
+    'Creating a storage provider: your first service.',
+    'Creating a DNS provider: your second service.',
+    'Building a network provider: traffic in motion.',
+  ]}
+/>
+
+<Callout type="success" title="Learn by building">
+  The fastest route to fluency is to build all three providers, because they
+  exercise the same architecture from different angles: manifest, permissions,
+  configuration, events and the request cycle. After that, the whole platform
+  feels like variations on one pattern.
+</Callout>
+
+## Related pages
+
+- [Examples](/docs/developers/examples): finished projects to study.
+- [Quick Start](/docs/developers/quick-start): the shortest path to code.
+- [Cookbook](/docs/developers/cookbook): small recipes to reuse.

@@ -1,0 +1,85 @@
+---
+title: "Examples"
+description: "Browse working Orivon examples: complete, runnable projects that show modules, applications, providers, wallets and identity in action."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 29
+tags: ["developers", "examples"]
+keywords: "examples, sample projects, runnable examples, demo"
+---
+
+The fastest way to learn a system is to read working code. This page collects
+complete, runnable Orivon examples. Each example is a small project you can
+clone, build and run, annotated to show the decisions behind it.
+
+<Callout type="success" title="Get the examples">
+  All examples ship with the SDK in the `examples/` directory. Run
+  `orivon run examples/hello-world` to try the first one.
+</Callout>
+
+## The example projects
+
+<CardGrid columns={2}>
+  <Card title="Hello World" href="/docs/developers/examples/hello-world">
+    The minimal module: a manifest, one method, and the request cycle.
+  </Card>
+  <Card title="Wallet Integration" href="/docs/developers/examples/wallet-integration">
+    Signing a message and submitting a transaction through the wallet APIs.
+  </Card>
+  <Card title="Storage Provider" href="/docs/developers/examples/storage-example">
+    A storage provider that pins and serves content by address.
+  </Card>
+  <Card title="Networking Provider" href="/docs/developers/examples/networking-example">
+    A networking provider that relays traffic between peers.
+  </Card>
+  <Card title="Identity Example" href="/docs/developers/examples/identity-example">
+    Resolving, verifying and storing identities.
+  </Card>
+  <Card title="Module Example" href="/docs/developers/examples/module-example">
+    A module that uses permissions and events to do real work.
+  </Card>
+  <Card title="Application Example" href="/docs/developers/examples/application-example">
+    A full application with UI, identity and storage.
+  </Card>
+  <Card title="Configuration Example" href="/docs/developers/examples/configuration-example">
+    A package with deep configuration and environment handling.
+  </Card>
+</CardGrid>
+
+## How to use the examples
+
+Each example follows the same shape:
+
+<Diagram caption="From example to running package.">
+  <Flow column>
+    <DiagramNode accent>Read the project structure</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Build with `orivon build`</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Run with `orivon run`</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Change something and rebuild</DiagramNode>
+  </Flow>
+</Diagram>
+
+The recommended way to learn is to read the example, then modify it. Breaking
+something deliberately and fixing it is the strongest kind of practice.
+
+## What each example teaches
+
+| Example | Covers |
+| --- | --- |
+| Hello World | Manifest, method, request cycle |
+| Wallet Integration | Wallet APIs, signing, transactions |
+| Storage Provider | Storage APIs, content addressing |
+| Networking Provider | Networking APIs, peer connections |
+| Identity Example | Identity APIs, verification |
+| Module Example | Permissions, events, services |
+| Application Example | Lifecycle, UI, full app |
+| Configuration Example | Config layers, environment |
+
+## Related pages
+
+- [Tutorials](/docs/developers/tutorials): guided, longer learning paths.
+- [Quick Start](/docs/developers/quick-start): the shortest path to running code.
+- [Cookbook](/docs/developers/cookbook): small, reusable recipes.

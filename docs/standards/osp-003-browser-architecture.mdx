@@ -1,0 +1,103 @@
+---
+title: "OSP-003: Browser Architecture"
+description: "Draft specification for the browser: process topology, tab lifecycle, navigation, and how renderers and runtime hosts relate."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["standards", "osp-003", "browser"]
+keywords: "OSP-003, browser, process topology, tabs, navigation, site isolation"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+The browser is the surface users see and the place where every other system
+meets. This draft defines its process topology, its tab lifecycle and its
+navigation model.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-003 |
+| Title | Browser Architecture |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Browser |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The browser coordinates a privileged process, per site renderers, runtime
+hosts and the core services. Tabs move through a defined lifecycle, navigation
+is governed by the navigation controller, and every privileged action is
+brokered. The reference design is the
+[Browser Architecture](/docs/technical-design/browser-architecture) page.
+
+## Purpose
+
+The browser exists to present untrusted content and applications safely. Its
+architecture answers the two structural questions: what runs in which process,
+and what happens to a tab over its lifetime.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The browser process and its managers.',
+    'Process topology and site isolation.',
+    'The tab lifecycle state machine.',
+    'Navigation and startup/shutdown sequences.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Module execution (covered by OSP-001).',
+    'Core service internals (covered by OSP-002).',
+    'Web rendering internals beyond the tab lifecycle (covered by the rendering drafts).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-001 Runtime Architecture](/docs/standards/osp-001-runtime-architecture): the hosts the browser starts.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): services the browser brokers to.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): the isolation guarantees.
+
+## Related specifications
+
+- [OSP-004 Module System](/docs/standards/osp-004-module-system): applications in the browser.
+- [OSP-007 Wallet API](/docs/standards/osp-007-wallet-api): signing surfaces the browser presents.
+
+## Implementation status
+
+The reference implementation includes the browser with per site renderers,
+tab state management and the broker model. The draft tracks the reference
+design at 0.1.0. No conformance suite has been published yet.
+
+## Future work
+
+- Spare renderer processes for instant tab restoration.
+- Tab snapshotting.
+- Process sharing where isolation allows.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Browser Architecture](/docs/technical-design/browser-architecture): the reference design.

@@ -1,0 +1,171 @@
+---
+title: "Security Model"
+description: "How the ecosystem keeps users safe: sandboxing, least privilege, capability based access, safe browsing and defense against web3 attacks."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["ecosystem", "security", "sandbox"]
+keywords: "security, sandbox, isolation, least privilege, capabilities, phishing, wallet, threat model"
+---
+
+Security is the ecosystem's most important promise. Users are being asked to own
+their identity, hold keys and move value, which is exactly what attackers want
+to steal. This page explains the threat model, the defenses built into the
+design, and how to think about what is and is not safe.
+
+## Security goals
+
+The ecosystem's security work can be summarized in four goals:
+
+1. **Protect identity.** The keys behind an identity never leave user control.
+2. **Contain applications.** A compromised application cannot reach the system,
+   other applications, or the wallet's keys.
+3. **Make abuse visible.** Trust signals and consent screens make deceptive
+   behavior harder to pull off silently.
+4. **Resist platform capture.** Because the system is decentralized, there is no
+   single server to hack, pressure or take down.
+
+## The threat model
+
+A threat model says who we are defending against and what they can do. The
+ecosystem's main threats:
+
+| Threat | What it looks like | Primary defense |
+| --- | --- | --- |
+| **Malware in an app** | A site or module tries to read data it should not | Sandboxing and least privilege |
+| **Phishing** | A fake site asks you to approve a transfer or reveal keys | Identity, Web3 Score, consent clarity |
+| **Key theft** | An attacker obtains private keys from the device | Secure storage, passphrase, recovery |
+| **Malicious module** | An extension with hidden behavior | Sandboxing, permissions, score |
+| **Supply chain** | A published module or app is tampered with | Signing and content addressing |
+| **Censorship** | An authority blocks content or services | Decentralized infrastructure |
+| **Tracking** | A site profiles users across the web | Default privacy, reduced fingerprinting |
+
+## Sandboxing and isolation
+
+The first line of defense is that applications cannot reach beyond their
+bounds. Every application and [module](/docs/ecosystem/modules) runs in its own
+isolated context.
+
+<Diagram caption="Applications and modules are isolated from each other and from the host.">
+  <Flow>
+    <DiagramNode>App A</DiagramNode>
+    <DiagramNode>App B</DiagramNode>
+    <DiagramNode>Module C</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Sandbox boundary</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Host system</DiagramNode>
+  </Flow>
+</Diagram>
+
+Isolation means a vulnerability in one application is contained. It cannot read
+another application's memory, files or keys.
+
+## Least privilege and capabilities
+
+Isolation only helps if applications also have little to misuse. The ecosystem
+uses a capability model:
+
+<CheckList
+  items={[
+    'An application starts with no special powers.',
+    'It receives only the permissions it declares, and only with user consent.',
+    'Permissions are narrow: "store these files" not "access all storage."',
+    'Every permission is visible and revocable at any time.',
+  ]}
+/>
+
+The browser surfaces this through the wallet and module dashboards, so users can
+always see what is installed and what it can do.
+
+## Protecting the wallet
+
+The wallet is the crown jewel, so it gets its own protections:
+
+<CardGrid columns={2}>
+  <Card title="Keys never leave">
+    Applications ask for signatures; they never see keys.
+  </Card>
+  <Card title="Clear signing">
+    The wallet shows exactly what will be signed, in plain language, and
+    requires confirmation.
+  </Card>
+  <Card title="Protected storage">
+    Keys sit behind OS secure storage, wallet encryption and the user's
+    passphrase.
+  </Card>
+  <Card title="Recovery by design">
+    Losing a device recovers to the same identity through the recovery flow.
+  </Card>
+</CardGrid>
+
+See the [Wallet System](/docs/ecosystem/wallet-system) for details.
+
+## Safe browsing and trust signals
+
+Because phishing is a people problem, not only a code problem, the ecosystem
+adds visible signals:
+
+- The [Web3 Score](/docs/ecosystem/web3-score) shows how a site has behaved.
+- The [Naming System](/docs/ecosystem/naming-system) flags confusingly similar
+  names.
+- The [Identity](/docs/ecosystem/identity) layer lets users verify who they are
+  dealing with.
+- Consent screens slow down high risk actions, which is where phishing attacks
+  usually land.
+
+<Callout type="danger" title="Caution">
+  The single most dangerous pattern on the web is also the hardest to fix: a
+  trusted looking site asking you to sign or reveal something. Treat any
+  unexpected request, even inside the wallet, as suspicious. Verify the
+  application's identity and score before approving.
+</Callout>
+
+## Supply chain and integrity
+
+Content in the ecosystem is content addressed and signed. Applications, modules
+and DDoc documents carry author signatures, and their addresses are derived
+from their content. This means:
+
+<CardGrid columns={2}>
+  <Card title="Tampering is detected">
+    Any change to content changes its address, so a swapped file is caught.
+  </Card>
+  <Card title="Sources are verified">
+    Signatures tie published content to a verifiable identity.
+  </Card>
+  <Card title="Distribution is safe">
+    Content can be served from anywhere, because integrity comes from the
+    address, not the server.
+  </Card>
+</CardGrid>
+
+## Responsible disclosure
+
+Security is never finished. The ecosystem maintains a responsible disclosure
+process so researchers can report issues safely and earn credit. This is one of
+the [Governance](/docs/ecosystem/governance) commitments.
+
+<Callout type="success" title="Next">
+  Security depends on how content actually travels. Read about
+  [Networking](/docs/ecosystem/networking) next.
+</Callout>
+
+## Related pages
+
+- [Wallet System](/docs/ecosystem/wallet-system): key protection in detail.
+- [Web3 Score](/docs/ecosystem/web3-score): trust signals that stop phishing.
+- [Modules](/docs/ecosystem/modules): sandboxing applied to extensions.
+
+## Further reading
+
+- [Storage](/docs/ecosystem/storage): content addressing and integrity.
+- [Governance](/docs/ecosystem/governance): the disclosure and review process.

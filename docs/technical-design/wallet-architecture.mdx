@@ -1,0 +1,271 @@
+---
+title: "Wallet Architecture"
+description: "The internal design of the Orivon wallet: the service model, providers, signing, transactions, events, permissions, security and recovery."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["technical-design", "wallet"]
+keywords: "wallet, keys, signing, transactions, providers, recovery, security, permissions, events"
+---
+
+The wallet is the most sensitive component in Orivon: it owns the keys behind
+every identity and every transaction. This page documents how the wallet is
+structured, how it signs, how providers plug in, and how recovery and security
+work.
+
+## The wallet service model
+
+The wallet is a core service, not a component inside the browser. It lives
+behind the Core API, so no other component ever holds keys or signs directly.
+
+<Diagram caption="The wallet service is the only component that touches keys.">
+  <Flow column>
+    <DiagramNode dim>Any component</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core API (wallet group)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Wallet service</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Key providers</DiagramNode>
+  </Flow>
+</Diagram>
+
+The wallet service owns:
+
+1. The key hierarchy and key providers.
+2. Signing, mediated by consent.
+3. Transaction building and submission through the network stack.
+4. The account model across networks.
+5. Recovery material.
+
+## Wallet abstraction
+
+The wallet exposes a uniform interface over very different networks. The
+abstraction has four parts:
+
+<CardGrid columns={2}>
+  <Card title="Account">
+    A user visible account that maps to network addresses.
+  </Card>
+  <Card title="Network adapter">
+    Translates the uniform model to a specific chain's rules.
+  </Card>
+  <Card title="Signer">
+    Produces signatures for the network's format.
+  </Card>
+  <Card title="Session">
+    Tracks the current identity context the wallet serves.
+  </Card>
+</CardGrid>
+
+This is what lets the browser show "your balance" without knowing which chain it
+came from. The [Ecosystem Wallet System](/docs/ecosystem/wallet-system)
+describes the user experience this enables.
+
+## Providers
+
+Key storage is abstracted behind providers. The wallet never assumes a single
+storage mechanism:
+
+| Provider | Keys live in | Threat level |
+| --- | --- | --- |
+| **SoftwareVault** | Encrypted vault on disk, unlocked by passphrase | Compromised device risk |
+| **OsKeychain** | The operating system's secure keychain | OS compromise risk |
+| **HardwareWallet** | External signing device | Highest protection |
+| **RemoteSigner** | A remote service signing on the user's behalf | Trusts the service |
+
+Providers are interchangeable at the interface level, and the wallet operates on
+whatever provider the user selects. The provider boundary is where the
+[Sandbox](/docs/technical-design/sandbox) guarantees and the wallet's own
+protections meet.
+
+## The key hierarchy
+
+Keys are organized in a hierarchy so that a single compromised key does not
+expose everything:
+
+<Diagram caption="The key hierarchy: master to session keys.">
+  <Flow column>
+    <DiagramNode>Master key (from recovery seed)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Identity keys (per DDoc)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Data keys (encrypt user data)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Session keys (short lived)</DiagramNode>
+  </Flow>
+</Diagram>
+
+- The **master key** protects everything and is derived from recovery material.
+- **Identity keys** correspond to DDoc verification methods.
+- **Data keys** encrypt storage per identity.
+- **Session keys** sign only for a session and are discarded on expiry.
+
+See [Identity Layer](/docs/technical-design/identity-layer) for how the keys
+relate to identity, and [Storage Engine](/docs/technical-design/storage-engine)
+for how data keys are used.
+
+## Signing
+
+Signing is the wallet's core operation, and it is always mediated by consent:
+
+<Steps>
+  <Step title="Request">
+    A component requests a signature for a specific payload.
+  </Step>
+  <Step title="Present">
+    The wallet renders exactly what will be signed, in plain language.
+  </Step>
+  <Step title="Consent">
+    The user approves or rejects. Rejection is final for that request.
+  </Step>
+  <Step title="Sign">
+    The wallet signs in place; the key never leaves its provider.
+  </Step>
+  <Step title="Return">
+    Only the signature is returned to the caller, never the key.
+  </Step>
+</Steps>
+
+<Diagram caption="The signing flow. Keys never leave the provider.">
+  <Flow column>
+    <DiagramNode dim>Caller requests</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Consent surface</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Wallet signs</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Signature returned</DiagramNode>
+  </Flow>
+</Diagram>
+
+The consent surface is the wallet's security UX: it is the last line of defense
+against phishing, which is why the [Security Model](/docs/ecosystem/security-model)
+treats it as core.
+
+## Transactions
+
+Transaction flow is separate from signing:
+
+1. **Build.** The network adapter builds the transaction from the uniform
+   account model.
+2. **Present.** The wallet shows what the transaction does and costs.
+3. **Sign.** Consent is given and the transaction is signed.
+4. **Submit.** The network stack broadcasts the signed bytes.
+5. **Confirm.** The wallet subscribes to confirmations and emits events.
+
+The wallet never submits raw, unsigned requests. Every transaction on the
+network is signed first, which is why a network compromise cannot forge value
+movement.
+
+## Events
+
+The wallet emits typed events on the communication bus:
+
+| Event | Meaning |
+| --- | --- |
+| `account-changed` | The active account changed |
+| `balance-changed` | A balance moved |
+| `transaction-pending` | A transaction was submitted |
+| `transaction-confirmed` | A transaction confirmed |
+| `permission-requested` | A signing or account request needs consent |
+
+Events are only delivered to subscribers holding the wallet permission, and they
+never carry key material. See [Communication Bus](/docs/technical-design/communication-bus).
+
+## Security
+
+The wallet's security posture combines several layers:
+
+<CheckList
+  items={[
+    'Keys never leave their provider; only signatures cross process boundaries.',
+    'Signing requires explicit consent for every operation.',
+    'The key hierarchy limits the blast radius of any single key.',
+    'Sessions are short lived and revocable.',
+    'All wallet state is encrypted at rest by the storage engine.',
+  ]}
+/>
+
+The wallet also enforces its own rate limits on signing requests, so a
+compromised caller cannot grind the consent surface into submission.
+
+## Permissions
+
+Wallet capabilities are permissions like any other:
+
+- **Wallet read** lets a component see accounts and balances.
+- **Wallet sign** lets it request signatures, subject to consent.
+- **Wallet manage** lets it change accounts and recovery material.
+
+These are granted through the [Permission System](/docs/technical-design/permission-system)
+and can be revoked independently. A component with wallet read cannot sign, and
+no component can self grant wallet manage.
+
+## Recovery
+
+Recovery is how a user regains access after losing keys. The design must balance
+accessibility against theft risk:
+
+<CardGrid columns={2}>
+  <Card title="Recovery shares">
+    The master key is split into shares held in separate locations; a threshold
+    reconstructs it.
+  </Card>
+  <Card title="Social recovery">
+    Trusted contacts can jointly authorize a recovery, under the identity's
+    policy.
+  </Card>
+  <Card title="Delays and limits">
+    High value recoveries can require time delays and rate limits to deter
+    theft.
+  </Card>
+</CardGrid>
+
+Recovery updates the DDoc with fresh keys, so the identity address survives the
+loss. The recovery flow is described in the [Identity](/docs/ecosystem/identity)
+ecosystem page.
+
+## Security notes
+
+- The wallet is the only component that holds keys, which makes its attack
+  surface small and auditable.
+- Signing is always consensual; there is no silent signing path.
+- Recovery is designed against both loss and theft, not just one.
+
+## Performance notes
+
+- Signing uses the worker pool; it never blocks the main thread.
+- Balance and account reads are cached with event driven invalidation.
+- Provider operations are async, so a slow hardware wallet does not stall the
+  browser.
+
+<Callout type="warning" title="Security">
+  Never add a path that signs without consent, even for "trusted" components.
+  The consent surface is the primary defense against phishing, and every bypass
+  converts a UI mistake into a financial loss.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  When integrating a network, implement a network adapter and route through the
+  wallet service. Direct signing from a component reintroduces the key exposure
+  the architecture exists to prevent.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes multi party signing for shared accounts, account
+  abstraction for cross chain transactions, and custodial provider integration
+  for enterprise users. See [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Identity Layer](/docs/technical-design/identity-layer): the identities the wallet signs for.
+- [Permission System](/docs/technical-design/permission-system): wallet capabilities.
+- [Security Architecture](/docs/technical-design/security-architecture): key protection.
+
+## Further reading
+
+- [Storage Engine](/docs/technical-design/storage-engine): encrypted wallet state.
+- [Networking Stack](/docs/technical-design/networking-stack): transaction transport.
+- [Communication Bus](/docs/technical-design/communication-bus): wallet events.

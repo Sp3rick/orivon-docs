@@ -1,0 +1,103 @@
+---
+title: "System Requirements"
+description: "The hardware and software requirements for Orivon development: operating systems, architecture, memory, disk and toolchain versions."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["developers", "system-requirements"]
+keywords: "system requirements, hardware, operating system, architecture, memory, disk"
+---
+
+Orivon development does not demand a powerful machine. The toolchain is
+lightweight, and the build targets WebAssembly, which keeps the requirements
+modest. This page states the supported configurations.
+
+## Operating systems
+
+| OS | Versions | Architectures |
+| --- | --- | --- |
+| **Windows** | Windows 10 and newer | x86-64 |
+| **macOS** | 13 (Ventura) and newer | Intel, Apple silicon |
+| **Linux** | Modern distributions | x86-64, arm64 |
+
+All platforms run the same CLI and produce the same project format. The
+differences between platforms are limited to the
+[Installation](/docs/developers/installation) steps.
+
+<Callout type="note" title="Linux without a supported distribution">
+  The CLI is a single static binary on Linux. If your distribution is not in
+  the supported set but can run the binary, it will generally work; support is
+  best on the common distributions.
+</Callout>
+
+## Hardware
+
+The requirements are split into minimum and recommended:
+
+| Resource | Minimum | Recommended |
+| --- | --- | --- |
+| **CPU** | 2 cores | 4+ cores |
+| **Memory** | 4 GB | 8 GB+ |
+| **Disk** | 2 GB free | 5 GB free |
+
+The disk figure covers the toolchain, cached packages and build output.
+Projects themselves are small; the disk is spent on the tooling around them.
+
+## Required software
+
+| Software | Minimum version | Notes |
+| --- | --- | --- |
+| **Git** | 2.x | Required for publishing and package metadata |
+| **Node.js** | 18 | Only needed for the SDK and JavaScript examples |
+| **Rust** | 1.7x | Only needed for Rust modules |
+
+The SDK and CLI themselves have no runtime dependency beyond the operating
+system, because modules compile to WebAssembly and run in the sandboxed
+runtime.
+
+<Callout type="info" title="Check your system">
+  Run `orivon doctor` after installing. It verifies the toolchain, reports
+  missing software, and tells you exactly what to fix. See the
+  [CLI reference](/docs/developers/cli).
+</Callout>
+
+## Network
+
+A working internet connection is needed for:
+
+- Downloading the CLI and SDK during installation.
+- Resolving and fetching dependencies.
+- Publishing packages to the registry.
+- Running `orivon dev` workflows that fetch remote content.
+
+Offline development is supported once dependencies are cached; see
+[Project Structure](/docs/developers/project-structure) for how the cache is
+organized.
+
+## What you do not need
+
+It is worth stating what Orivon development explicitly does **not** require:
+
+<CheckList
+  items={[
+    'A powerful GPU. Builds and the dev runtime are CPU focused.',
+    'A blockchain node. Providers are used remotely through the networking APIs.',
+    'A cryptographic hardware wallet. Software signers are sufficient for development.',
+    'A container runtime. Projects run in the local runtime without Docker.',
+  ]}
+/>
+
+This keeps the barrier to entry low, which is the point: building on Orivon
+should be as easy as building a web app.
+
+<Callout type="success" title="Best practice">
+  If your development machine meets the recommended tier, you will never notice
+  the toolchain. If it only meets the minimum, builds take longer but everything
+  still works.
+</Callout>
+
+## Related pages
+
+- [Installation](/docs/developers/installation): how to install what is required.
+- [Development Environment](/docs/developers/development-environment): recommended tools.
+- [Troubleshooting](/docs/developers/troubleshooting): fixes when something does not work.

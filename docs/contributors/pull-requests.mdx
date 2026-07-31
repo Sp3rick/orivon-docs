@@ -1,0 +1,137 @@
+---
+title: "Pull Requests"
+description: "The pull request process for Orivon: preparing a PR, the required checklist, review expectations and merge requirements."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["contributors", "workflow"]
+keywords: "pull requests, PR checklist, review expectations, merge requirements"
+---
+
+A pull request is how your work becomes part of Orivon. A well-prepared PR
+respects reviewers' time, moves through review quickly, and sets your change
+up for merge. This page covers the whole process.
+
+<Callout type="info" title="Start with the template">
+  Use the [pull request template](/docs/contributors/templates/pull-request)
+  when you open your PR. It encodes the required checklist.
+</Callout>
+
+## Preparing a PR
+
+Before you open the PR:
+
+<CheckList
+  items={[
+    'Branch from the current development branch.',
+    'Make the change small and focused on one thing.',
+    'Run the formatter, linter and tests locally.',
+    'Rebase on the latest development branch.',
+    'Write the commit messages following the convention.',
+  ]}
+/>
+
+A PR that passes local checks on the first push is rare and appreciated.
+
+## The required checklist
+
+Every PR must satisfy:
+
+| Check | Requirement |
+| --- | --- |
+| Scope | One logical change, described clearly |
+| Tests | New behavior has tests; fixes have regression tests |
+| Checks | Lint, type check and tests pass |
+| Documentation | User-visible changes update the relevant docs |
+| Security | No permissions or sandbox regressions |
+| Privacy | No secrets or personal data in the change |
+| History | Clear commits, no merge noise |
+
+The template restates this list, and the review enforces it.
+
+## Writing the description
+
+A good PR description covers:
+
+```markdown
+### Summary
+Fix the json output flag dropping response headers.
+
+### Motivation
+Consumers of the json output could not read metadata without a second
+request. See #214.
+
+### Test plan
+- Added a unit test for the header serialization.
+- Ran the CLI test suite locally, all pass.
+
+### Tradeoffs
+None beyond the added field in the output object.
+
+### Follow-ups
+Document the json output shape in the CLI reference.
+```
+
+## Review expectations
+
+When your PR is open:
+
+<Steps>
+  <Step title="CI runs">
+    Checks run automatically on every push. Fix failures promptly.
+  </Step>
+  <Step title="Review begins">
+    A reviewer reads the change and posts comments.
+  </Step>
+  <Step title="You respond">
+    Reply to each comment, pushing fixes as needed.
+  </Step>
+  <Step title="Approval">
+    The reviewer approves when the change meets the bar.
+  </Step>
+  <Step title="Merge">
+    The PR merges and the branch is deleted.
+  </Step>
+</Steps>
+
+<Callout type="success" title="The mindset">
+  Review is not a hurdle; it is the process that makes the codebase safe to
+  ship. Feedback on your PR is the highest value feedback you will get.
+  Engage with it openly.
+</Callout>
+
+## Merge requirements
+
+A PR merges when all of the following hold:
+
+<CheckList
+  items={[
+    'Approved by at least one reviewer.',
+    'All required checks pass.',
+    'No merge conflicts with the development branch.',
+    'The description and checklist are complete.',
+  ]}
+/>
+
+Depending on the repository, either a maintainer merges or the author merges
+after approval. Never merge without approval.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Opening huge PRs">
+    Review quality drops with size. Split large work into reviewable PRs.
+  </Card>
+  <Card title="Ignoring review comments">
+    Every comment needs a response, even a polite counterargument.
+  </Card>
+  <Card title="Merging stale branches">
+    Merge the current development branch or rebase before final review.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Development Workflow](/docs/contributors/development-workflow): the full loop.
+- [Code Reviews](/docs/contributors/code-reviews): what reviewers look for.
+- [Pull request template](/docs/contributors/templates/pull-request): the form to use.

@@ -1,0 +1,102 @@
+---
+title: "Types"
+description: "Reference for the primitive and composite types shared across the Orivon APIs."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["api-reference", "types"]
+keywords: "types, type reference, primitives, unions, aliases, generics, composite types"
+---
+
+This page defines the primitive, union and generic types used throughout the
+APIs. Interfaces are documented separately on [Interfaces](/docs/api-reference/interfaces);
+value constants are on [Enums](/docs/api-reference/enums).
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Primitive conventions
+
+| Type | Convention |
+| --- | --- |
+| `string` | UTF-8; identifiers are lowercase kebab-case. |
+| `number` | Double precision; epoch values are milliseconds. |
+| `boolean` | `true` / `false` only. |
+| `Uint8Array` | Binary data. Never passed as a base64 string. |
+| `null` / `undefined` | `null` is not produced by the API; absence is `undefined`. |
+| `unknown` | JSON-serializable payload; validate before use. |
+
+## Type index
+
+| Type | Definition | Used by |
+| --- | --- | --- |
+| `AssetSymbol` | `string` | Wallet, DNS. |
+| `EpochMs` | `number` | All timestamps. |
+| `Did` | `` `did:orivon:${string}` `` | Identity. |
+| `Hex` | `` `0x${string}` `` | Wallet, security. |
+| `Json` | `boolean \| number \| string \| null \| Json[] \| {[k: string]: Json}` | Messaging, storage. |
+| `Page<T>` | `{items: T[], cursor?: string, hasMore: boolean}` | Pagination. |
+| `HttpMethod` | `"GET" \| "POST" \| "PUT" \| "DELETE" \| "PATCH"` | Networking. |
+| `MimeType` | `string` | Storage, networking. |
+| `PermissionName` | `` `domain:action` `` | Permissions. |
+| `Version` | `` `${number}.${number}.${number}` `` | Versioning. |
+| `Rfc3339` | `string` | Schemas, JSON documents. |
+
+## Generics
+
+### `Page<T>`
+
+The pagination envelope. See [Interfaces](/docs/api-reference/interfaces) for
+the field contract and an example loop.
+
+### `Json`
+
+```ts
+type Json =
+  | boolean
+  | number
+  | string
+  | null
+  | Json[]
+  | { [key: string]: Json };
+```
+
+Rules:
+
+- `undefined` is not valid JSON; omit the field instead.
+- `BigInt` is not serializable; use string for large integers.
+- Dates serialize as `Rfc3339` strings in JSON documents.
+
+## Union examples
+
+```ts
+type StartReason = 'user' | 'url-handler' | 'autostart' | 'internal';
+
+type HttpStatusError = 'ERR_TIMEOUT' | 'ERR_DNS_NOT_FOUND' | 'ERR_CONNECTION_CLOSED';
+```
+
+## Template literal types
+
+```ts
+type Did = `did:orivon:${string}`;
+
+type PermissionName = `${string}:${string}`;
+
+type Version = `${number}.${number}.${number}`;
+```
+
+## Conversion helpers
+
+```ts
+function toEpochMs(date: Rfc3339): EpochMs;
+function toRfc3339(epochMs: EpochMs): Rfc3339;
+function toHex(bytes: Uint8Array): Hex;
+function fromHex(hex: Hex): Uint8Array;
+```
+
+<Note title="Numeric safety">
+  Treat all IDs and amounts crossing the API boundary as opaque strings or
+  numbers per the documented type. Never assume monotonicity or in-process
+  ordering of generated identifiers.
+</Note>
+
+**Related:** [Interfaces](/docs/api-reference/interfaces) · [Enums](/docs/api-reference/enums) · [Functions](/docs/api-reference/functions)

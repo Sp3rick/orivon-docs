@@ -1,0 +1,168 @@
+---
+title: "Third-Party Licenses"
+description: "Registry of third-party software licenses used by Orivon. Generated from dependency manifests."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["project", "licenses", "third-party", "dependencies", "registry"]
+keywords: "third-party licenses, dependencies, registry, orivon dependencies"
+---
+
+This page provides a registry of third-party licenses for Orivon's
+dependencies. It is **generated automatically** from `Cargo.lock`,
+`package-lock.json`, and other lockfiles at each release.
+
+<Callout type="info" title="Authoritative source">
+  The definitive, machine-readable registry is published with each release as
+  `THIRD-PARTY-LICENSES.json` and `THIRD-PARTY-LICENSES.csv` in the release
+  artifacts. This page is a human-readable summary.
+</Callout>
+
+## License distribution (v1.2.0)
+
+| License Family | Count | Percentage |
+| --- | --- | --- |
+| MIT | 412 | 42% |
+| Apache-2.0 | 287 | 29% |
+| BSD-3-Clause | 123 | 12% |
+| BSD-2-Clause | 67 | 7% |
+| ISC | 41 | 4% |
+| Unicode-DFS-2016 | 18 | 2% |
+| CC0-1.0 | 12 | 1% |
+| MPL-2.0 | 9 | 1% |
+| Other permissive | 24 | 2% |
+| **Total** | **993** | **100%** |
+
+<Callout type="success" title="Zero copyleft dependencies">
+  Orivon has **zero** GPL, AGPL, LGPL, or other copyleft dependencies in the
+  platform runtime, browser, core, or SDKs. This is enforced by CI.
+</Callout>
+
+## Top dependencies by license
+
+### Apache-2.0
+| Crate/Package | Version | Purpose |
+| --- | --- | --- |
+| `aws-lc-rs` | 0.1.x | Cryptographic primitives (TLS, X.509, etc.) |
+| `ring` | 0.17.x | Low-level crypto (AEAD, KDF, signatures) |
+| `tonic` | 0.10.x | gRPC implementation |
+| `prost` | 0.12.x | Protocol Buffers |
+| `hyper` | 1.x | HTTP/1.1, HTTP/2 client/server |
+| `reqwest` | 0.12.x | HTTP client |
+| `tokio` | 1.x | Async runtime |
+| `tower` | 0.4.x | Service middleware |
+| `axum` | 0.7.x | Web framework (internal tools) |
+
+### MIT
+| Crate/Package | Version | Purpose |
+| --- | --- | --- |
+| `serde` | 1.0.x | Serialization framework |
+| `serde_json` | 1.0.x | JSON support |
+| `thiserror` | 1.0.x | Error handling |
+| `anyhow` | 1.0.x | Error handling |
+| `tracing` | 0.1.x | Structured logging |
+| `clap` | 4.x | CLI argument parsing |
+| `indicatif` | 0.17.x | Progress bars |
+| `tempfile` | 3.x | Temporary files |
+| `walkdir` | 2.x | Directory traversal |
+
+### BSD-3-Clause
+| Crate/Package | Version | Purpose |
+| --- | --- | --- |
+| `wasmtime` | 19.x | WebAssembly runtime (core dependency) |
+| `cranelift` | 0.109.x | Code generation for Wasmtime |
+| `wasmparser` | 0.190.x | WebAssembly parsing |
+| `object` | 0.32.x | Binary object manipulation |
+| `goblin` | 0.6.x | Binary parsing |
+
+## Dependency policy enforcement
+
+| Rule | Enforcement |
+| --- | --- |
+| **No copyleft** | `cargo deny check licenses` — blocks GPL, AGPL, LGPL, etc. |
+| **Permissive only** | Allowlist: Apache-2.0, MIT, BSD-*, ISC, CC0, Unicode-DFS-2016, MPL-2.0 (review), EPL-2.0 (review) |
+| **License file required** | Every dependency must have a license file or SPDX header |
+| **SPDX in lockfile** | `cargo metadata --format-version=1` includes license data |
+| **Audit trail** | `THIRD-PARTY-LICENSES.json` published with every release |
+
+## Generating the registry
+
+The registry is generated during release:
+
+```bash
+# Cargo dependencies
+cargo metadata --format-version=1 > cargo-metadata.json
+cargo-license --json > cargo-licenses.json
+
+# npm dependencies
+npm ls --json --all > npm-deps.json
+license-checker --json > npm-licenses.json
+
+# Combine and deduplicate
+./scripts/generate-third-party-licenses.js \
+  --cargo cargo-licenses.json \
+  --npm npm-licenses.json \
+  --output THIRD-PARTY-LICENSES.json
+```
+
+## Output format (JSON)
+
+```json
+{
+  "generated": "2026-07-15T12:00:00Z",
+  "release": "v1.2.0",
+  "totalDependencies": 993,
+  "licenseDistribution": {
+    "MIT": 412,
+    "Apache-2.0": 287,
+    "BSD-3-Clause": 123,
+    "...": "..."
+  },
+  "dependencies": [
+    {
+      "name": "ring",
+      "version": "0.17.5",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/briansmith/ring",
+      "description": "Safe, fast, small crypto using Rust",
+      "scope": "runtime"
+    }
+  ]
+}
+```
+
+## Scope categorization
+
+| Scope | Description | Examples |
+| --- | --- | --- |
+| **runtime** | Shipped in browser/runtime binaries | `wasmtime`, `ring`, `aws-lc-rs` |
+| **build** | Build-time only (proc-macros, build.rs) | `serde_derive`, `prost-build` |
+| **dev** | Testing, benchmarking, documentation | `criterion`, `proptest`, `mdbook` |
+| **cli** | CLI tool only | `clap`, `indicatif`, `colored` |
+| **docs** | Documentation site only | `astro`, `react`, `lucide-react` |
+
+## Verification
+
+Users can verify the registry against the release:
+
+```bash
+# Download release artifacts
+wget https://github.com/OrivonBrowser/orivon-runtime/releases/download/v1.2.0/THIRD-PARTY-LICENSES.json
+
+# Verify against lockfile
+./scripts/verify-licenses.sh THIRD-PARTY-LICENSES.json Cargo.lock package-lock.json
+```
+
+## Exception process
+
+If a critical dependency has a non-permissive license:
+
+1. **Document** — File an issue with justification and alternatives analysis.
+2. **Review** — Security WG + Legal (when Foundation formed) review.
+3. **Approve** — TSC supermajority vote required.
+4. **Mitigate** — Isolate in separate process/module; plan migration.
+5. **Track** — Exception logged in `THIRD-PARTY-LICENSES.json` with `exception: true`.
+
+**Current exceptions:** None.
+
+**Related:** [Licensing](/docs/project/licensing) · [Open Source Licenses](/docs/project/open-source-licenses) · [Legal](/docs/project/legal) · [Security Policy](/docs/project/security-policy#dependency-management)

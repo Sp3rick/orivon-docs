@@ -1,0 +1,140 @@
+---
+title: "Issue Guidelines"
+description: "How to file good issues for Orivon: reporting bugs, requesting features, asking questions and improving documentation."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["contributors", "issues"]
+keywords: "issue guidelines, bug reports, feature requests, questions, documentation issues"
+---
+
+Issues are the work queue of the project. A good issue is actionable: it
+gives a maintainer everything needed to understand, reproduce and resolve
+it. This page explains the types of issues and how to write each one well.
+
+<Callout type="info" title="The golden rule">
+  Write the issue you would want to receive. If you were assigned it with no
+  further context, would you know what to do?
+</Callout>
+
+## Types of issues
+
+| Type | Use for |
+| --- | --- |
+| Bug report | Something that does not work as expected |
+| Feature request | A new capability or improvement |
+| Question | Clarification, better as a discussion |
+| Documentation | Missing, wrong or unclear docs |
+
+## Before you file
+
+<CheckList
+  items={[
+    'Search existing issues for a match, including closed ones.',
+    'Search the documentation for the answer.',
+    'Check the latest development version: the bug may be fixed.',
+    'Ask in discussions if you are unsure whether it is a bug or a feature.',
+  ]}
+/>
+
+## Bug reports
+
+Bugs are the most common issue type and the most commonly mishandled. Use
+the [bug report template](/docs/contributors/templates/bug-report). The core
+of a good bug report is a reliable reproduction:
+
+```text
+Steps to reproduce
+1. Create a module with permissions ["identity.read"].
+2. Call identity.resolve("alice.orivon").
+3. Observe: returns a rejected promise.
+
+Expected: the resolved identity.
+Actual: error { code: "unresolvable", name: "alice.orivon" }.
+```
+
+Include versions and environment, and strip the reproduction to its minimum.
+See [Bug Reports](/docs/contributors/bug-reports).
+
+## Feature requests
+
+Feature requests propose improvements. Use the
+[feature request template](/docs/contributors/templates/feature-request),
+and answer the question it asks:
+
+- What problem does this solve?
+- Who is affected and how?
+- What would a good solution look like?
+- What are the tradeoffs?
+
+A feature request without the problem statement is hard to evaluate. The
+problem, not the proposed solution, is the valuable part.
+
+## Questions
+
+Questions are welcome, but the issue tracker is for work items:
+
+| Question | Better home |
+| --- | --- |
+| "How do I do X?" | GitHub discussions or chat |
+| "Is this a bug or intended?" | GitHub discussions, then a bug issue |
+| "What should I work on?" | Discussions or good first issues |
+
+Questions filed as issues are usually converted to discussions by
+maintainers. Save yourself the round trip.
+
+## Documentation issues
+
+Documentation problems are bugs too:
+
+<CheckList
+  items={[
+    'Broken links or missing pages.',
+    'Outdated instructions or examples.',
+    'Unclear explanations a reader could not follow.',
+    'Missing topics that caused you to search.',
+  ]}
+/>
+
+Often the fastest fix is to edit the page yourself. See
+[Documentation Contributions](/docs/contributors/documentation-contributions).
+
+## Labels and triage
+
+Maintainers label issues to organize the queue:
+
+| Label | Meaning |
+| --- | --- |
+| `bug` | Confirmed defect |
+| `feature` | Improvement proposal |
+| `good first issue` | Beginner friendly task |
+| `help wanted` | Open for any contributor |
+| `needs triage` | Not yet reviewed |
+| `documentation` | Docs related |
+
+You do not need to label issues yourself; triage handles it. What you should
+do is reply to questions on your issue and keep it up to date.
+
+## Issue etiquette
+
+<CheckList
+  items={[
+    'One issue per problem; duplicates get closed.',
+    'Do not bump issues for status; watch the labels instead.',
+    'Comment with new information, not agreement.',
+    'Close your own issue if you solved it or it is stale.',
+    'Respect the maintainers time; they triage on their schedule.',
+  ]}
+/>
+
+<Callout type="success" title="The payoff">
+  A great bug report is often the first step to a great contribution. Many
+  contributors fix their own reported issues, and the report is the head
+  start on the fix.
+</Callout>
+
+## Related pages
+
+- [Bug Reports](/docs/contributors/bug-reports): the bug report process.
+- [Feature Requests](/docs/contributors/feature-requests): the proposal process.
+- [Community Guidelines](/docs/contributors/community-guidelines): channel etiquette.

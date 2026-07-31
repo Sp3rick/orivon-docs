@@ -1,0 +1,220 @@
+---
+title: "Orivon Whitepaper"
+description: "The platform paper: why Orivon exists, the problems it addresses, its architectural pillars, and the ecosystem it establishes."
+readingTime: 45
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["research", "whitepaper", "orivon-platform"]
+keywords: "orivon whitepaper, platform, web3 browser, runtime, user agency, decentralization, architecture"
+---
+
+*Orivon Research Group · Version 1.0 · Published 2026-07-15 · Status: Published*
+
+## Abstract
+
+The modern web is a client–server network in which a small number of platforms
+control access to content, identity, and data. Orivon is a web3 browser and
+application runtime that reverses this dynamic. It combines a full-featured
+browser with a sandboxed, WASM-based runtime; an open module system; a
+self-sovereign identity and wallet layer; and decentralized infrastructure for
+networking, storage, and naming.
+
+This paper frames the problems of the modern web, defines the platform's
+architectural pillars, and describes the ecosystem Orivon establishes. It is
+the entry point for the deeper papers in this section: each pillar is expanded
+in its own whitepaper.
+
+## Background
+
+Browsers were designed in an era when the web was primarily a document network.
+Three decades later they are the operating systems of the internet — the 
+runtime for almost all software most people use — yet the assumptions of that
+original era still shape them. The result is an architecture optimized for
+advertising and centralized control rather than for users.
+
+At the same time, a separate stack grew up around the blockchain ecosystem:
+wallets, identity systems, decentralized storage, and naming systems. These
+innovations are powerful but fragmented. Users must jump between browser
+extensions, mobile wallets, and command-line tools, each with its own security
+model. Web3 has not arrived as a *platform*; it has arrived as a collection of
+add-ons.
+
+Orivon's hypothesis is that the browser is the correct integration point:
+a single surface where the open web, user identity, and decentralized
+infrastructure can finally converge.
+
+## Problem Statement
+
+The web today exhibits three structural failures:
+
+1. **Concentration of power.** Content, payments, and identity are mediated by
+   a handful of platforms that control the discovery and monetization of the
+   entire web.
+2. **Misaligned incentives.** Browsers and services are funded by surveillance
+   advertising, so the product optimizes for tracking and engagement rather
+   than user outcomes.
+3. **Broken identity and data ownership.** Users do not control their identity
+   or data; they borrow both from providers, who can revoke access at any
+   time.
+
+A web browser that does not address these failures is not a fix; it is a
+rebranding. Any meaningful solution must change the *underlying architecture*:
+who holds identity, who holds data, and who runs software.
+
+## Motivation
+
+The motivation for Orivon is therefore architectural, not incremental:
+
+- **User agency.** The user, not the platform, should own identity, data, and
+  the decision of what software runs on their device.
+- **Open participation.** Anyone should be able to build, distribute, and run
+  applications without asking permission from a gatekeeper.
+- **Safety by construction.** User agency is only meaningful if the platform
+  can run third-party code without endangering the user. Safety must be a
+  structural property, not a matter of trust.
+- **A usable decentralized stack.** Existing decentralized systems are
+  technically sound but practically inaccessible. Orivon aims to make them
+  usable for an ordinary user.
+
+These motivations lead to a small number of principles that constrain every
+design decision in the platform (see Appendix A).
+
+## Architecture
+
+The platform is organized into five pillars.
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                         Orivon Browser                     │
+│  tabs · address bar · wallet & identity surface · settings │
+├────────────────────────────────────────────────────────────┤
+│                      Orivon Runtime                        │
+│  WASM execution · module sandbox · scheduling · isolation  │
+├────────────────────────────────────────────────────────────┤
+│                      Orivon Core                           │
+│  platform services · module lifecycle · host interfaces    │
+├────────────────────────────────────────────────────────────┤
+│     Module System (application layer, runs on runtime)     │
+│  manifests · permissions · distribution · messaging        │
+├────────────────────────────────────────────────────────────┤
+│        Decentralized Infrastructure                        │
+│  networking (P2P + DNS) · storage (DSN) · identity (DIDs)  │
+└────────────────────────────────────────────────────────────┘
+```
+
+### The Browser
+
+A full browser with the standard surface users expect — tabs, address bar,
+bookmarks, history — extended with an integrated wallet and identity surface.
+The browser is the front door; everything below it is invisible to the user
+until they need it.
+
+### The Runtime
+
+A sandboxed execution environment for untrusted modules, built on
+WebAssembly. The runtime provides scheduling, resource isolation, and a
+capability-secure host interface. No module can touch the platform except
+through explicitly granted capabilities.
+
+### The Core
+
+The small, trusted foundation: platform services (networking, storage,
+identity, wallet), module lifecycle management, and the APIs the runtime and
+browser build on. Minimalism of the core is itself a security property.
+
+### The Module System
+
+Modules are the unit of distribution, permissioning, and isolation. A module
+declares its capabilities in a manifest, is verified on installation, and runs
+inside the sandbox. Applications, extensions, and even system components are
+all modules.
+
+### Decentralized Infrastructure
+
+Direct access to decentralized networking (including DNS), storage, and
+identity. The platform talks to these systems natively rather than through
+centralized intermediaries.
+
+## Design Decisions
+
+The architecture is the result of five load-bearing decisions:
+
+| Decision | Rationale |
+| --- | --- |
+| **Browser is the platform** | The browser already mediates the user's entire digital life; extending it is more credible than a parallel app. |
+| **WASM as the execution substrate** | Portable, sandboxable, fast, and language-neutral; the only mature sandbox that is not tied to one language. |
+| **Capability-based security** | Modules cooperate without trusting each other; every interaction requires an explicit grant. |
+| **Self-sovereign identity** | Users hold DIDs and credentials; no provider can revoke their existence on the network. |
+| **Local-first by default** | Data lives on the user's device, encrypted; remote systems are replicas, not sources of truth. |
+
+Each decision is analysed in depth in the corresponding
+[Design Documents](/docs/research/design-documents) entry, where alternatives
+and trade-offs are recorded.
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Sandboxing vs. native performance | Sandbox (WASM) | Some performance overhead vs. native code; mitigated by JIT and host fallbacks. |
+| Local-first vs. cloud convenience | Local-first | Sync and collaboration are harder; requires a replication layer. |
+| User agency vs. platform convenience | User agency | More user decisions (permissions, identity, storage); requires strong UX. |
+| Decentralization vs. operational simplicity | Decentralization | Higher latency and operational complexity for some operations. |
+| Minimal core vs. feature richness | Minimal core | More work to add features at the right layer; discipline required. |
+
+## Implementation Strategy
+
+The platform is implemented in stages, each gated on a stable foundation:
+
+1. **Core + Runtime** — the trust boundary and execution model land first.
+2. **Module System** — manifests, permissions, and distribution.
+3. **Browser surface** — tabs, address bar, and integrated wallet/identity.
+4. **Decentralized infrastructure** — networking, storage, identity,
+   integrated natively.
+5. **Web3 Score** — reputation, built on the identity layer.
+
+The strategy favors vertical slices that are independently testable. Every
+stage ships with a conformance test suite; see the [Standards](/docs/standards/conformance-testing)
+section.
+
+## Future Work
+
+- Formal verification of the sandbox's capability confinement properties.
+- Interoperability with the broader W3C ecosystem and emerging web3 standards.
+- Decentralized update and governance mechanisms for the platform itself.
+- A distributed storage network (DSN) operating at scale.
+- Privacy-preserving reputation (see the [Web3 Score Research](/docs/research/web3-score-research)).
+
+## References
+
+- Orivon, *Browser Whitepaper*, 2026.
+- Orivon, *Runtime Whitepaper*, 2026.
+- Orivon, *Security Whitepaper*, 2026.
+- W3C, *WebAssembly Core Specification*, current recommendation.
+- W3C DID Working Group, *Decentralized Identifiers (DIDs) v1.0*.
+- Internet Identity Workshop, *Identity Credential and Access Management*
+  literature series.
+
+## Appendix A — Platform principles
+
+1. **Users own their identity.** Identity is held by the user, expressed as
+   DIDs, and cannot be revoked by any provider.
+2. **Users own their data.** Data is local-first and encrypted; sharing is
+   explicit and revocable.
+3. **Software is permissioned, not trusted.** Code runs in a sandbox and acts
+   only through granted capabilities.
+4. **The ecosystem is open.** Anyone can build, distribute, and run modules
+   without a gatekeeper.
+5. **Infrastructure is decentralized.** The platform's infrastructure is
+   operated by its users, not by a single company.
+
+## Appendix B — Relationship to other documents
+
+| Document | Relationship |
+| --- | --- |
+| [Browser Whitepaper](/docs/research/browser-whitepaper) | Deep-dive on pillar 1. |
+| [Runtime Whitepaper](/docs/research/runtime-whitepaper) | Deep-dive on pillar 2. |
+| [Core Whitepaper](/docs/research/core-whitepaper) | Deep-dive on pillar 3. |
+| [Module System Whitepaper](/docs/research/module-system-whitepaper) | Deep-dive on pillar 4. |
+| [Networking Whitepaper](/docs/research/networking-whitepaper) | Deep-dive on pillar 5. |
+
+**Related:** [Browser Whitepaper](/docs/research/browser-whitepaper) · [Runtime Whitepaper](/docs/research/runtime-whitepaper) · [Security Whitepaper](/docs/research/security-whitepaper) · [Research Library](/docs/research/research-library)

@@ -1,0 +1,203 @@
+---
+title: "CLI Reference"
+description: "Reference for the Orivon CLI: commands, flags, exit codes and examples."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 30
+tags: ["api-reference", "cli-reference"]
+keywords: "cli, cli reference, orivon cli, commands, flags, exit codes, orivon init, orivon build, orivon test, orivon publish, orivon run"
+---
+
+The `orivon` command-line tool is used to scaffold, build, test, run and
+publish packages. This page is the command reference; for a walkthrough see
+[Developer Documentation](/docs/developers/installation).
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Usage
+
+```sh
+orivon [global options] <command> [command options] [arguments]
+```
+
+### Global options
+
+| Flag | Description |
+| --- | --- |
+| `-h, --help` | Show help. |
+| `-v, --version` | Print version. |
+| `--verbose` | Verbose logging. |
+| `--json` | Machine-readable output. |
+| `--config <path>` | Use a config file. |
+| `--no-color` | Disable color output. |
+
+## Commands
+
+### `init`
+
+Scaffold a new package.
+
+```sh
+orivon init [name] [--type module|application] [--template <name>] [--yes]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--type` | Package type. Default `module`. |
+| `--template` | Template name. |
+| `--yes` | Accept defaults without prompting. |
+
+### `build`
+
+Compile and bundle a package.
+
+```sh
+orivon build [--watch] [--minify] [--sourcemap] [--out-dir <dir>]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--watch` | Rebuild on change. |
+| `--minify` | Minify output. |
+| `--sourcemap` | Emit source maps. |
+| `--out-dir` | Output directory. Default `dist`. |
+
+### `test`
+
+Run the package test suite.
+
+```sh
+orivon test [--watch] [--coverage] [--filter <pattern>] [--ci]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--watch` | Watch mode. |
+| `--coverage` | Emit coverage report. |
+| `--filter` | Run tests matching a pattern. |
+| `--ci` | CI mode (fail on warnings). |
+
+### `run`
+
+Launch a package against the runtime.
+
+```sh
+orivon run [path] [--profile <name>] [--debug] [--env <KEY=value>]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--profile` | Runtime profile. |
+| `--debug` | Attach a debugger. |
+| `--env` | Override an environment variable. |
+
+### `package`
+
+Validate the manifest and produce a distributable artifact.
+
+```sh
+orivon package [--out <file>] [--sign] [--key <id>]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--out` | Output artifact path. |
+| `--sign` | Sign the artifact. |
+| `--key` | Key id used for signing. |
+
+### `publish`
+
+Publish a package to a storefront.
+
+```sh
+orivon publish [path] [--store <store>] [--token <token>] [--dry-run]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--store` | Target storefront. |
+| `--token` | Publish token. |
+| `--dry-run` | Validate without publishing. |
+
+### `manifest`
+
+Inspect or generate manifest data.
+
+```sh
+orivon manifest [path] [--json]
+```
+
+### `dns`
+
+Manage registered DNS names.
+
+```sh
+orivon dns resolve <name>
+orivon dns register <name> --records <file>
+orivon dns update <name> --records <file>
+orivon dns release <name>
+```
+
+### `key`
+
+Manage signing keys.
+
+```sh
+orivon key generate [--algorithm <alg>]
+orivon key list
+orivon key export <id>
+orivon key delete <id>
+```
+
+## Examples
+
+```sh
+# Scaffold an application
+orivon init example.wallet --type application --yes
+
+# Build for production
+orivon build --minify --sourcemap
+
+# Run tests in CI
+orivon test --ci --coverage
+
+# Launch with a debugger
+orivon run --debug
+
+# Validate and package
+orivon package --sign --key wallet-signer
+
+# Publish (dry run)
+orivon publish --dry-run
+```
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Success. |
+| `1` | Command failure. |
+| `2` | Usage or argument error. |
+| `3` | Validation failure (manifest, schema). |
+| `4` | Build failure. |
+| `5` | Test failure. |
+
+## JSON output
+
+With `--json`, commands emit a result envelope:
+
+```json
+{
+  "command": "build",
+  "ok": true,
+  "durationMs": 482,
+  "artifact": "dist/package.orivon"
+}
+```
+
+<Note title="Exit codes in automation">
+  Match on exit codes, not on stderr text. Codes are stable within the 1.x
+  series; see [Deprecations](/docs/api-reference/deprecations) for changes.
+</Note>
+
+**Related:** [Environment Variables](/docs/api-reference/environment-variables) · [Manifest Format](/docs/api-reference/manifest-format) · [Developer Documentation](/docs/developers/cli)

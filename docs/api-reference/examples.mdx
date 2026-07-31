@@ -1,0 +1,141 @@
+---
+title: "Examples"
+description: "End-to-end API examples covering common package patterns across the Orivon APIs."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 32
+tags: ["api-reference", "examples"]
+keywords: "examples, code examples, api examples, end-to-end, reference examples, patterns"
+---
+
+Complete, copy-pasteable examples showing how the APIs compose. Each example
+links to the related full reference pages.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Activate and subscribe
+
+```ts
+const app = globalThis.app;
+
+await app.activate();
+
+app.on('ready', () => {
+  app.log.info('runtime', 'package ready');
+});
+
+app.on('message', (envelope) => {
+  app.log.info('runtime', 'message received', {from: envelope.from, type: envelope.type});
+});
+```
+
+## Request a permission, then use the wallet
+
+```ts
+async function ensureGrant(name: string): Promise<void> {
+  const state = await app.permissions.check({name});
+  if (state !== PermissionState.Granted) {
+    const result = await app.permissions.request([{name}]);
+    if (result.granted.length === 0) {
+      throw new OrivonError('ERR_PERMISSION_DENIED', `${name} not granted`);
+    }
+  }
+}
+
+await ensureGrant('wallet.read');
+
+const accounts = await app.wallet.listAccounts();
+if (accounts.length === 0) {
+  const account = await app.wallet.createAccount();
+  app.log.info('wallet', 'created account', {id: account.id});
+}
+```
+
+## Sign and verify
+
+```ts
+const payload = new TextEncoder().encode('hello orivon');
+
+const {id} = await app.security.generateKeyPair('ed25519');
+const signature = await app.security.sign(id, payload);
+
+const publicKey = await app.security.exportPublicKey(id);
+const valid = await app.security.verify('ed25519', publicKey, signature, payload);
+```
+
+## KV store with file backup
+
+```ts
+await app.storage.set('preferences', {theme: 'dark', notifications: true});
+const prefs = await app.storage.get('preferences');
+
+await app.storage.writeFile('preferences.json', new TextEncoder().encode(JSON.stringify(prefs)));
+```
+
+## Scheduled task
+
+```ts
+const handle = await app.core.scheduleTask({
+  name: 'refresh-balances',
+  intervalMs: 60_000,
+  run: async () => {
+    const accounts = await app.wallet.listAccounts();
+    for (const account of accounts) {
+      const balance = await app.wallet.getBalance(account.id);
+      app.log.info('wallet', 'balance', {id: account.id, asset: balance.asset, amount: balance.amount});
+    }
+  },
+});
+
+// later
+await app.core.cancelTask(handle);
+```
+
+## DNS registration
+
+```ts
+await app.dns.register('myapp', {
+  records: [{type: 'TXT', value: 'v=orivon1;app=example.wallet'}],
+  ttl: 3600,
+});
+
+const records = await app.dns.resolve('myapp');
+```
+
+## HTTP fetch with retry
+
+```ts
+async function fetchWithRetry(url: string, attempts = 3): Promise<HttpResponse> {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await app.networking.fetch(url);
+    } catch (error) {
+      lastError = error;
+      if (!isOrivonError(error) || error.code !== 'ERR_TIMEOUT') throw error;
+      await sleep(500 * 2 ** i);
+    }
+  }
+  throw lastError;
+}
+```
+
+## Event-driven application window
+
+```ts
+app.on('app:state-changed', (event) => {
+  if (event.state === 'Background') {
+    app.log.info('app', 'moved to background');
+  }
+});
+
+const window = await app.application.createWindow({width: 800, height: 600});
+```
+
+<Note title="Error handling">
+  Every example assumes the calling package holds the relevant grants. Handle
+  `ERR_PERMISSION_DENIED` as shown in the permission example above; never
+  swallow errors silently.
+</Note>
+
+**Related:** [Conventions](/docs/api-reference/conventions) · [Error Codes](/docs/api-reference/error-codes) · [Developer Examples](/docs/developers/examples)

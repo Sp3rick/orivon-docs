@@ -1,0 +1,124 @@
+---
+title: "Accepted Specifications"
+description: "What it means for an Orivon specification to be Accepted, the acceptance criteria, and the current state of acceptance."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["standards", "accepted"]
+keywords: "accepted, specifications, acceptance criteria, normative, registry"
+---
+
+Acceptance is the moment a specification stops being a proposal and becomes a
+promise. An **Accepted** specification is normative: implementations are
+measured against it, conformance is certified against it, and consumers can
+build on it. This page defines acceptance and tracks its current state.
+
+## What acceptance means
+
+An Accepted specification has properties no draft has:
+
+| Property | Meaning |
+| --- | --- |
+| **Normative** | Its requirements are binding, not directional |
+| **Immutable** | Its published form is frozen and versioned |
+| **Testable** | Conformance tests exist against its text |
+| **Supported** | The reference implementation has shipped it |
+| **Migrated** | Its compatibility and migration story is settled |
+
+Acceptance is not "the design is final forever". It is "the contract for this
+version is final". Change after acceptance happens through the
+[versioning](/docs/standards/versioning) rules, with a new version.
+
+<Diagram caption="Acceptance is the gate between proposal and contract.">
+  <Flow column>
+    <DiagramNode dim>Draft (direction)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Review and conformance</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Accepted (contract)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Acceptance criteria
+
+A draft is eligible for acceptance only when every criterion is met:
+
+<CheckList
+  items={[
+    'Discussion is resolved with no open blocking objections.',
+    'The document follows the template and the writing rules.',
+    'Security, privacy, performance and accessibility considerations are complete and argued.',
+    'The reference implementation implements the specification.',
+    'A conformance suite verifies the implementation against the normative text.',
+    'Backward compatibility and migration sections are complete.',
+  ]}
+/>
+
+The criteria are deliberately strict. Acceptance is expensive to reverse, so
+the bar is set high on purpose. Reviewing the
+[lifecycle](/docs/standards/specification-lifecycle) shows where each criterion
+is checked.
+
+## The acceptance process
+
+Acceptance follows a fixed sequence:
+
+<Steps>
+  <Step title="Enter review">
+    The draft is submitted to the editors with open issues resolved.
+  </Step>
+  <Step title="Conformance proof">
+    The reference implementation passes the conformance suite for the draft.
+  </Step>
+  <Step title="Editors vote">
+    Editors approve, request changes, or reject.
+  </Step>
+  <Step title="Freeze and publish">
+    The approved text is frozen at its version and recorded in the registry.
+  </Step>
+</Steps>
+
+Once published, the accepted version becomes the reference that future work,
+including future revisions, is measured against.
+
+## What acceptance provides
+
+Acceptance is a service to the whole ecosystem, not a ceremony:
+
+- **Consumers** can build against a contract that will not silently change.
+- **Implementers** have a testable definition of done.
+- **Auditors** can verify claims against the normative text.
+- **The project** has a stable foundation for the next specification.
+
+This is the payoff described in [Why Standards Matter](/docs/standards/why-standards-matter):
+stability that makes independent work possible.
+
+## Current state
+
+The acceptance table is currently empty, by design:
+
+| Identifier | Title | Status | Accepted at |
+| --- | --- | --- | --- |
+| - | No accepted specifications yet | Draft | - |
+
+All fifteen specifications (OSP-001 to OSP-015) remain in
+[draft](/docs/standards/draft-specifications). Acceptance is expected to begin
+as the reference implementation catches up with the drafts, tracked on the
+[Roadmap](/docs/standards/roadmap).
+
+<Callout type="warning" title="Do not mistake drafts for acceptance">
+  A draft that is heavily implemented is still a draft. It becomes Accepted only
+  through the process above, and not before.
+</Callout>
+
+<Callout type="success" title="How acceptance will be marked">
+  When a specification is accepted, its status in the
+  [registry](/docs/standards/specification-registry) changes from Draft to
+  Accepted, its version moves to 1.0.0, and this page lists it with the date.
+</Callout>
+
+## Related pages
+
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): the stages before acceptance.
+- [Conformance Testing](/docs/standards/conformance-testing): how compliance is proven.
+- [Specification Registry](/docs/standards/specification-registry): where statuses are recorded.

@@ -1,0 +1,120 @@
+---
+title: "Runtime Architecture"
+description: "In-depth paper on the Orivon runtime: WASM instance model, host interface, scheduler, quotas, and isolation mechanics."
+readingTime: 28
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["research", "architecture-paper", "runtime"]
+keywords: "runtime architecture, WASM, instance, host interface, scheduler, quotas, isolation, preemption"
+---
+
+*Orivon Research Group · Runtime Engineering · Version 1.0 · Published 2026-06-28 · Status: Published*
+
+## Overview
+
+The runtime is the execution engine for modules: it loads WASM artifacts,
+runs them in isolated instances, schedules their work, and mediates every
+interaction with the host through a capability-gated interface. This paper
+details the runtime's internal architecture.
+
+## Instance model
+
+### Instance lifecycle
+
+```
+instantiate → initialize → run → suspend/resume → terminate
+```
+
+Each instance owns:
+
+| Resource | Isolation |
+| --- | --- |
+| Linear memory | Bounds-checked, private. |
+| Table | Host-side reference table (gates). |
+| Call stack | Instance-local, checked. |
+| Host references | Capability handles, opaque. |
+
+### Loading pipeline
+
+1. **Validation** — the WASM binary is validated against the core spec.
+2. **Import resolution** — imports are resolved against the module's grants.
+3. **Compilation** — baseline + optimizing tiers.
+4. **Instantiation** — memory and tables are created with the module's quota.
+
+## Host interface
+
+### Design
+
+Host functions are the *only* way an instance interacts with the platform:
+
+```text
+instance ──► host function dispatch
+                 │
+                 ├── capability check (grant registry)
+                 ├── quota check
+                 └── service call (core-backed)
+```
+
+### Capability enforcement
+
+Every dispatch checks the instance's grant set before the host function body
+runs. Enforcement is:
+
+- **Fail-closed** — an ungranted call rejects with `ERR_PERMISSION_DENIED`.
+- **Cheap** — a single grant-table lookup per call.
+- **Non-bypassable** — there is no ambient path to the host.
+
+## Scheduler
+
+### Scheduling model
+
+| Property | Design |
+| --- | --- |
+| Units | Module tasks (async continuations). |
+| Policy | Weighted fair scheduling. |
+| Preemption | At WASM control-flow boundaries. |
+| Priorities | Interactive tasks prioritized; background throttled. |
+| Deadlines | Optional per-task deadlines for interactive work. |
+
+### Quotas
+
+| Resource | Enforcement point | Over-limit behavior |
+| --- | --- | --- |
+| CPU | Instruction budget | Throttle, then terminate. |
+| Memory | Allocator + sandbox | Allocation failure → terminate. |
+| I/O | Host mediation | Rate-limit, queue, or reject. |
+| Time | Scheduler deadlines | `ERR_TIMEOUT`. |
+
+## Isolation mechanics
+
+The runtime enforces isolation in layers:
+
+1. **WASM semantics** — linear memory cannot address host memory.
+2. **Instance separation** — no shared mutable memory.
+3. **Host mediation** — all I/O is mediated and audited.
+4. **Capability gates** — authority is a property of grants, not of code.
+
+## Security considerations
+
+- The host interface is the only attack surface a module can reach; it is
+  minimized and reviewed.
+- Preemption at control-flow boundaries means the scheduler never relies on
+  module cooperation.
+- Quota enforcement prevents denial-of-service by modules.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| JIT warm-up | Tiered compilation, profile-guided optimization. |
+| Capability checks | Single lookup per call; negligible overhead. |
+| Memory overhead | Generational GC for WASM GC proposal; region-based allocators. |
+| Scheduler overhead | Lock-free task queues. |
+
+## Open questions
+
+- Formal proof that capability enforcement cannot be bypassed.
+- Interaction between WASM GC and sandbox memory bounds.
+- Optimal scheduling for mixed CPU/IO module workloads.
+
+**Related:** [Runtime Whitepaper](/docs/research/runtime-whitepaper) · [WASM Research](/docs/research/wasm-research) · [Runtime Research](/docs/research/runtime-research)

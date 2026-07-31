@@ -1,0 +1,181 @@
+---
+title: "Debugging"
+description: "Debug your Orivon code: debugging tools, diagnostics, tracing, error inspection and the debug protocol."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["developers", "debugging"]
+keywords: "debugging, debug tools, diagnostics, tracing, error inspection, breakpoints"
+---
+
+Bugs are a normal part of development, and good tooling makes them short
+lived. This page explains how to debug Orivon code: the tools, the diagnostics
+and the workflow.
+
+## The debugging workflow
+
+Debugging Orivon follows a standard loop:
+
+<Diagram caption="The debugging loop.">
+  <Flow column>
+    <DiagramNode accent>Reproduce</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Inspect (logs, traces, state)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Isolate (breakpoints, tests)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Fix</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Verify</DiagramNode>
+  </Flow>
+</Diagram>
+
+The fastest path starts with a failing test, because a test gives you a
+reproducible starting point. See [Testing](/docs/developers/testing).
+
+## Debug tools
+
+The SDK provides a debug mode that exposes the runtime state:
+
+```sh
+orivon run --debug
+```
+
+Debug mode starts the runtime with a debug listener. Attach a debugger:
+
+```ts
+import {attachDebugger} from '@orivon/sdk/debug';
+
+const debug = attachDebugger({port: 9229});
+debug.on('breakpoint', ({file, line}) => {
+  console.log(`break at ${file}:${line}`);
+});
+```
+
+In debug mode you can set breakpoints, inspect variables and step through
+code. The debug protocol is the same one the editor extension uses.
+
+## Logging
+
+Logging is the first diagnostic to reach for:
+
+```ts
+app.log.debug('entering build', {input: payload.size});
+app.log.info('build complete', {tookMs: 12});
+app.log.warn('falling back to cache', {reason: 'timeout'});
+app.log.error('build failed', {error: err});
+```
+
+Log levels filter what you see. The log architecture is documented on the
+[Logging](/docs/developers/logging) page.
+
+## Diagnostics
+
+Runtime diagnostics give you a health view of your package:
+
+```sh
+orivon run --diagnostics
+```
+
+Diagnostics report:
+
+<CheckList
+  items={[
+    'Memory and CPU usage for your package.',
+    'Open subscriptions and their counts.',
+    'Pending requests and responses.',
+    'Permission checks and denials.',
+    'Event counts per topic.',
+  ]}
+/>
+
+Diagnostics are the fastest way to find leaks and runaway work. They are the
+runtime side of the [Performance](/docs/developers/performance) work.
+
+## Tracing
+
+For distributed flows, use tracing:
+
+```ts
+const trace = app.trace.start('wallet-flow');
+try {
+  await signAndSubmit();
+  trace.complete();
+} catch (error) {
+  trace.fail(error);
+}
+```
+
+Traces follow a request across services, so you can see where time goes and
+where a flow breaks. Traces are exported to your
+[logging](/docs/developers/logging) backend.
+
+<Callout type="success" title="Best practice">
+  Add traces at the boundaries of expensive or failure prone operations: API
+  calls, storage writes and permission requests. A trace at the boundary turns
+  "it failed somewhere" into "it failed in this specific step".
+</Callout>
+
+## Error inspection
+
+Errors are typed and carry context. Inspect them properly:
+
+```ts
+try {
+  await app.storage.get(address);
+} catch (error) {
+  switch (error.code) {
+    case 'not_found':
+      return fallback();
+    case 'unauthorized':
+      await app.permission.request('storage.read');
+      return retry();
+    default:
+      app.log.error('unexpected', {error});
+      throw error;
+  }
+}
+```
+
+The error codes are the contract for handling failures. See
+[Error Handling](/docs/technical-design/error-handling) and the
+[Troubleshooting](/docs/developers/troubleshooting) page.
+
+## Inspecting state
+
+In debug mode, inspect runtime state:
+
+```ts
+const state = await debug.snapshot();
+console.log(state.memory);
+console.log(state.subscriptions);
+```
+
+Snapshots let you verify assumptions about what your package is doing, which
+is often the fastest way to find the discrepancy between intent and behavior.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Debugging in production config">
+    Debug mode is for development. Never ship debug listeners enabled.
+  </Card>
+  <Card title="Logging instead of tracing">
+    Logs answer "what happened"; traces answer "through what path". Use both.
+  </Card>
+  <Card title="Catching and swallowing">
+    A caught error with no log line erases the only evidence you had.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  Debugging is built on [Logging](/docs/developers/logging) and
+  [Error Handling](/docs/technical-design/error-handling). The runtime side is
+  the [Process Model](/docs/technical-design/process-model).
+</Callout>
+
+## Related pages
+
+- [Logging](/docs/developers/logging): structured logging.
+- [Testing](/docs/developers/testing): reproducing bugs.
+- [Troubleshooting](/docs/developers/troubleshooting): common problems and fixes.

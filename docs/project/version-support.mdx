@@ -1,0 +1,176 @@
+---
+title: "Version Support Policy"
+description: "Orivon version support policy: supported versions, maintenance windows, security updates, breaking changes, and upgrade recommendations."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["project", "version support", "maintenance", "security", "upgrades"]
+keywords: "orivon version support, maintenance windows, security updates, breaking changes, upgrade recommendations"
+---
+
+This policy defines which Orivon versions receive updates, for how long, and
+what users can expect when upgrading. It applies to all Orivon platform
+components: runtime, browser, core, SDKs, and CLI.
+
+## Support matrix
+
+| Version | Release Date | Channel | Support Status | Security Fixes | Bug Fixes | EOL Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| **v2.x** | 2027-Q1 (planned) | Stable / LTS | Planned | ✅ | ✅ | 2029-Q1 (LTS) |
+| **v1.4** | 2026-Q4 (planned) | Stable | Planned | ✅ | ✅ | 2027-Q1 |
+| **v1.3** | 2026-Q3 (planned) | Stable | Planned | ✅ | ✅ | 2026-Q4 |
+| **v1.2** | 2026-07-15 | Stable | **Active** | ✅ | ✅ | 2026-Q3 |
+| **v1.1** | 2026-04-20 | Stable | **Maintenance** | ✅ | Critical only | 2026-07-15 |
+| **v1.0** | 2026-01-10 | **LTS** | **Active LTS** | ✅ | ✅ | **2028-01-10** |
+| **v0.x** | 2024–2025 | Beta/Preview | **EOL** | ❌ | ❌ | 2026-01-10 |
+
+<Callout type="info" title="Current status as of July 2026">
+  **v1.2** is the current Stable release. **v1.0 LTS** receives extended support
+  until January 2028. **v1.1** is in maintenance mode (security fixes only).
+  All v0.x releases are end-of-life.
+</Callout>
+
+## Support definitions
+
+| Support Level | Duration | What You Get |
+| --- | --- | --- |
+| **Active** | Until next Stable release (~8–12 weeks) | Security fixes, bug fixes, documentation updates, new features (next release) |
+| **Maintenance** | Until next Stable after Active | Security fixes only (critical/high severity). No new features, no non-critical bug fixes. |
+| **LTS (Long-Term Support)** | 24 months from LTS designation | Security fixes, critical bug fixes, documentation updates. No new features. |
+| **EOL (End-of-Life)** | After support ends | No fixes of any kind. Artifacts archived but not updated. |
+
+## Maintenance windows
+
+### Standard releases (non-LTS)
+- **Active support:** ~8–12 weeks (until next Stable).
+- **Maintenance support:** Additional ~8–12 weeks (security only).
+- **Total support window:** ~16–24 weeks from release.
+
+### LTS releases
+- **Active LTS support:** 24 months from LTS designation.
+- **Point releases:** As needed for security/critical fixes (typically monthly or per-incident).
+- **No maintenance-only phase** — LTS goes directly to EOL after 24 months.
+
+### Schedule example (v1.x series)
+```
+v1.0 (LTS) ──────────────────────────────────► 24 months
+     │
+     ├── v1.1 (Active ~8w) ──► (Maintenance ~8w) ──► EOL
+     │
+     ├── v1.2 (Active ~8w) ──► (Maintenance ~8w) ──► EOL
+     │
+     ├── v1.3 (Active ~8w) ──► (Maintenance ~8w) ──► EOL
+     │
+     └── v1.4 (Active ~8w) ──► (Maintenance ~8w) ──► EOL
+                              │
+                              ▼
+                        v2.0 (LTS) ──────────────────────────────────► 24 months
+```
+
+## Security updates
+
+### Scope
+Security fixes are backported to:
+1. **Current Stable** (Active)
+2. **Previous Stable** (Maintenance)
+3. **Current LTS** (Active LTS)
+
+### Severity and response
+
+| Severity | Response Target | Backport Policy |
+| --- | --- | --- |
+| **Critical** (RCE, sandbox escape, key compromise) | 24–48 hours | All supported versions |
+| **High** (privilege escalation, data exposure) | 72 hours | All supported versions |
+| **Medium** (DoS, info leak, bypass) | 7 days | Active + LTS |
+| **Low** (minor, defense-in-depth) | Next release cycle | Active only |
+
+### Disclosure coordination
+- Security fixes developed in private forks.
+- Coordinated disclosure with reporters.
+- Public advisory published same day as fix release.
+- CVE requested for all critical/high issues.
+
+See [Security Policy](/docs/project/security-policy) for the full responsible
+disclosure process.
+
+## Breaking changes
+
+### Definition
+A breaking change is any modification that requires users to change their
+code, configuration, or deployment to maintain equivalent functionality:
+
+- Removal or signature change of public APIs.
+- Module format changes requiring rebuild.
+- Capability model changes affecting permissions.
+- Configuration schema changes.
+- CLI command removal or behavior change.
+- Default behavior changes with observable effects.
+
+### Policy
+| Release Type | Breaking Changes Allowed? | Process |
+| --- | --- | --- |
+| **MAJOR (x.0.0)** | Yes | Required: migration guide, deprecation period in previous minor |
+| **MINOR (x.y.0)** | No (backward-compatible only) | New features must not break existing code |
+| **PATCH (x.y.z)** | Never | Bug/security fixes only |
+
+### Deprecation process
+1. **Announce** — Deprecation noted in release notes and documentation.
+2. **Warning** — Runtime/deprecation warnings added (where feasible).
+3. **Wait** — Minimum one MINOR release cycle (8–12 weeks) before removal.
+4. **Remove** — In next MAJOR release (or MINOR if explicitly approved by TSC).
+5. **Document** — Migration guide published with concrete examples.
+
+<Callout type="warning" title="Deprecations are commitments">
+  Once a deprecation is announced, the project commits to the timeline.
+  Removing a deprecated feature early requires TSC supermajority vote.
+</Callout>
+
+## Upgrade recommendations
+
+### For production deployments
+| Current Version | Recommended Action |
+| --- | --- |
+| **v1.0 LTS** | Stay on LTS; apply point releases. Plan v2.0 LTS migration for 2027. |
+| **v1.1** | Upgrade to v1.2 (current Stable) or v1.0 LTS immediately. |
+| **v1.2** | Current Stable — apply patch releases. Plan v1.3 upgrade when released. |
+| **v0.x** | **Upgrade immediately** — no security support. Migrate to v1.0 LTS or v1.2. |
+
+### For development / CI
+- Use **Beta** or **Preview** for testing upcoming changes.
+- Pin **Stable** in production CI pipelines.
+- Test **Release Candidates** before Stable adoption.
+
+### Migration resources
+- [Migration Guides](/docs/developers/migration-guides) — Step-by-step for each breaking release.
+- [Changelog Archive](/docs/project/changelog-archive) — Full change history.
+- [API Reference](/docs/api-reference/overview) — Versioned API docs.
+- [Release Notes](/docs/project/release-archive) — Per-release highlights.
+
+## Component-specific notes
+
+| Component | Versioning | Support Alignment |
+| --- | --- | --- |
+| **Runtime** | SemVer | Aligned with platform releases |
+| **Browser** | SemVer | Aligned with platform releases |
+| **Core Libraries** | SemVer | Aligned; may patch independently for security |
+| **TypeScript SDK** | SemVer | Tracks platform MINOR; PATCH for SDK-only fixes |
+| **Rust SDK** | SemVer | Tracks platform MINOR; PATCH for SDK-only fixes |
+| **CLI** | SemVer | Tracks platform MINOR |
+| **Standards** | Spec Version | Independent; platform implements specific versions |
+
+## Exceptions
+
+The TSC may authorize exceptions for:
+- **Critical security fixes** to EOL versions (case-by-case, announced publicly).
+- **Enterprise LTS extensions** (commercial support agreements, separate from project).
+- **Regulatory compliance** fixes requiring backports.
+
+All exceptions are documented in the release notes and transparency reports.
+
+<Callout type="success" title="Upgrade early, upgrade often">
+  The shortest path to security and stability is staying on a supported
+  version. The project designs upgrades to be straightforward — migration
+  guides and tooling are provided for every breaking change.
+</Callout>
+
+**Related:** [Release Lifecycle](/docs/project/release-lifecycle) · [Security Policy](/docs/project/security-policy) · [Roadmap](/docs/project/roadmap) · [Migration Guides](/docs/developers/migration-guides)

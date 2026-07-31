@@ -1,0 +1,175 @@
+---
+title: "Governance"
+description: "How the ecosystem is governed: open standards, community participation and the Orivon Foundation, without a single company in charge."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["ecosystem", "governance", "foundation"]
+keywords: "governance, standards, foundation, DAO, community, transparency, decisions, disputes"
+---
+
+A decentralized ecosystem needs a way to make decisions. If one company decides
+the rules, the ecosystem is not really open. This page explains how Orivon is
+governed: the layers of decision making, the open standards process, and the
+role of the Orivon Foundation.
+
+## The governance problem
+
+Every ecosystem makes decisions: what a standard should say, how a naming
+dispute is settled, how scoring rules evolve. The question is who decides. The
+worst outcome would be to replace one platform's rule with another platform's
+rule. Governance exists to make the rules belong to the community.
+
+<Diagram caption="Governance sits above the technology and decides how it evolves.">
+  <Flow column>
+    <DiagramNode accent>Community</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Open standards process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implementation</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Layers of governance
+
+Governance in the ecosystem works at three levels, each with a clear scope:
+
+<CardGrid columns={3}>
+  <Card title="Technical standards">
+    How objects, identities, modules and the runtime behave. Decided through
+    an open process where anyone can propose and comment.
+  </Card>
+  <Card title="Community decisions">
+    Priorities, disputes and the direction of the ecosystem. Decided by
+    participants through structured, transparent processes.
+  </Card>
+  <Card title="The Foundation">
+    Stewardship: funding, coordination and the legal entity that holds shared
+    assets. Accountable to the community.
+  </Card>
+</CardGrid>
+
+## The open standards process
+
+Standards are the source of truth, so their process must be the most
+transparent part of the system. The process follows a clear path:
+
+<Steps>
+  <Step title="Propose">
+    Anyone can propose a change or a new standard. Proposals are public and
+    include the problem and the design.
+  </Step>
+  <Step title="Discuss">
+    The community comments, challenges and improves the proposal. No single
+    company fast tracks its own ideas.
+  </Step>
+  <Step title="Ratify">
+    A proposal is accepted when it meets the ecosystem's criteria: technical
+    soundness, backward compatibility and community support.
+  </Step>
+  <Step title="Adopt">
+    Implementations adopt the standard, and the ecosystem tests it in the real
+    world.
+  </Step>
+</Steps>
+
+Because standards are what make everything interoperable, this process is
+deliberately slower than shipping a feature. Slowness here is a feature: it is
+what prevents one participant from changing the rules for everyone.
+
+## Disputes and content decisions
+
+Decentralized systems still need answers to hard questions: who owns a disputed
+name? What happens to clearly illegal content? The ecosystem separates the
+infrastructure from the rules:
+
+- **The infrastructure stays neutral.** The naming system and storage do not
+  decide what is allowed.
+- **Communities set rules.** Namespaces and communities set their own policies
+  within the standards.
+- **Disputes have a path.** Governance provides a transparent dispute process
+  with published decisions and appeals.
+
+<Callout type="info" title="Did you know?">
+  The separation of infrastructure and rules is what keeps the ecosystem
+  replaceable. Because content is stored on neutral infrastructure, communities
+  can leave one namespace and start another without losing the web itself.
+</Callout>
+
+## The Orivon Foundation
+
+The Orivon Foundation is the legal and organizational steward of the ecosystem.
+Its roles are deliberately limited so it serves the community rather than
+commanding it:
+
+<CardGrid columns={2}>
+  <Card title="Hold shared assets">
+    The Foundation holds assets the ecosystem needs to survive, such as
+    canonical registries and funding.
+  </Card>
+  <Card title="Coordinate work">
+    It organizes contributions, grants and research across independent teams.
+  </Card>
+  <Card title="Protect the mission">
+    It defends the neutrality and openness of the ecosystem in legal and
+    policy settings.
+  </Card>
+  <Card title="Stay accountable">
+    Its budget and decisions are public, and its leadership is accountable to
+    the community.
+  </Card>
+</CardGrid>
+
+The Foundation's plans, including the community DAO and reward structures, are
+documented as planned work under [Future Products](/docs/ecosystem/future-products)
+and the upcoming Foundation section.
+
+## Transparency
+
+Transparency is how the community can trust the process. The ecosystem commits
+to:
+
+<CheckList
+  items={[
+    'Public proposals, discussions and decisions.',
+    'Published budget and spending for the Foundation.',
+    'Open source implementations of the standards.',
+    'A responsible disclosure process for security issues.',
+  ]}
+/>
+
+## How you participate
+
+Governance is not a spectator sport. Anyone can participate:
+
+<CardGrid columns={2}>
+  <Card title="Propose and comment">
+    The standards process is open to every participant.
+  </Card>
+  <Card title="Run a namespace">
+    Communities can operate their own namespaces with their own rules.
+  </Card>
+  <Card title="Contribute work">
+    Build modules, infrastructure or research that the ecosystem needs.
+  </Card>
+  <Card title="Vote in the community">
+    Decisions about priorities and direction go through structured community
+    processes.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Next">
+  The ecosystem is being built in stages. See what is real today and what is
+  planned in [Future Products](/docs/ecosystem/future-products).
+</Callout>
+
+## Related pages
+
+- [Future Products](/docs/ecosystem/future-products): planned Foundation and DAO work.
+- [Naming System](/docs/ecosystem/naming-system): namespaces and disputes in context.
+- [Security Model](/docs/ecosystem/security-model): the disclosure process.
+
+## Further reading
+
+- [Vision](/docs/introduction/vision): the principles governance protects.
+- [Roadmap](/docs/introduction/roadmap): where governance work is headed.

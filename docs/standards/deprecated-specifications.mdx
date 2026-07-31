@@ -1,0 +1,111 @@
+---
+title: "Deprecated Specifications"
+description: "How Orivon retires specifications: the deprecation process, replacement tracking, and the current state."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 25
+tags: ["standards", "deprecated"]
+keywords: "deprecated, deprecated specifications, retirement, migration, replacement, archived"
+---
+
+Deprecation is the honest way to retire a specification. Nothing is deleted and
+nothing is silently changed; a deprecated specification stays readable, is
+clearly labeled, and points at its replacement. This page documents the
+retirement process and tracks its current state.
+
+## Why deprecation exists
+
+Specifications do not last forever. They are superseded by better designs,
+replaced by newer standards, or absorbed into another document. The failure
+mode to avoid is a specification that stops being recommended but keeps being
+implemented, because no one was told.
+
+<Diagram caption="Deprecation is a bridge, not a wall.">
+  <Flow column>
+    <DiagramNode accent>Deprecated specification</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Migration path documented</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Replacement specification</DiagramNode>
+  </Flow>
+</Diagram>
+
+Deprecation keeps the ecosystem informed so it can move together, at a pace
+each consumer can manage.
+
+## The deprecation process
+
+A specification is deprecated through the same
+[lifecycle](/docs/standards/specification-lifecycle) discipline as everything
+else:
+
+<Steps>
+  <Step title="Propose">
+    A deprecation proposal explains why the specification is superseded.
+  </Step>
+  <Step title="Document">
+    The deprecation is recorded with its replacement and a timeline.
+  </Step>
+  <Step title="Mark">
+    The specification's status changes to Deprecated in the
+    [registry](/docs/standards/specification-registry).
+  </Step>
+  <Step title="Retire">
+    After the migration window, the specification moves to Archived.
+  </Step>
+</Steps>
+
+A deprecation is never announced and executed in the same release. Consumers
+always get a window, per the [migration strategy](/docs/standards/versioning).
+
+## What a deprecation record contains
+
+When a specification is deprecated, its record in the registry and on its page
+carries:
+
+<CardGrid columns={2}>
+  <Card title="Reason">
+    Why the specification is no longer recommended.
+  </Card>
+  <Card title="Replacement">
+    The specification that takes its place, with its identifier and version.
+  </Card>
+  <Card title="Timeline">
+    When the status takes effect and when archival is expected.
+  </Card>
+  <Card title="Migration path">
+    What consumers should do, with references to the replacement's migration
+    section.
+  </Card>
+</CardGrid>
+
+The property that makes this safe: **a deprecated specification is still
+fully specified.** Consumers mid-migration can keep reading exactly what the
+old behavior was.
+
+## Current state
+
+There are no deprecated specifications yet, which is the expected state for a
+young program:
+
+| Identifier | Title | Status | Replacement |
+| --- | --- | --- | --- |
+| - | No deprecated specifications yet | - | - |
+
+Deprecation is a defined process waiting to be used. When a specification is
+superseded, it will appear here. The
+[versioning](/docs/standards/versioning) and
+[lifecycle](/docs/standards/specification-lifecycle) pages define the rules that
+will govern it.
+
+<Callout type="info" title="Deprecated versus Archived">
+  **Deprecated** means "do not build on this, here is the path forward".
+  **Archived** means "historical reference only, outside compliance scope". A
+  specification passes through Deprecated before it becomes Archived.
+</Callout>
+
+## Related pages
+
+- [Versioning](/docs/standards/versioning): the migration model deprecation uses.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): where deprecation sits.
+- [Specification Registry](/docs/standards/specification-registry): where statuses are recorded.

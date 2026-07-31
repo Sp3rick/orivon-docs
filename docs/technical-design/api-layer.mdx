@@ -1,0 +1,211 @@
+---
+title: "API Layer"
+description: "The internal design of the Orivon API layer: the Core API, module APIs and browser APIs, with versioning, validation, error handling and rate limits."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["technical-design", "api"]
+keywords: "API layer, Core API, module API, browser API, versioning, validation, error handling, rate limiting"
+---
+
+The API layer is the boundary between components and the services behind them.
+It is where capabilities become callable, where versions are negotiated, and
+where errors and limits are defined. This page documents the API architecture
+and its rules.
+
+## The API surface
+
+The API layer is not one API. It is four surfaces with different audiences:
+
+| Surface | Audience | Purpose |
+| --- | --- | --- |
+| **Core API** | Every component | Authoritative access to core services |
+| **Module API** | Modules | What a module can call at runtime |
+| **Browser API** | Web content | The web platform plus Web3 extensions |
+| **Internal APIs** | Trusted components | Coordination between managers and services |
+
+The boundaries between them are deliberate. A web page cannot call the Core
+API; a module cannot call the browser's internal APIs.
+
+<Diagram caption="The four API surfaces and who may call them.">
+  <Flow column>
+    <DiagramNode>Browser API</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Web content</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Module API</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Modules</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core API</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>All components</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The Core API
+
+The Core API is the single, versioned way to reach core services. It is built
+from the same typed messages as the communication bus, so the API layer and the
+transport are one model.
+
+Properties of the Core API:
+
+<CardGrid columns={2}>
+  <Card title="Versioned">
+    The API version is negotiated at connection time; callers and services
+    agree on the highest common version.
+  </Card>
+  <Card title="Schema validated">
+    Every call is validated against its schema before execution.
+  </Card>
+  <Card title="Authenticated">
+    Every call carries the caller's identity and session.
+  </Card>
+  <Card title="Authorized">
+    Every call passes the policy service, exactly as documented in
+    [Core Architecture](/docs/technical-design/core-architecture).
+  </Card>
+</CardGrid>
+
+## The Module API
+
+The Module API is what modules receive at activation. It is a reduced,
+capability bound surface:
+
+- The module only sees the API functions its granted capabilities map to.
+- The handles it receives are typed and cannot be forged.
+- Every call re-checks the current policy, so a revoked grant fails even if the
+  module still holds the handle.
+
+The Module API is generated from the same interface description as the bus, so
+the code a module calls and the messages a service receives are always in sync.
+
+## The Browser API
+
+The Browser API extends the standard web platform with the Web3 capabilities
+defined by the ecosystem: identity, wallet, naming, storage and score signals.
+It is a web platform API, not a private internal API:
+
+- It follows web platform conventions: promises, events and the same-origin
+  model.
+- Capabilities are exposed as permissions in the
+  [Permission System](/docs/technical-design/permission-system).
+- No browser internal state is exposed to pages; the API is the only surface.
+
+## Versioning
+
+Versioning is the contract that lets the system evolve without breaking callers.
+
+<Steps>
+  <Step title="Negotiate">
+    Caller and service exchange supported versions at connect time.
+  </Step>
+  <Step title="Select">
+    They operate at the highest mutually supported version.
+  </Step>
+  <Step title="Migrate">
+    When a caller upgrades, it moves to the newer version at its own pace.
+  </Step>
+  <Step title="Deprecate">
+    Old versions are deprecated on a published schedule and removed only after
+    the migration window.
+  </Step>
+</Steps>
+
+Breaking changes are only allowed in a new major version. A minor version may
+add surfaces but never change behavior of an existing surface.
+
+<Callout type="info" title="Developer note">
+  The versioning discipline is what lets the browser process upgrade the core
+  independently of renderers. A renderer running an old API version and a core
+  running a new one still interoperate at their common version.
+</Callout>
+
+## Validation
+
+Validation happens at the API boundary, before any service logic runs:
+
+1. **Schema validation** checks types, shapes and required fields.
+2. **Range validation** checks values are within declared bounds.
+3. **Semantic validation** checks the request makes sense in its context (for
+   example, a path that is inside the caller's namespace).
+
+Malformed requests are rejected with a `ValidationError` and never reach a
+service. This keeps untrusted input away from core logic, which is one of the
+[Security Architecture](/docs/technical-design/security-architecture)
+principles.
+
+## Error handling
+
+Errors at the API layer are typed and consistent across every surface:
+
+| Error | When | Caller sees |
+| --- | --- | --- |
+| `ValidationError` | Request does not match the schema | Which field failed |
+| `UnauthorizedError` | Caller lacks the capability | The required capability |
+| `NotFoundError` | The target does not exist | A stable error code |
+| `ConflictError` | State prevents the operation | The conflicting state |
+| `RateLimitedError` | The caller exceeded a limit | When to retry |
+| `ServiceError` | A service failed internally | A retryable or fatal marker |
+
+Errors never leak internals: a caller sees error codes and sanitized messages,
+never stack traces or internal identifiers. The full model is in
+[Error Handling](/docs/technical-design/error-handling).
+
+## Rate limiting
+
+The API layer enforces rate limits so that one caller cannot starve the system:
+
+- Limits are per caller identity, per API group.
+- Limits are announced so well behaved callers can adapt.
+- Exceeding a limit returns `RateLimitedError` with a retry hint.
+- Burst allowances smooth transient spikes without granting free rein.
+
+Rate limits are data, configured per API group in the
+[Configuration](/docs/technical-design/configuration) store.
+
+## Future API evolution
+
+The API layer is designed for evolution:
+
+<CardGrid columns={2}>
+  <Card title="Additive growth">
+    New capabilities are added as new API groups, never by overloading existing
+    ones.
+  </Card>
+  <Card title="Stable core">
+    The identity, session and policy primitives are expected to change rarely.
+  </Card>
+  <Card title="Capability driven">
+    New surfaces arrive with their permissions, so the permission model scales
+    with the API.
+  </Card>
+  <Card title="Web first">
+    The Browser API tracks web platform evolution rather than inventing private
+    replacements.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  When adding a new API, write the schema first, then the permission it needs,
+  then the implementation. Reverse order is how APIs grow dangerous.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes an API compatibility test suite that runs against every
+  release, machine readable API contracts, and experimental API groups that
+  ship behind flags. See [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Communication Bus](/docs/technical-design/communication-bus): the transport behind the API layer.
+- [Core Architecture](/docs/technical-design/core-architecture): the services the Core API fronts.
+- [Permission System](/docs/technical-design/permission-system): the capabilities every API call needs.
+
+## Further reading
+
+- [Error Handling](/docs/technical-design/error-handling): the error contract.
+- [Configuration](/docs/technical-design/configuration): how limits and flags are set.
+- [Testing Architecture](/docs/technical-design/testing-architecture): API compatibility testing.

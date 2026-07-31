@@ -1,0 +1,153 @@
+---
+title: "Tutorial: Using Permissions"
+description: "Understand grants, requests and scopes by building a module with a realistic permission surface, step by step."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.5
+tags: ["developers", "tutorials"]
+keywords: "permissions tutorial, grants, scopes, permission requests"
+---
+
+Permissions are how Orivon controls what your package can do. This tutorial
+builds a module with a realistic permission surface so you understand grants,
+requests and scopes from the inside.
+
+<Callout type="info" title="Prerequisites">
+  The [quick start](/docs/developers/quick-start), and the
+  [Permissions](/docs/developers/permissions) guide.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new photo-album --template module
+```
+
+## Step 2: Start minimal
+
+`orivon.toml` starts with nothing:
+
+```toml
+[package]
+name = "photo-album"
+version = "0.1.0"
+description = "An album that reads identity and stores photos"
+
+[interface]
+methods = ["load", "store", "status"]
+
+[permissions]
+# nothing yet: default deny
+```
+
+The module runs in the default deny state: it can do nothing until it asks.
+
+## Step 3: Add the permissions it needs
+
+Each feature requests the capability it uses:
+
+```toml
+[permissions]
+identity = ["read"]
+storage = ["read", "write"]
+```
+
+<Callout type="success" title="The rule">
+  Add a permission only when a feature needs it, in the narrowest scope. A
+  manifest with fewer permissions is easier to review and safer to run.
+</Callout>
+
+## Step 4: Use permissions with scopes
+
+Permissions can be scoped:
+
+```toml
+[permissions]
+identity = ["read", "resolve"]
+storage = ["read", "write"]
+```
+
+A scope limits the permission to a particular resource. The photo album asks
+for storage scoped to its own bucket:
+
+```ts
+const bucket = app.storage.bucket('photo-album');
+await bucket.write('photo-1', photoData);
+```
+
+Scoped storage keeps the album from touching the user's other data.
+
+## Step 5: Request at first use
+
+Do not request everything at startup; request at first use:
+
+```ts
+export async function load() {
+  try {
+    await app.permission.check('identity.read');
+  } catch {
+    await app.permission.request('identity.read');
+  }
+  const identity = await app.identity.read();
+  return {owner: identity.name};
+}
+```
+
+First use requests are honest: the user sees what is needed exactly when it
+is needed.
+
+## Step 6: Handle denial
+
+A user can deny any request. Handle it:
+
+```ts
+export async function store(input: {photo: Uint8Array}) {
+  try {
+    return await bucket.write('photo', input.photo);
+  } catch (error) {
+    if (error.code === 'unauthorized') {
+      return {status: 'denied', hint: 'grant storage.write to store photos'};
+    }
+    throw error;
+  }
+}
+```
+
+## Step 7: The permission flow
+
+<Diagram caption="Every privileged call passes the permission gate.">
+  <Flow column>
+    <DiagramNode accent>Package calls a service</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Permission check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Granted or request</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Denied or allowed</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Step 8: Run it
+
+```sh
+orivon build
+orivon run --call photo-album load '{}'
+orivon run --call photo-album status '{}'
+```
+
+## What you built
+
+- A module that starts denied and requests only what it uses.
+- Scoped storage that respects the user's data.
+- Graceful handling of denial.
+
+<Callout type="success" title="Extend it">
+  Use the [cookbook](/docs/developers/cookbook) permissions recipe for
+  first use requests, and document each permission in the README.
+</Callout>
+
+## Related pages
+
+- [Permissions](/docs/developers/permissions): the full guide.
+- [Permission System](/docs/technical-design/permission-system): the design.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

@@ -1,0 +1,69 @@
+---
+title: "Runtime Research"
+description: "Active runtime research: execution models, scheduling, sandboxing, performance, resource isolation, and future runtime ideas."
+readingTime: 26
+lastUpdated: "July 31, 2026"
+order: 29
+tags: ["research", "runtime-research"]
+keywords: "runtime research, execution models, scheduling, sandboxing, performance, resource isolation, future runtime"
+---
+
+*Orivon Research Group · Runtime Engineering · Status: Active Research*
+
+This area investigates the runtime's open problems. The
+[Runtime Architecture](/docs/research/runtime-architecture) paper describes
+the current design; this page records the research.
+
+## Execution models
+
+| Model | Question | Status |
+| --- | --- | --- |
+| WASM core | Production substrate. | Shipped. |
+| WASM GC | Garbage-collected languages on WASM. | Tracking spec. |
+| wasm64 | Large-memory modules. | Tracking spec. |
+| Component model | Composable modules. | Under evaluation. |
+
+## Scheduling
+
+| Research topic | Question |
+| --- | --- |
+| Fairness | What weights produce fair CPU allocation? |
+| Preemption | Is boundary preemption sufficient for all workloads? |
+| Interactive priority | How to keep UI tasks latency-bound? |
+| Energy | Scheduling that minimizes power on mobile? |
+
+## Sandboxing
+
+| Topic | Direction |
+| --- | --- |
+| Formal verification | Prove capability confinement. |
+| Hardware isolation | Memory tagging as defense in depth. |
+| Side channels | Measure and mitigate WASM timing channels. |
+| JIT security | Secure code generation and code-memory permissions. |
+
+## Performance
+
+| Concern | Direction |
+| --- | --- |
+| JIT warm-up | Profile-guided optimization, tiered compilation. |
+| Host call cost | Reducing dispatch overhead further. |
+| Memory | Region-based allocation, GC tuning. |
+| Startup | Fast cold starts for small modules. |
+
+## Resource isolation
+
+| Resource | Question |
+| --- | --- |
+| Memory | Optimal per-instance limits? |
+| CPU | Burst vs. sustained budget tuning. |
+| I/O | Fair rate limiting across modules. |
+| Energy | Cross-module energy accounting (research). |
+
+## Future runtime ideas
+
+- **Component-model modules** — compositional, type-checked interfaces.
+- **Shared-nothing plus secure channels** — finer concurrency.
+- **Verifiable execution** — proofs about module behavior.
+- **Heterogeneous execution** — CPU/GPU/accelerator offload for modules.
+
+**Related:** [Runtime Whitepaper](/docs/research/runtime-whitepaper) · [Runtime Architecture](/docs/research/runtime-architecture) · [WASM Research](/docs/research/wasm-research) · [Performance Research](/docs/research/performance-research)

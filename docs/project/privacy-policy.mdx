@@ -1,0 +1,188 @@
+---
+title: "Privacy Policy"
+description: "Orivon privacy policy: data collection, processing, user rights, and compliance — with placeholders for legal review."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["project", "privacy", "policy", "gdpr", "data protection"]
+keywords: "privacy policy, data protection, gdpr, user rights, data collection, orivon privacy"
+---
+
+This Privacy Policy describes how the Orivon project ("we," "us," "our") handles
+personal data when you use the Orivon browser, visit our websites, participate
+in our community, or interact with our services.
+
+<Callout type="warning" title="Legal review pending">
+  This policy is a **structured draft** for community transparency. It has not
+  yet undergone formal legal review. Placeholders marked **[LEGAL REVIEW]**
+  indicate sections requiring attorney validation before this policy is
+  considered final for regulatory compliance (GDPR, CCPA, etc.).
+</Callout>
+
+## Quick summary
+
+| What we collect | Why | Your control |
+| --- | --- | --- |
+| **Nothing by default** | Orivon browser has no telemetry, no tracking, no phone-home | N/A |
+| **Opt-in crash reports** | Improve stability | Disable in settings |
+| **Opt-in performance metrics** | Optimize performance | Disable in settings |
+| **Account data (forum, GitHub)** | Community participation | Delete account anytime |
+| **Email (newsletter)** | Monthly digest | Unsubscribe in every email |
+
+## Data we collect
+
+### 1. Orivon Browser (desktop application)
+**By default: Zero telemetry. No unique identifiers. No network requests except:**
+- Explicit user actions (navigating, downloading, updating).
+- Certificate validation (standard TLS).
+- Extension/store requests initiated by user.
+
+**Opt-in data (only if user enables in Settings):**
+| Data | Purpose | Retention | Shared |
+| --- | --- | --- | --- |
+| Crash reports (minidump) | Stability debugging | 90 days | Aggregated only |
+| Performance traces (local) | Performance optimization | 30 days | Never |
+| Feature usage counters | Product prioritization | 180 days | Aggregated, anonymized |
+
+<Callout type="info" title="Opt-in is explicit">
+  No data leaves your device without your informed consent. Settings default
+  to "Off." You can view exactly what would be sent before enabling.
+</Callout>
+
+### 2. Websites (orivon.dev, docs.orivon.dev, forum.orivon.dev)
+| Data | Purpose | Legal Basis | Retention |
+| --- | --- | --- | --- |
+| **Server logs** (IP, UA, timestamp, path) | Security, abuse prevention, capacity | Legitimate interest | 30 days |
+| **Cookies** (session, CSRF, preferences) | Authentication, security, UX | Legitimate interest / Consent | Session–1 year |
+| **Account data** (username, email, avatar, posts) | Community participation | Contract | Until deletion |
+| **Newsletter email** | Monthly digest | Consent | Until unsubscribe |
+
+### 3. Community platforms (GitHub, Discord, Discord)
+| Platform | Data Controller | Policy Link |
+| --- | --- | --- |
+| **GitHub** | GitHub, Inc. | [GitHub Privacy](https://docs.github.com/en/site-policy/privacy-policies) |
+| **Discord** | Discord Inc. | [Discord Privacy](https://discord.com/privacy) |
+| **Forum (Discourse)** | Orivon Project | This policy |
+
+We only receive data you voluntarily provide on these platforms (username,
+public contributions, public messages). We do not access private messages or
+non-public data.
+
+### 4. Email communications
+| Type | Frequency | Unsubscribe |
+| --- | --- | --- |
+| **Newsletter** | Monthly | Link in every email |
+| **Security advisories** | As needed | Not optional (security) |
+| **Account emails** | Transactional | Not optional (service) |
+
+## How we use data
+
+| Purpose | Data Used | Legal Basis |
+| --- | --- | --- |
+| **Provide the browser** | None (local) | Contract |
+| **Improve stability (opt-in)** | Crash reports | Consent |
+| **Optimize performance (opt-in)** | Performance traces | Consent |
+| **Community participation** | Account data, posts | Contract |
+| **Security & abuse prevention** | Server logs, IP | Legitimate interest |
+| **Legal compliance** | As required | Legal obligation |
+| **Newsletter** | Email | Consent |
+
+## Data sharing
+
+We **do not sell personal data**. We share data only:
+
+| Recipient | Purpose | Safeguards |
+| --- | --- | --- |
+| **Hosting providers** (Vercel, GitHub Pages, etc.) | Serve websites | DPAs, EU Standard Contractual Clauses |
+| **Email provider** (Buttondown, etc.) | Send newsletter | DPA, no secondary use |
+| **Security researchers** | Coordinated disclosure | Minimal, case-specific, NDA where needed |
+| **Legal authorities** | Valid legal process | Only what is legally required; notice where permitted |
+
+We do not share data with advertisers, data brokers, or AI training companies.
+
+## Your rights
+
+| Right | How to exercise |
+| --- | --- |
+| **Access** | Email privacy@orivon.dev for data we hold directly |
+| **Rectification** | Edit profile on forum/GitHub; email for other data |
+| **Erasure** | Delete forum/GitHub account; email for other data |
+| **Restriction** | Email privacy@orivon.dev |
+| **Portability** | Email privacy@orivon.dev (JSON/CSV export) |
+| **Objection** | Email privacy@orivon.dev (marketing, legitimate interest) |
+| **Withdraw consent** | Unsubscribe link (newsletter); Settings (browser opt-in) |
+
+**Response time:** Within 30 days (GDPR) / 45 days (CCPA).
+
+## International transfers
+
+Our hosting providers may process data in the United States and other
+jurisdictions. We rely on:
+- **EU Standard Contractual Clauses** (for EU/UK data).
+- **Adequacy decisions** where applicable.
+- **Derogations** for explicit consent or contract necessity.
+
+**[LEGAL REVIEW: Confirm transfer mechanisms and update per Schrems II guidance.]**
+
+## Children's privacy
+
+Orivon is not directed to children under 13 (or 16 in EU). We do not
+knowingly collect personal data from children. If you believe we have,
+contact privacy@orivon.dev for immediate deletion.
+
+## Security
+
+| Measure | Implementation |
+| --- | --- |
+| **Encryption in transit** | TLS 1.2+ everywhere; HSTS; certificate pinning where feasible |
+| **Encryption at rest** | Database encryption; disk encryption on servers |
+| **Access control** | Least privilege; MFA for admin; audit logs |
+| **Data minimization** | Collect only what is necessary; auto-delete per schedule |
+| **Incident response** | 72-hour breach notification (GDPR); see [Security Policy](/docs/project/security-policy) |
+
+## Retention summary
+
+| Data Category | Retention | Deletion Trigger |
+| --- | --- | --- |
+| Server logs | 30 days | Automatic |
+| Crash reports (opt-in) | 90 days | Automatic |
+| Performance traces (opt-in) | 30 days | Automatic |
+| Feature usage (opt-in) | 180 days | Automatic |
+| Account data | Until deletion | User request |
+| Newsletter email | Until unsubscribe | User request |
+| Security advisories email | Duration of project | N/A (security) |
+
+## Cookies and tracking
+
+| Cookie | Purpose | Duration | Consent |
+| --- | --- | --- | --- |
+| `session` | Authentication | Session | Legitimate interest |
+| `csrf_token` | CSRF protection | Session | Legitimate interest |
+| `preferences` | UI preferences | 1 year | Legitimate interest |
+| `analytics` | **Not used** | — | — |
+| `marketing` | **Not used** | — | — |
+
+We do not use Google Analytics, Matomo, or any third-party analytics on our
+sites. We do not use tracking pixels in emails beyond open-rate tracking for
+newsletter delivery confirmation.
+
+## Changes to this policy
+
+- Material changes: 30-day notice via newsletter, blog, and forum.
+- Minor clarifications: Updated in place with changelog.
+- Version history: Maintained in [governance repository](https://github.com/OrivonBrowser/orivon-governance).
+
+## Contact
+
+**Data Protection Officer (interim):** privacy@orivon.dev  
+**Postal address:** To Be Announced (Foundation incorporation)  
+**Supervisory authority:** To Be Announced (post-Foundation)
+
+<Callout type="success" title="Privacy by design, not afterthought">
+  Orivon was built from the ground up to minimize data collection. The
+  browser defaults to zero telemetry. The websites use no third-party
+  analytics. Your data stays yours — that is the architecture, not a policy
+  promise.
+</Callout>
+
+**Related:** [Trust Center](/docs/project/trust-center) · [Security Policy](/docs/project/security-policy) · [Compliance](/docs/project/compliance) · [Licensing](/docs/project/licensing)

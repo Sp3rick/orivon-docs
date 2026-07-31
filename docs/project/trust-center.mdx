@@ -1,0 +1,140 @@
+---
+title: "Trust Center"
+description: "Orivon Trust Center: centralized security, privacy, compliance, transparency, responsible disclosure, system status, and security advisories."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["project", "trust center", "security", "privacy", "compliance", "transparency"]
+keywords: "trust center, security, privacy, compliance, transparency, responsible disclosure, security advisories"
+---
+
+The **Trust Center** is the single authoritative source for Orivon's security,
+privacy, compliance, and transparency posture. It is designed for enterprise
+evaluators, auditors, security researchers, and anyone who needs to verify
+the project's trustworthiness.
+
+<Callout type="info" title="Trust Center is a living resource">
+  This page links to detailed policies and real-time status. Bookmark it for
+  quick access to the latest advisories, certifications, and transparency
+  reports.
+</Callout>
+
+## Quick links
+
+| Area | Resource | Status |
+| --- | --- | --- |
+| **Security Policy** | [Security Policy](/docs/project/security-policy) | Active |
+| **Privacy Policy** | [Privacy Policy](/docs/project/privacy-policy) | Active |
+| **Compliance** | [Compliance](/docs/project/compliance) | In Progress |
+| **Responsible Disclosure** | [Responsible Disclosure](/docs/contributors/responsible-disclosure) | Active |
+| **System Status** | [status.orivon.dev](https://status.orivon.dev) | Operational |
+| **Security Advisories** | [GitHub Security Advisories](https://github.com/OrivonBrowser/orivon-runtime/security/advisories) | Current |
+| **Transparency Reports** | [Transparency Reports](/docs/project/transparency) | Quarterly |
+| **Certifications** | [Compliance](/docs/project/compliance#certifications) | Planned |
+
+## Security posture
+
+### Principles
+- **Capability-based security** — No ambient authority; every action requires an explicit capability.
+- **Defense in depth** — Sandbox, capability enforcement, code review, fuzzing, formal verification.
+- **Secure by default** — Permissions denied unless explicitly granted; no telemetry by default.
+- **Supply chain integrity** — Signed releases, SBOMs, dependency scanning, provenance attestation.
+- **Transparent disclosure** — Coordinated vulnerability disclosure with public advisories.
+
+### Current capabilities
+| Capability | Implementation | Verification |
+| --- | --- | --- |
+| **WASM sandbox** | Capability-based, per-module | Unit tests, fuzzing, audit |
+| **Memory safety** | Rust core, WASM isolation | Clippy, Miri, sanitizers |
+| **Cryptography** | Ring, aws-lc-rs, vetted primitives | Crypto review, test vectors |
+| **Dependency scanning** | Cargo audit, npm audit, OSV | CI on every PR |
+| **Signed releases** | Cosign/Sigstore, keyless signing | `cosign verify` on all artifacts |
+| **SBOM generation** | CycloneDX JSON/SPD | Published with every release |
+
+### Security certifications (planned)
+| Certification | Target | Status |
+| --- | --- | --- |
+| **SOC 2 Type II** | 2027-H2 | Planning |
+| **ISO 27001** | 2028 | Gap analysis planned |
+| **Common Criteria** | 2029+ | Research phase |
+
+## Privacy posture
+
+### Principles
+- **Local-first** — Data stays on device unless user explicitly shares.
+- **No telemetry by default** — Opt-in only; transparent about what is collected.
+- **User-controlled identity** — DIDs, keys, credentials owned by user.
+- **Minimal data** — Collect only what is necessary for requested functionality.
+- **Transparency** — Public privacy policy; open-source code auditable.
+
+### Data handling
+| Data Type | Collection | Purpose | Retention |
+| --- | --- | --- | --- |
+| **Crash reports** | Opt-in | Stability improvement | 90 days |
+| **Performance metrics** | Opt-in | Performance optimization | 90 days |
+| **Usage analytics** | Not collected | — | — |
+| **Identity credentials** | User-controlled | User authentication | User-controlled |
+| **Web3 Score signals** | User-consented | Reputation computation | User-controlled |
+
+See [Privacy Policy](/docs/project/privacy-policy) for full details.
+
+## Compliance posture
+
+### Regulatory alignment (planned)
+| Regulation | Scope | Status |
+| --- | --- | --- |
+| **GDPR** | EU users, data processing | Readiness assessment 2027 |
+| **CCPA/CPRA** | California users | Alignment with GDPR work |
+| **ePrivacy** | Browser communications | Standards-track alignment |
+| **Accessibility (WCAG 2.1 AA)** | Browser UI, docs | In progress (v1.3 target) |
+
+### Industry standards
+| Standard | Relevance | Status |
+| --- | --- | --- |
+| **NIST CSF** | Cybersecurity framework | Mapping in progress |
+| **NIST 800-53** | Security controls | SOC 2 preparation |
+| **CIS Benchmarks** | Configuration hardening | Planned |
+
+## Transparency commitments
+
+| Commitment | Frequency | Location |
+| --- | --- | --- |
+| **Security advisories** | Per incident | GitHub Advisories + newsletter |
+| **Transparency reports** | Quarterly | [Transparency Reports](/docs/project/transparency) |
+| **Financial reports** | Annually (post-Foundation) | Foundation repository |
+| **Governance minutes** | Bi-weekly | Governance repository |
+| **Release notes** | Per release | [Release Archive](/docs/project/release-archive) |
+| **Dependency updates** | Weekly | Automated PRs + SBOM |
+
+## Responsible disclosure
+
+Orivon operates a **Coordinated Vulnerability Disclosure (CVD)** program:
+
+- **Scope:** All Orivon repositories and infrastructure.
+- **Safe harbor:** Good-faith research protected; no legal action for compliant disclosure.
+- **Response:** Acknowledgment within 48 hours; triage within 5 business days.
+- **Coordination:** Private fix development; public advisory on release.
+- **Recognition:** Hall of fame; swag; grant consideration for significant findings.
+
+**Report to:** security@orivon.dev (PGP key available)
+
+See [Responsible Disclosure](/docs/contributors/responsible-disclosure) for full
+process, scope, and rewards.
+
+## System status
+
+| Service | Status Page | Uptime Target |
+| --- | --- | --- |
+| **Package registry** | status.orivon.dev | 99.9% |
+| **Documentation site** | status.orivon.dev | 99.9% |
+| **Forum** | status.orivon.dev | 99.5% |
+| **CI/CD** | GitHub Status | 99.9% |
+| **Discord** | Discord Status | N/A (third-party) |
+
+<Callout type="success" title="Trust is earned daily">
+  The Trust Center is not a static badge — it is a commitment to continuous
+  transparency. If you have questions about our security, privacy, or
+  compliance posture, contact security@orivon.dev or open a discussion.
+</Callout>
+
+**Related:** [Security Policy](/docs/project/security-policy) · [Privacy Policy](/docs/project/privacy-policy) · [Compliance](/docs/project/compliance) · [Responsible Disclosure](/docs/contributors/responsible-disclosure) · [Transparency Reports](/docs/project/transparency)

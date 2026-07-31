@@ -1,0 +1,105 @@
+---
+title: "OSP-004: Module System"
+description: "Draft specification for the module system: identification, packaging, loading, dependencies, lifecycle and update behavior."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["standards", "osp-004", "modules"]
+keywords: "OSP-004, module system, OMP, lifecycle, dependencies, lockfile, versioning"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Modules are how the ecosystem extends Orivon. This draft defines how modules
+are identified, packaged, loaded, versioned and retired.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-004 |
+| Title | Module System |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Modules |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+A module is packaged as an Orivon Module Package (OMP), declared by a manifest,
+pinned by a lockfile to content addressed dependencies, and run in a sandboxed
+runtime host. The reference design is the
+[Module Architecture](/docs/technical-design/module-architecture) page.
+
+## Purpose
+
+Modules are untrusted code with granted capabilities. The module system exists
+to make that safe and tractable: verified identity, pinned dependencies,
+explicit permissions and a defined lifecycle from registration to uninstall.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'Module identification and the OMP package format.',
+    'The manifest and lockfile model.',
+    'Module loading, activation and lifecycle.',
+    'Dependency resolution and verification.',
+    'Update, removal and failure handling.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'The manifest file format in detail (covered by OSP-005).',
+    'How module code is granted capabilities (covered by OSP-006).',
+    'The execution environment (covered by OSP-001).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-005 Package Manifest](/docs/standards/osp-005-package-manifest): the declared format.
+- [OSP-001 Runtime Architecture](/docs/standards/osp-001-runtime-architecture): where modules run.
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): granted capabilities.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): supply chain guarantees.
+
+## Related specifications
+
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): module lifecycle events.
+- [OSP-014 Configuration](/docs/standards/osp-014-configuration): module configuration scope.
+- [Versioning](/docs/standards/versioning): the version model modules use.
+
+## Implementation status
+
+The reference implementation includes the module loader with signed load
+plans, content addressed dependency pins and lifecycle enforcement. The draft
+tracks the reference design at 0.1.0. No conformance suite has been published
+yet.
+
+## Future work
+
+- Hot module update.
+- Module namespaces and scoped publication.
+- Offline dependency caching.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Module Architecture](/docs/technical-design/module-architecture): the reference design.

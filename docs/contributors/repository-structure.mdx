@@ -1,0 +1,151 @@
+---
+title: "Repository Structure"
+description: "The Orivon monorepo layout: every major directory, its purpose, and how the pieces fit together."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["contributors", "workflow"]
+keywords: "repository structure, monorepo, directories, code layout"
+---
+
+Orivon is organized as a monorepo: several related projects in one
+repository, sharing tooling and conventions. Knowing the layout tells you
+where to look for any piece of the system, and where your contribution
+belongs.
+
+<Callout type="info" title="A living map">
+  Repositories evolve. If a directory is missing or has moved, the latest
+  README at the repository root is authoritative.
+</Callout>
+
+## The top level
+
+<Diagram caption="The top-level layout of the monorepo.">
+  <Flow column>
+    <DiagramNode accent>Root: workspaces, tooling, docs</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core, runtime, browser, SDK, CLI</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Standards, tests, tooling</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Docs, examples, website</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Directory map
+
+| Directory | Purpose |
+| --- | --- |
+| `core/` | Core services: identity, wallet, storage, networking |
+| `runtime/` | The sandboxed runtime host and module execution |
+| `browser/` | The Orivon browser and its UI |
+| `sdk/` | The TypeScript SDK (`@orivon/sdk`) |
+| `cli/` | The `orivon` command line tool |
+| `standards/` | Specification drafts and accepted specifications |
+| `tests/` | Integration and conformance test suites |
+| `tooling/` | Build tooling, generators and shared utilities |
+| `docs/` | This documentation site |
+| `examples/` | Runnable example modules and applications |
+
+## The runtime
+
+`runtime/` holds the heart of the platform:
+
+<CardGrid columns={2}>
+  <Card title="Host">
+    The process that loads, sandboxes and supervises packages.
+  </Card>
+  <Card title="Sandbox">
+    The isolation boundary: capability-based access, default deny.
+  </Card>
+  <Card title="Module loader">
+    Loading, verifying and resolving package dependencies.
+  </Card>
+  <Card title="Services">
+    The core services each package can request access to.
+  </Card>
+</CardGrid>
+
+The architecture is detailed in
+[Runtime Architecture](/docs/technical-design/runtime-architecture).
+
+## The core
+
+`core/` implements the services the whole platform builds on:
+
+| Directory | Service |
+| --- | --- |
+| `core/identity/` | DDoc identity, resolution, verification |
+| `core/wallet/` | Keys, signing, transactions |
+| `core/storage/` | Content addressed storage and pinning |
+| `core/networking/` | Transports, peer communication |
+| `core/dns/` | Naming and resolution |
+
+Each is described in the [Core Architecture](/docs/technical-design/core-architecture).
+
+## The browser
+
+`browser/` contains the user-facing product: the browser shell, tab and
+navigation, and the rendering pipeline. Design work mostly lands here. See
+[Browser Architecture](/docs/technical-design/browser-architecture).
+
+## The SDK and CLI
+
+- `sdk/` is what application developers import. It is the primary public API
+  surface and changes to it are high impact.
+- `cli/` is the developer tool: scaffolding, build, run, test, publish. See
+  the [CLI reference](/docs/developers/cli).
+
+## The docs
+
+`docs/` is the documentation site in this repository, organized by level:
+
+| Level | Directory |
+| --- | --- |
+| Introduction | `docs/introduction/` |
+| Ecosystem | `docs/ecosystem/` |
+| Technical Design | `docs/technical-design/` |
+| Standards | `docs/standards/` |
+| Developer Docs | `docs/developers/` |
+| Contributor Guide | `docs/contributors/` |
+
+See [Documentation Contributions](/docs/contributors/documentation-contributions).
+
+## Working within the structure
+
+<Callout type="success" title="Best practice">
+  Match your change to its home: a runtime fix goes in `runtime/`, a docs
+  fix in `docs/`, a service change in `core/`. The directory is a signal of
+  scope, and reviewers expect the two to line up.
+</Callout>
+
+When you are unsure where something lives:
+
+<CheckList
+  items={[
+    'Search the codebase for the feature or error string.',
+    'Check the README in the candidate directory.',
+    'Ask in the community chat or a GitHub discussion.',
+    'Open the issue you are fixing and link the directories you found.',
+  ]}
+/>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Changing the SDK for a runtime fix">
+    Fix problems at their layer. A runtime fix belongs in `runtime/`.
+  </Card>
+  <Card title="Editing generated files">
+    Build output and generated code are not hand edited. Change the source.
+  </Card>
+  <Card title="Missing conventions per directory">
+    Each directory has its own README and tests. Read them before editing.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Development Workflow](/docs/contributors/development-workflow): how changes flow.
+- [Coding Standards](/docs/contributors/coding-standards): the code conventions.
+- [Repository structure](/docs/developers/project-structure): the package layout developers use.

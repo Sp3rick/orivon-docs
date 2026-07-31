@@ -1,0 +1,164 @@
+---
+title: "Permissions"
+description: "How permissions work for developers: requesting access, scopes, best practices, security considerations and common mistakes."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["developers", "permissions"]
+keywords: "permissions, permission requests, scopes, grants, consent, security"
+---
+
+Permissions are the contract between your package and the user. Everything
+your code can do is granted, and everything else is denied. This page explains
+how to request access, how scopes work, and how to earn user trust.
+
+## The model
+
+Access is capability based with a default deny policy:
+
+<Diagram caption="Every privileged call is checked against the grants.">
+  <Flow column>
+    <DiagramNode accent>Call a capability</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Granted? (auto, consent, deny)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Execute or deny</DiagramNode>
+  </Flow>
+</Diagram>
+
+Your package declares the capabilities it wants in the
+[manifest](/docs/developers/module-manifest). At runtime, every call to a
+protected API is checked against the grants. The full model is in the
+[Permission Model](/docs/standards/osp-006-permission-model) specification.
+
+## Requesting permissions
+
+Permissions are declared, not requested at runtime:
+
+```toml
+[permissions]
+allow = ["identity.read", "storage.write"]
+```
+
+<CheckList
+  items={[
+    'Declare the permission in the manifest before using the API.',
+    'The user consents at install time based on the manifest.',
+    'The runtime enforces the grant on every call.',
+    'You can request additional grants at runtime when needed.',
+  ]}
+/>
+
+A runtime request for a new grant looks like:
+
+```ts
+const granted = await app.permission.request('wallet.sign');
+if (granted === 'denied') {
+  // fall back gracefully
+}
+```
+
+## Scopes
+
+Grants are scoped so a permission is not a blank check:
+
+| Scope | Limits the grant to |
+| --- | --- |
+| **Origin** | A specific web origin |
+| **Application** | Your application's context |
+| **Module** | One module instance |
+| **Profile** | The user profile |
+
+The same capability can be granted in one scope and denied in another. When
+you request a permission, request the narrowest scope that works.
+
+## Grant decisions
+
+A grant request resolves in one of three ways:
+
+| Decision | Meaning |
+| --- | --- |
+| **Auto granted** | The manifest declared it and the policy allows it |
+| **Consent required** | The user is asked |
+| **Auto denied** | The policy rejects it |
+
+You must handle every path, especially denial. A denied permission is a normal
+runtime condition, not a crash.
+
+## Best practices
+
+<Callout type="success" title="Best practice">
+  Follow the principle of least privilege: request the smallest set of
+  capabilities, in the narrowest scopes, for the shortest duration. A minimal
+  permission set is the most persuasive argument a package can make at consent
+  time.
+</Callout>
+
+<Steps>
+  <Step title="Audit before you declare">
+    List every API your code calls and only declare those capabilities.
+  </Step>
+  <Step title="Scope to the minimum">
+    Prefer origin and module scopes over profile and global scopes.
+  </Step>
+  <Step title="Handle denial gracefully">
+    Every privileged call can be denied. Degrade, do not crash.
+  </Step>
+  <Step title="Document the why">
+    Describe each permission in your package docs. Users trust what they
+    understand.
+  </Step>
+</Steps>
+
+## Security considerations
+
+Permissions are the security boundary, and the way you use them matters:
+
+<CardGrid columns={2}>
+  <Card title="Least privilege">
+    A package with `wallet.sign` is a target. Only request it for a real,
+    visible feature.
+  </Card>
+  <Card title="Consent surfaces">
+    Every permission is shown to the user. Broad permissions erode trust and
+    are reviewed more strictly.
+  </Card>
+  <Card title="Temporary grants">
+    Prefer temporary grants for one shot operations over persistent ones.
+  </Card>
+  <Card title="Revocation">
+    Users can revoke grants. Your code must behave correctly after revocation,
+    so never cache grant decisions.
+  </Card>
+</CardGrid>
+
+<Callout type="warning" title="Never cache grants">
+  A grant can be revoked at any time. Re-check on every call instead of
+  caching a decision. Cached grants are how revoked access keeps working.
+</Callout>
+
+## Common mistakes
+
+| Mistake | Why it hurts |
+| --- | --- |
+| Declaring `allow = ["*"]` | A blank check; rejected by reviewers and policy |
+| Requesting speculatively | Red flags at consent time |
+| Ignoring denial | Privileged code that assumes access will crash or corrupt state |
+| Storing grant decisions | Stale access after revocation |
+| Using profile scope casually | Widens the blast radius of your package |
+
+<Callout type="info" title="Relation to the rest">
+  Permissions are defined by the
+  [Permission Model](/docs/standards/osp-006-permission-model) and enforced in
+  the [Core Architecture](/docs/technical-design/core-architecture). The
+  ecosystem view is on the
+  [Security Model](/docs/ecosystem/security-model) page.
+</Callout>
+
+## Related pages
+
+- [Module Manifest](/docs/developers/module-manifest): where permissions are declared.
+- [Using Permissions tutorial](/docs/developers/tutorials/using-permissions): a hands on guide.
+- [Best Practices](/docs/developers/best-practices): security practices.

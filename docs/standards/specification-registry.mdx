@@ -1,0 +1,107 @@
+---
+title: "Specification Registry"
+description: "The searchable registry of every Orivon specification: identifiers, categories, statuses, versions and summaries, with filters."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["standards", "registry"]
+keywords: "registry, specifications, OSP, categories, status, version, search, filter"
+---
+
+The registry is the single point of truth for the Orivon specification series.
+Every document is listed here with its identifier, title, category, status,
+version, last update and summary. The registry is searchable and filterable, so
+you can find a specification by identifier, by what it covers, or by where it
+stands in the [lifecycle](/docs/standards/specification-lifecycle).
+
+## Using the registry
+
+- **Search** by identifier, title or summary.
+- **Filter by status** to see only drafts, accepted or deprecated documents.
+- **Filter by category** to narrow to one area of the ecosystem.
+- Each row links to the full specification page.
+
+Every specification is also indexed by the site-wide
+[search](/docs/technical-design), so typing an OSP identifier anywhere finds it.
+
+<Callout type="warning" title="Read the status">
+  A **Draft** entry is a direction, not a promise. Only an **Accepted**
+  specification is normative. See [Versioning](/docs/standards/versioning) for
+  what each status and version means.
+</Callout>
+
+<SpecRegistry
+  specs={[
+    {id: 'OSP-001', title: 'Runtime Architecture', category: 'Runtime', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the runtime host, its lifecycle and the module execution environment.', route: '/docs/standards/osp-001-runtime-architecture'},
+    {id: 'OSP-002', title: 'Core Architecture', category: 'Core', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the core services, their boundaries and the request pipeline.', route: '/docs/standards/osp-002-core-architecture'},
+    {id: 'OSP-003', title: 'Browser Architecture', category: 'Browser', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the browser process topology, tabs and navigation.', route: '/docs/standards/osp-003-browser-architecture'},
+    {id: 'OSP-004', title: 'Module System', category: 'Modules', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the module system, packaging and lifecycle.', route: '/docs/standards/osp-004-module-system'},
+    {id: 'OSP-005', title: 'Package Manifest', category: 'Package Format', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the orivon.toml manifest and the package layout.', route: '/docs/standards/osp-005-package-manifest'},
+    {id: 'OSP-006', title: 'Permission Model', category: 'Permissions', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the capability and permission model.', route: '/docs/standards/osp-006-permission-model'},
+    {id: 'OSP-007', title: 'Wallet API', category: 'Wallet', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the wallet interface applications use for keys and signing.', route: '/docs/standards/osp-007-wallet-api'},
+    {id: 'OSP-008', title: 'Identity System', category: 'Identity', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines identity, the DDoc format and authentication.', route: '/docs/standards/osp-008-identity-system'},
+    {id: 'OSP-009', title: 'Networking', category: 'Networking', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines networking, transport and peer communication.', route: '/docs/standards/osp-009-networking'},
+    {id: 'OSP-010', title: 'Storage', category: 'Storage', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines storage, content addressing and synchronization.', route: '/docs/standards/osp-010-storage'},
+    {id: 'OSP-011', title: 'Event System', category: 'Events', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the event system and its message schemas.', route: '/docs/standards/osp-011-event-system'},
+    {id: 'OSP-012', title: 'Web3 Score', category: 'SDK', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the Web3 Score format and its computation.', route: '/docs/standards/osp-012-web3-score'},
+    {id: 'OSP-013', title: 'Security Model', category: 'Security', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the security model and its guarantees.', route: '/docs/standards/osp-013-security-model'},
+    {id: 'OSP-014', title: 'Configuration', category: 'Configuration', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the configuration system and its schemas.', route: '/docs/standards/osp-014-configuration'},
+    {id: 'OSP-015', title: 'SDK', category: 'SDK', status: 'Draft', version: '0.1.0', updated: 'July 31, 2026', summary: 'Defines the SDK surface and its integration points.', route: '/docs/standards/osp-015-sdk'},
+  ]}
+/>
+
+## Categories
+
+Specifications are grouped into categories that map to the ecosystem. A
+category is a label for navigation, not a standard itself:
+
+| Category | Covers |
+| --- | --- |
+| **Runtime** | The runtime host and module execution |
+| **Core** | Core services and the request pipeline |
+| **Browser** | Browser processes, tabs and navigation |
+| **Modules** | The module system and its lifecycle |
+| **SDK** | The developer SDK surface |
+| **Wallet** | Key storage and signing |
+| **Identity** | Identity, DDoc and authentication |
+| **DNS** | Decentralized naming |
+| **Networking** | Transports and peer communication |
+| **Storage** | Content addressing and persistence |
+| **Security** | The security model and guarantees |
+| **Cryptography** | Cryptographic primitives and formats |
+| **Permissions** | Capabilities and consent |
+| **Events** | The event and message system |
+| **Configuration** | Configuration files and schemas |
+| **Package Format** | The package and manifest format |
+| **CLI** | Command line tooling |
+| **Developer Tools** | Tooling around the SDK |
+| **APIs** | Application interfaces |
+| **User Experience** | User facing behavior and consent |
+
+Not every category has a published specification yet. Categories without a
+document are expected future work, tracked on the [Roadmap](/docs/standards/roadmap).
+
+## Status summary
+
+Current status across the registry:
+
+| Status | Count | Meaning |
+| --- | --- | --- |
+| **Draft** | 15 | Public proposals under discussion |
+| **Accepted** | 0 | Normative and binding |
+| **Deprecated** | 0 | Superseded, migration path available |
+| **Archived** | 0 | Reference only, out of compliance scope |
+
+The [Draft Specifications](/docs/standards/draft-specifications) page lists the
+fifteen current drafts with their full summaries.
+
+<Callout type="success" title="Best practice">
+  Pin by identifier and version, not by title. An identifier like `OSP-006` is
+  stable across every version; a title is not.
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the current drafts in detail.
+- [Accepted Specifications](/docs/standards/accepted-specifications): what acceptance means.
+- [Versioning](/docs/standards/versioning): what the version numbers promise.

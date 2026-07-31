@@ -1,0 +1,170 @@
+---
+title: "Best Practices"
+description: "Practical recommendations for building production quality Orivon packages: project organization, naming, security, performance, accessibility, maintainability and documentation."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 28
+tags: ["developers", "best-practices"]
+keywords: "best practices, project organization, naming conventions, security, performance, accessibility, maintainability"
+---
+
+Best practices are the distilled experience of the ecosystem: rules that make
+packages easier to build, easier to review and easier to trust. They are
+recommendations, not requirements, but each one exists because its absence
+caused real problems.
+
+## Project organization
+
+A well organized project is a legible one:
+
+<CheckList
+  items={[
+    'One responsibility per source file, named after what it does.',
+    'Keep the manifest small; delegate detail to config.',
+    'Mirror tests to source one to one.',
+    'Separate logic from UI in applications.',
+    'Commit source and manifest, never build output or cache.',
+  ]}
+/>
+
+The reference layout is on the
+[Project Structure](/docs/developers/project-structure) page.
+
+## Naming conventions
+
+Names are how other developers navigate your code:
+
+| Thing | Convention | Example |
+| --- | --- | --- |
+| Package name | kebab-case | `my-storage-provider` |
+| Permissions | `domain.action` | `identity.read` |
+| Event topics | `domain.event` | `storage.changed` |
+| Methods | lowerCamelCase | `greetUser` |
+| Config keys | snake_case | `max_results` |
+
+Consistent naming makes the whole ecosystem feel like one system. It matters
+for the surfaces users see (permissions, events) as much as for variables.
+
+## Security
+
+Security is a set of habits, not a feature:
+
+<Steps>
+  <Step title="Least privilege">
+    Request the minimum permissions in the narrowest scopes. See
+    [Permissions](/docs/developers/permissions).
+  </Step>
+  <Step title="Verify before trust">
+    Resolve and verify identities, check the verified flag on names, and
+    validate input.
+  </Step>
+  <Step title="Keep secrets out">
+    No secrets in code, config, logs or content addressed storage.
+  </Step>
+  <Step title="Handle revocation">
+    Re-check grants on every call; never cache them.
+  </Step>
+</Steps>
+
+<Callout type="warning" title="Security review checklist">
+  Before publishing, check: no wildcard permissions, no secrets in the
+  package, every privileged call handles denial, dependencies are pinned, and
+  identity is verified where it matters.
+</Callout>
+
+## Performance
+
+Performance is designed, then measured:
+
+- Defer work to first use; keep `activate` small.
+- Cache expensive repeatable work with content addressing.
+- Send identifiers, not documents, across the bus.
+- Never block the main thread.
+- Profile before optimizing. See [Performance](/docs/developers/performance).
+
+## Accessibility
+
+Orivon applications run in the browser, so web accessibility applies:
+
+<CheckList
+  items={[
+    'Label every interactive element in the UI.',
+    'Provide keyboard navigation for all flows.',
+    'Respect reduced motion preferences.',
+    'Maintain contrast for text and controls.',
+    'Announce state changes to assistive technology.',
+  ]}
+/>
+
+Accessibility is not a feature for others; it is how every user gets a good
+experience. The [User Experience](/docs/ecosystem) ecosystem content describes
+the platform commitments.
+
+## Maintainability
+
+Code is read more than it is written. Optimize for the reader:
+
+<CardGrid columns={2}>
+  <Card title="Clear over clever">
+    Write code that states what it does. The reader is usually future you.
+  </Card>
+  <Card title="Small functions">
+    A function that does one thing is testable and reviewable.
+  </Card>
+  <Card title="Typed boundaries">
+    Type the seams: requests, responses, config, events.
+  </Card>
+  <Card title="Explained decisions">
+    When the code is surprising, say why in a comment.
+  </Card>
+</CardGrid>
+
+## Documentation
+
+Your package documentation is part of the product:
+
+<Steps>
+  <Step title="README">
+    What the package does, what it needs, and a quick example.
+  </Step>
+  <Step title="Permission explanations">
+    Why each requested permission exists, written for users.
+  </Step>
+  <Step title="Configuration docs">
+    Every config value, its default and its effect.
+  </Step>
+  <Step title="Migration notes">
+    How the package handles its own breaking changes.
+  </Step>
+</Steps>
+
+A package that documents its permissions and configuration honestly is easier
+to trust and easier to adopt.
+
+## Review checklist
+
+A condensed checklist for before you publish:
+
+<CheckList
+  items={[
+    'Manifest is complete and validated.',
+    'Permissions are minimal and documented.',
+    'Tests pass with coverage.',
+    'Dependencies are pinned.',
+    'Secrets and personal data are absent from the package.',
+    'README, permission docs and config docs are current.',
+    'The package has a license.',
+  ]}
+/>
+
+<Callout type="success" title="The goal">
+  Best practices exist so that packages are safe to run, easy to review and
+  possible to maintain. A package that meets this list is a good citizen of
+  the ecosystem.
+</Callout>
+
+## Related pages
+
+- [Permissions](/docs/developers/permissions): the security core.
+- [Testing](/docs/developers/testing): the quality core.
+- [Performance](/docs/developers/performance): the speed core.

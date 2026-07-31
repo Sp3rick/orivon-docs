@@ -1,0 +1,131 @@
+---
+title: "Networking API"
+description: "Reference for the Networking API: fetch, HTTP responses, streams and outbound connections."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["api-reference", "networking-api"]
+keywords: "networking api, fetch, http request, response, headers, websocket, connection, stream, timeout"
+---
+
+The Networking API provides outbound communication: HTTP requests, streaming
+connections and network diagnostics. All traffic is routed through the
+platform's networking stack, which enforces policies, timeouts and the
+networking grant.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: NetworkingFacade
+
+### `networking.fetch(url, options?)`
+
+Performs an HTTP request and resolves with the full response.
+
+```ts
+const response = await app.networking.fetch('https://api.example.com/v1/status', {
+  method: 'GET',
+  headers: {Accept: 'application/json'},
+});
+const body = await response.json();
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | Absolute HTTP(S) URL. |
+| `options.method` | `string \| undefined` | HTTP method. Default `GET`. |
+| `options.headers` | `HeadersInit \| undefined` | Request headers. |
+| `options.body` | `Uint8Array \| string \| undefined` | Request body. |
+| `options.timeoutMs` | `number \| undefined` | Total timeout. Default `30000`. |
+| `options.signal` | `AbortSignal \| undefined` | Cancellation. |
+
+**Returns:** `Promise<HttpResponse>`
+
+**Throws:** `ERR_INVALID_URL` · `ERR_NETWORK_UNREACHABLE` · `ERR_TIMEOUT` · `ERR_ABORTED` · `ERR_PERMISSION_DENIED`
+
+### `networking.fetchText(url, options?)`
+
+Convenience wrapper returning `{status, headers, text}`.
+
+**Returns:** `Promise<{status: number, headers: Headers, text: string}>`
+
+### `networking.fetchJson(url, options?)`
+
+Convenience wrapper parsing JSON. Rejects with `ERR_HTTP_PARSE_ERROR` on
+invalid JSON.
+
+**Returns:** `Promise<{status: number, headers: Headers, body: unknown}>`
+
+### `networking.connect(url, options?)`
+
+Opens a streaming connection (WebSocket or raw socket by scheme).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | `wss://` or `ws://` URL. |
+| `options.protocols` | `string[] \| undefined` | WebSocket sub-protocols. |
+| `options.timeoutMs` | `number \| undefined` | Handshake timeout. Default `10000`. |
+
+**Returns:** `Promise<Connection>`
+
+### `networking.resolveHost(host)`
+
+Resolves a host to addresses without performing a full request. Convenience
+wrapper over the platform resolver.
+
+**Returns:** `Promise<string[]>`
+
+**Throws:** `ERR_NETWORK_UNREACHABLE`
+
+### `networking.getNetworkState()`
+
+Returns connectivity state.
+
+**Returns:** `Promise<{online: boolean, type: string}>`
+
+## Types
+
+### `HttpResponse`
+
+| Field / method | Type | Description |
+| --- | --- | --- |
+| `status` | `number` | HTTP status code. |
+| `ok` | `boolean` | `status` in 200–299. |
+| `headers` | `Headers` | Response headers. |
+| `body` | `Uint8Array` | Raw response body. |
+| `json()` | `() => Promise<unknown>` | Parses `body` as JSON. |
+| `text()` | `() => Promise<string>` | Decodes `body` as UTF-8. |
+
+### `Connection`
+
+| Field / method | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | Connected URL. |
+| `readyState` | `number` | Connection state. |
+| `send` | `(data: Uint8Array \| string) => void` | Sends a frame. |
+| `close` | `(code?, reason?) => void` | Closes the connection. |
+| `onMessage` | `(handler) => void` | Frame handler. |
+| `onClose` | `(handler) => void` | Close handler. |
+
+### `Headers`
+
+Interface with `get(name)`, `has(name)`, `entries()` and `set(name, value)`.
+
+## Policies
+
+- Only `https://` and `wss://` are allowed outside a local development loopback
+  (`http://` and `ws://` are limited to `localhost`, `127.0.0.1` and `[::1]`).
+- Redirects are followed up to 10 hops by default.
+- Requests are subject to the manifest `network.timeoutMs` and `network.maxRedirects`
+  configuration when set.
+- Private-network requests (RFC 1918 ranges) require the
+  `networking.privateNetwork` permission.
+
+## Networking events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `networking:connection-opened` | `{url, id}` | A connection opened. |
+| `networking:connection-closed` | `{id, code}` | A connection closed. |
+| `networking:state-changed` | `{online, type}` | Connectivity changed. |
+
+**Related:** [DNS API](/docs/api-reference/dns-api) · [Configuration](/docs/api-reference/configuration) · [Error Codes](/docs/api-reference/error-codes)

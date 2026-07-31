@@ -1,0 +1,314 @@
+---
+title: "Module Architecture"
+description: "The internal design of the Orivon module system: package format, manifest, registration, hooks, dependencies, versioning, updates and removal."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["technical-design", "modules"]
+keywords: "module, manifest, registration, hooks, dependencies, versioning, updates, removal, package"
+---
+
+Modules are how the ecosystem extends itself without forking. This page is the
+engineering view of that system: the on disk package format, the manifest
+contract, how modules register, run, update and are removed, and how failures
+are contained.
+
+## Module package format
+
+A module is distributed as an **Orivon Module Package**, a single content
+addressed archive:
+
+<Diagram caption="A module package is verified by hash before anything is executed.">
+  <Flow column>
+    <DiagramNode>Module package (.omp)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>orivon.toml manifest</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Compiled WASM / JS bundles</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Assets and locale files</DiagramNode>
+  </Flow>
+</Diagram>
+
+The package contains exactly four things:
+
+1. A **manifest** that describes the module.
+2. The **entry bundles**: a WASM binary, JavaScript, or both.
+3. **Assets**: icons, styles and other static files.
+4. A **signature block**: the author's signature over the whole package.
+
+The content address of the package is derived from its bytes. Two modules with
+identical bytes are the same module, which makes both tamper detection and
+deduplication trivial. See [Security Architecture](/docs/technical-design/security-architecture)
+for how this fits the integrity model.
+
+## The manifest
+
+The manifest is the contract between the module and the system. It is a TOML
+file named `orivon.toml`. A representative manifest:
+
+```toml
+# orivon.toml
+id = "dev.orivon.storage-bridge"
+name = "Storage Bridge"
+version = "1.4.2"
+authors = ["dev.orivon"]
+entry = "dist/entry.wasm"
+runtime = "wasm32-wasip1"
+min-runtime = "0.18.0"
+
+[permissions]
+storage = ["read", "write"]
+network = ["connect:api.example.com"]
+
+[dependencies]
+"dev.orivon.common-utils" = { version = "1.2.0", pin = "QmXv..." }
+
+[hooks]
+on-activate = "activate"
+on-suspend = "suspend"
+on-resume = "resume"
+on-shutdown = "shutdown"
+```
+
+The fields the system trusts are validated against the manifest schema and
+against the author's signature. Anything the manifest does not declare is
+denied by default.
+
+## The manifest contract
+
+The manifest declares five things the runtime and core rely on:
+
+<CardGrid columns={2}>
+  <Card title="Identity">
+    The module id and author identity determine who may update it and how it is
+    addressed.
+  </Card>
+  <Card title="Entry points">
+    The runtime to use and which function to call to activate and deactivate.
+  </Card>
+  <Card title="Permissions">
+    The exact capabilities the module requests. See
+    [Permission System](/docs/technical-design/permission-system).
+  </Card>
+  <Card title="Dependencies">
+    Other modules it needs, with version constraints and content pins.
+  </Card>
+  <Card title="Hooks">
+    Lifecycle functions the runtime will invoke.
+  </Card>
+</CardGrid>
+
+## Registration
+
+Registration is the step where a module becomes known to the system. It happens
+in the core's ModuleService, not in the runtime:
+
+<Steps>
+  <Step title="Submit">
+    The user (or an installer) submits a package address to the module service.
+  </Step>
+  <Step title="Verify">
+    The module service fetches and verifies the signature and content hash.
+  </Step>
+  <Step title="Review">
+    The manifest is validated and the requested permissions are checked against
+    policy.
+  </Step>
+  <Step title="Consent">
+    If new permissions are required, the user grants them through the policy
+    broker.
+  </Step>
+  <Step title="Record">
+    The module is recorded in the registry with its state set to registered.
+  </Step>
+</Steps>
+
+Registration records, it does not execute. Execution is a later lifecycle step.
+The [Module Loader](/docs/technical-design/module-loader) page covers what
+happens between registration and execution.
+
+## Initialization and activation
+
+When the runtime loads a registered module, it goes through initialization and
+then activation:
+
+1. **Compile.** The entry bundle is compiled in a fresh sandboxed context.
+2. **Wire.** The module receives capability handles for its granted permissions.
+3. **Initialize.** Module level state is created.
+4. **Activate.** The runtime calls the `on-activate` hook, and the module
+   returns an activation handle that represents the running instance.
+
+```rust
+// Inside the module entry point
+#[no_mangle]
+pub extern "C" fn activate(api: *const OrivonApi) -> *const Activation {
+    let app = unsafe { OrivonApi::from_ptr(api) };
+    let mut state = ModuleState::new();
+    state.on_storage(app.storage());
+    Activation::new(state)
+}
+```
+
+## Execution and events
+
+Once active, a module reacts to events instead of running a main loop:
+
+- **Lifecycle events** tell it to suspend, resume or shut down.
+- **Capability events** notify it when its permissions change.
+- **Domain events** deliver data it subscribed to, such as wallet or network
+  updates.
+
+The module never polls the core; it receives events it was granted. Event
+delivery is described in [Communication Bus](/docs/technical-design/communication-bus).
+
+## Hooks
+
+Hooks are the module's contract with the runtime lifecycle. Each hook is a
+function declared in the manifest and called at a defined point:
+
+| Hook | Called when | Purpose |
+| --- | --- | --- |
+| `on-activate` | Module is activated | Set up state and register handlers |
+| `on-suspend` | Module is suspended | Persist transient state |
+| `on-resume` | Module is resumed | Restore transient state |
+| `on-shutdown` | Module is being removed | Release resources |
+| `on-config-change` | Its configuration changes | Reapply settings |
+
+Hooks are advisory: the system does not depend on them succeeding, because the
+system itself persists authoritative state. A hook that fails is reported, not
+trusted.
+
+## Permissions
+
+A module's permissions are fixed at consent time and enforced at call time. The
+module cannot self escalate, and the runtime checks every API call against the
+current policy. Revocation is immediate and does not require the module to
+cooperate. The full model is in
+[Permission System](/docs/technical-design/permission-system).
+
+## Dependencies
+
+Modules can depend on other modules. Dependencies are resolved against a
+**lockfile** produced at install time:
+
+- The lockfile pins the exact content address of every transitive dependency.
+- Version constraints use semantic versioning ranges, but resolution always
+  ends at a pinned address.
+- Dependency graphs are checked for cycles before installation.
+- A dependency change that the module did not declare is a failed verification.
+
+<Callout type="warning" title="Security">
+  Dependency chains are the classic supply chain attack surface. The lockfile,
+  content pins and author signatures are what make a compromised dependency
+  detectable. Never allow a dependency to be resolved without its pin. See
+  [Security Architecture](/docs/technical-design/security-architecture).
+</Callout>
+
+## Versioning
+
+Module versions follow semantic versioning and are content addressed:
+
+- **Patch** updates must be backward compatible.
+- **Minor** updates may add capabilities but not break behavior.
+- **Major** updates may break compatibility and always require re-review of the
+  manifest.
+
+Version identity is the content address, not a build number. The same version
+string plus the same content is the same artifact; a different artifact is a
+different version even if the string matches, which is why updates cannot be
+silently swapped.
+
+## Updates
+
+An update is a new package for the same module id:
+
+<Steps>
+  <Step title="Detect">
+    The module service discovers a signed update for a registered module.
+  </Step>
+  <Step title="Verify">
+    The new package is verified: signature, content hash and manifest.
+  </Step>
+  <Step title="Diff">
+    The permission diff between old and new versions is computed.
+  </Step>
+  <Step title="Consent">
+    If permissions changed, the user consents again. Otherwise the update is
+    presented for approval.
+  </Step>
+  <Step title="Swap">
+    The running instance is suspended, the new version is activated, and the
+    registry is updated.
+  </Step>
+</Steps>
+
+Updates are atomic from the user's perspective: either the new version is fully
+activated or the old version stays.
+
+## Removal
+
+Removal is the reverse of registration:
+
+1. **Suspend.** The running instance is told to suspend.
+2. **Shutdown.** The `on-shutdown` hook runs.
+3. **Unload.** The runtime drops the execution context.
+4. **Unregister.** The module service removes the registry entry.
+5. **Release.** Storage and permission grants tied to the module are released.
+
+Removal is always available to the user, even if a module misbehaves, because
+removal is enforced by the core, not by the module.
+
+## Failure recovery
+
+Modules fail in a contained way:
+
+| Failure | Containment | Recovery |
+| --- | --- | --- |
+| Hook panics | The context is dropped | Module marked failed; reinstall possible |
+| Permission revoked mid-run | Calls begin failing with a capability error | Module adapts or is removed |
+| Dependency update breaks | The lockfile is not changed silently | Old version restored from registry |
+| Sandbox violation | The context is terminated | Module quarantined, never auto re-enabled |
+
+The principle: one module's failure never affects another module or the browser
+process. See [Error Handling](/docs/technical-design/error-handling).
+
+## Security notes
+
+- Packages are verified by content hash and author signature before any code
+  runs.
+- The manifest is the only source of permissions; undeclared capabilities are
+  denied.
+- Dependency resolution always terminates at a pinned content address.
+
+## Performance notes
+
+- Modules are compiled once and cached by content address, so re-activation is
+  cheap.
+- Event delivery is push based; idle modules consume no CPU.
+- Suspended modules keep zero live memory except persisted state.
+
+<Callout type="success" title="Best practice">
+  Keep modules small and single purpose. A module that declares a wide
+  permission set or deep dependency graph is harder to verify, and the Web3
+  Score signals that cost.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include differential updates (downloading only changed
+  chunks), parallel dependency resolution, and signed update chains that allow
+  long-lived maintenance without re-publishing the whole graph. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Module Loader](/docs/technical-design/module-loader): from package bytes to running code.
+- [Permission System](/docs/technical-design/permission-system): how module permissions are enforced.
+- [Application Lifecycle](/docs/technical-design/application-lifecycle): the same lifecycle applied to apps.
+
+## Further reading
+
+- [Security Architecture](/docs/technical-design/security-architecture): supply chain protection.
+- [Communication Bus](/docs/technical-design/communication-bus): module events and hooks.
+- [Configuration](/docs/technical-design/configuration): per module settings.

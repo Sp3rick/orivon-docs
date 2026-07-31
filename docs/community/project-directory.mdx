@@ -1,0 +1,110 @@
+---
+title: "Project Directory"
+description: "The searchable Orivon project directory: browse by category, filter by tags, and find projects to use or contribute to."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 30
+tags: ["community", "directory", "projects", "search"]
+keywords: "project directory, searchable, browse, filter, categories, tags, orivon projects"
+---
+
+The Project Directory is the searchable catalog of all ecosystem projects
+listed on Orivon. It is the go-to place for users to find apps, for developers
+to find modules, and for contributors to find projects to join.
+
+## Browse the directory
+
+The directory is organized by category and filterable by tags:
+
+<Accordion
+  items={[
+    {
+      q: "Applications",
+      a: "End-user applications built on Orivon: browsers, wallets, social apps, productivity tools, games, and more."
+    },
+    {
+      q: "Modules",
+      a: "Runtime modules that extend platform capabilities: new protocols, algorithms, storage backends, identity methods, and utilities."
+    },
+    {
+      q: "Developer Tools",
+      a: "Tools for building on Orivon: CLI, scaffolding, testing frameworks, debuggers, profilers, CI/CD templates, and linters."
+    },
+    {
+      q: "Infrastructure",
+      a: "Operational infrastructure: nodes, relays, indexers, oracles, bridges, hosting providers, and monitoring."
+    },
+    {
+      q: "Identity & Privacy",
+      a: "Privacy-preserving tools: DID methods, verifiable credential implementations, zero-knowledge tools, private compute frameworks."
+    },
+    {
+      q: "Research & Standards",
+      a: "Reference implementations, test suites, and conformance tools for Orivon standards."
+    },
+  ]}
+/>
+
+## Project cards
+
+Each project in the directory shows:
+
+| Field | Description |
+| --- | --- |
+| **Name** | Project name and logo. |
+| **Category** | Primary category (see above). |
+| **Tags** | Technology tags: `wasm`, `rust`, `typescript`, `p2p`, `zk`, etc. |
+| **Description** | One-line summary. |
+| **License** | Must be Apache 2.0 or compatible. |
+| **Repository** | Link to public repo. |
+| **Website** | Project homepage (if any). |
+| **Maintainer** | Contact for security and collaboration. |
+| **Status** | `Active`, `Maintenance`, `Archived`, `Experimental`. |
+| **Orivon version** | Minimum compatible platform version. |
+| **Last updated** | Timestamp of last release or commit. |
+
+## Search and filters
+
+The directory supports:
+
+- **Text search** across name, description, and tags.
+- **Category filter** (single or multiple).
+- **Tag filter** (AND/OR logic).
+- **Status filter** (active, maintenance, etc.).
+- **Sort** by: recently updated, stars, name, category.
+
+## Submitting a project
+
+See [Ecosystem Projects](/docs/community/ecosystem-projects#getting-listed) for the
+submission process. In short:
+
+1. Build on Orivon.
+2. Open source it (Apache 2.0 compatible).
+3. Document it.
+4. Submit via PR to the directory repo.
+5. Get reviewed and published.
+
+## Directory data
+
+The directory is maintained as a structured data file (YAML/JSON) in the
+ecosystem repository. This enables:
+
+- Programmatic access for tooling.
+- Automated freshness checks (stale detection).
+- Integration with the [Grants Program](/docs/community/grants-program) and
+  [Community Showcase](/docs/community/community-showcase).
+
+## API access
+
+A public API for the directory is planned (To Be Announced) to enable:
+
+- IDE plugins for module discovery.
+- Dashboard integrations.
+- Automated dependency tracking.
+
+<Callout type="info" title="Directory is seeding">
+  The directory launches empty and grows with the ecosystem. Check back
+  regularly — new projects are added weekly once the submission process opens.
+</Callout>
+
+**Related:** [Ecosystem Projects](/docs/community/ecosystem-projects) · [Case Studies](/docs/community/case-studies) · [Success Stories](/docs/community/success-stories)

@@ -1,0 +1,121 @@
+---
+title: "Permission System"
+description: "In-depth paper on the Orivon permission system: capability descriptors, grant lifecycle, enforcement, and user-facing consent."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["research", "architecture-paper", "permission-system"]
+keywords: "permission system, capabilities, grants, descriptors, consent, enforcement, revocation, permission manager"
+---
+
+*Orivon Research Group · Security Research · Version 1.0 · Published 2026-06-22 · Status: Published*
+
+## Overview
+
+The permission system converts the platform's security principles into an
+operational mechanism: it defines how capabilities are described, how grants
+are acquired and revoked, and how the runtime enforces them. This paper
+analyses the permission system in depth.
+
+## Capability descriptors
+
+A capability is described by a descriptor:
+
+| Field | Role |
+| --- | --- |
+| `name` | The capability, e.g. `wallet.sign`. |
+| `scope` | Narrowing context, e.g. `transactions`. |
+| `resources` | Specific targets, e.g. a DID or key id. |
+
+Descriptors are the unit of both *request* and *grant*; a grant is a descriptor
+that has been approved.
+
+## Grant lifecycle
+
+```
+declared (manifest) → requested → granted ⇄ revoked
+                        └──► denied
+```
+
+| State | Meaning |
+| --- | --- |
+| `granted` | The caller may perform the operation. |
+| `prompt` | First use requires consent. |
+| `denied` | The caller may not perform the operation. |
+
+### Transitions
+
+| Transition | Trigger | Effect |
+| --- | --- | --- |
+| Declare → Request | Module requests a capability. | Consent prompt (if needed). |
+| Request → Granted | User approves. | Registry records the grant. |
+| Granted → Revoked | User revokes, or policy changes. | Calls begin rejecting. |
+| Granted → Denied | User denies a re-request. | No grant exists. |
+
+## Enforcement
+
+### Where enforcement happens
+
+Enforcement is mechanical and lives in the runtime host, not in the UI:
+
+```
+host function call
+    → grant lookup (registry)
+    → granted? dispatch : reject ERR_PERMISSION_DENIED
+```
+
+### Properties
+
+| Property | Mechanism |
+| --- | --- |
+| Fail-closed | No grant ⇒ no operation. |
+| Atomic | Grant state changes are atomic. |
+| Observable | Changes emit `permissions:changed`. |
+| Auditable | All grants are logged. |
+
+## Consent model
+
+### User-facing rules
+
+- First use of a sensitive capability prompts the user.
+- Prompts show the caller, the capability, and the scope.
+- Consent is per descriptor, not blanket.
+- The user can grant once, allow always, or deny.
+
+### Minimum-viable prompting
+
+The system batches related prompts and defers low-risk capabilities to reduce
+friction, but never prompts implicitly for sensitive operations.
+
+## Permission manager
+
+The permission manager is the user-facing surface:
+
+| Function | Behavior |
+| --- | --- |
+| View | All grants across modules and sessions. |
+| Search | Filter by module, capability, or scope. |
+| Revoke | One-click revocation. |
+| History | Full grant and usage log. |
+
+## Security considerations
+
+- The grant registry is the single source of truth (see
+  [Core Architecture](/docs/research/core-architecture)).
+- Enforcement cannot be bypassed through any API path.
+- Revocation is effective immediately for in-flight enforcement.
+- Permissions never outlive the session that granted them.
+
+## Performance considerations
+
+- Grant lookup is a single table read per call.
+- Registry is read-optimized; writes are rare.
+- Change events are batched.
+
+## Open questions
+
+- Permission hysteresis: when should a "deny" reset to "prompt"?
+- Delegation: can a module grant a subset of its grants to another?
+- Cross-session grant semantics and portability.
+
+**Related:** [Permission System](/docs/research/security-model) · [Permissions API](/docs/api-reference/permissions-api) · [Security Research](/docs/research/security-research)

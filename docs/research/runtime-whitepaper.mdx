@@ -1,0 +1,170 @@
+---
+title: "Runtime Whitepaper"
+description: "The runtime paper: WASM-based execution, the module sandbox, scheduling, and resource isolation in the Orivon runtime."
+readingTime: 30
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["research", "whitepaper", "runtime"]
+keywords: "runtime whitepaper, WASM, sandbox, execution model, scheduling, resource isolation, capability, module"
+---
+
+*Orivon Research Group · Runtime Engineering · Version 1.0 · Published 2026-07-21 · Status: Published*
+
+## Abstract
+
+The Orivon runtime executes untrusted modules safely and predictably. It is a
+sandboxed execution environment built on WebAssembly: modules run in isolated
+instances, are scheduled by the runtime, and interact with the host only
+through an explicit, capability-secure interface. This paper specifies the
+execution model, sandboxing strategy, scheduling, and resource isolation, and
+argues that WASM is the substrate that makes portable, capability-safe
+execution practical today.
+
+## Background
+
+Safe execution of third-party code has a long history, from Java applets to
+browser JavaScript to language-specific sandboxes (gVisor, Firecracker,
+WebAssembly System Interface). Each approach trades expressiveness, portability,
+and isolation differently.
+
+For a platform that must run untrusted *applications* — not just scripts — the
+requirements are demanding: a strict memory model, a portable binary format,
+no reliance on a single programming language, and low overhead. WebAssembly
+is the first technology that meets all four at once.
+
+## Problem Statement
+
+A runtime for Orivon modules must solve:
+
+1. **Isolation.** A module must not be able to read or corrupt another module's
+   memory, the host, or the browser process.
+2. **Portability.** Modules must run identically across platforms without
+   recompilation.
+3. **Language neutrality.** Developers must not be forced into one language.
+4. **Capability security.** Modules may do only what they are granted, and
+   grants must be enforceable mechanically.
+5. **Predictable resource use.** Modules must not be able to consume unbounded
+   CPU, memory, or I/O.
+
+## Motivation
+
+The module system (see the [Module System Whitepaper](/docs/research/module-system-whitepaper))
+is only viable if the underlying runtime can promise these properties.
+Extension ecosystems that run trusted code (browser extensions, plugin
+architectures) repeatedly suffer security failures precisely because their
+runtimes cannot isolate code mechanically. Orivon's runtime is designed so
+that *misbehavior is impossible by construction* rather than improbable by
+policy.
+
+## Architecture
+
+### Execution model
+
+Modules compile to WASM and run in isolated instances:
+
+| Layer | Component | Role |
+| --- | --- | --- |
+| Binary | WASM module | Portable code, verified at load. |
+| Instance | Isolated instance | Private memory, linear memory with bounds checking. |
+| Host | Runtime host | Capability-gated host functions. |
+| Scheduler | Runtime scheduler | Cooperative + preemptive control of module tasks. |
+
+### Sandboxing
+
+Sandboxing is layered:
+
+1. **WASM memory model.** Linear memory is bounds-checked; modules cannot
+   address host memory directly.
+2. **Capability gating.** Every host function call passes through a capability
+   check. A module without a grant cannot even *attempt* a privileged
+   operation.
+3. **System call mediation.** Files, network, and process operations are
+   mediated by the host via WASI-style interfaces, never exposed raw.
+4. **Instance separation.** Modules cannot reference each other's memory;
+   communication flows through the messaging layer.
+
+### Scheduling
+
+The scheduler multiplexes module tasks:
+
+| Property | Policy |
+| --- | --- |
+| Fairness | Weighted fair scheduling per module. |
+| Preemption | Long-running tasks are preempted at the WASM instruction boundary. |
+| Quotas | CPU, memory, and I/O quotas are enforced per module. |
+| Timeouts | Hung tasks are terminated after a configurable deadline. |
+
+### Resource isolation
+
+- **Memory:** per-instance limit enforced by the allocator and the sandbox.
+- **CPU:** instruction-count-based budget; exceeded budgets trigger throttling
+  or termination.
+- **I/O:** rate-limited through host mediation.
+- **Persistence:** modules only reach storage through the
+  [Storage Whitepaper](/docs/research/storage-whitepaper) interface, which
+  enforces quotas and encryption.
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| WASM over JS-only | Language-neutral, portable, and sandboxable; JS can still target WASM. |
+| Capability-gated host functions | Mechanical enforcement of "only what is granted". |
+| Instruction-boundary preemption | Safe preemption without trusting module code. |
+| Per-module quotas as first-class | Predictability is a security property. |
+| WASI-style system interfaces | Standard, auditable, portable host interface. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| WASM vs. native execution | WASM | JIT compilation and ABI overhead; mitigated with host optimizations. |
+| Preemption at boundaries vs. at any instruction | Boundary preemption | Granularity limited to instruction boundaries; acceptable for cooperative workloads. |
+| Capability checks per call vs. ambient authority | Per-call checks | Minor per-call overhead; provides mechanical safety. |
+| Strict quotas vs. flexible resource use | Strict quotas | Some legitimate workloads need quota tuning. |
+
+## Implementation Strategy
+
+1. Ship the WASM core with bounds-checked memory and instance isolation.
+2. Add the capability-gated host interface.
+3. Add scheduling and quotas.
+4. Layer system interfaces (WASI) for files, network, and time.
+5. Expose runtime services to modules through the [API Reference](/docs/api-reference/runtime-api).
+
+## Future Work
+
+- ABI stabilization across wasm32 and emerging wasm64.
+- Hardware-backed isolation experiments (memory tagging, capability hardware).
+- Formal verification of the capability checker.
+- Cooperative scheduling APIs exposed to modules for I/O-bound workloads.
+
+## References
+
+- W3C, *WebAssembly Core Specification*, current recommendation.
+- The WASI Project, *WebAssembly System Interface* proposals.
+- R. Wahbe et al., "Efficient software-based fault isolation," *SOSP 1993*.
+- The Chromium Projects, *V8 Sandbox* design documents.
+- Orivon, *Security Whitepaper*, 2026.
+
+## Appendix A — Capability interface sketch
+
+```ts
+interface HostFunctions {
+  storageGet(key: string): Promise<unknown>;      // requires storage.read
+  walletSign(payload: Uint8Array): Promise<Uint8Array>; // requires wallet.sign
+  netFetch(url: string): Promise<HttpResponse>;   // requires networking.fetch
+}
+```
+
+Every function is checked against the module's grant set before dispatch.
+
+## Appendix B — Quota defaults
+
+| Resource | Default quota |
+| --- | --- |
+| Memory | 512 MB per instance |
+| CPU | 10% of a core sustained, 50% burst |
+| File size | 100 MB per file |
+| Concurrent I/O | 16 operations |
+
+**Related:** [Core Whitepaper](/docs/research/core-whitepaper) · [Module System Whitepaper](/docs/research/module-system-whitepaper) · [Runtime Research](/docs/research/runtime-research) · [WASM Research](/docs/research/wasm-research)

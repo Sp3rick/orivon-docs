@@ -1,0 +1,179 @@
+---
+title: "Module System Whitepaper"
+description: "The module system paper: manifests, the capability model, lifecycle, and distribution of Orivon modules."
+readingTime: 30
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["research", "whitepaper", "module-system"]
+keywords: "module system whitepaper, modules, manifest, capabilities, lifecycle, distribution, verification"
+---
+
+*Orivon Research Group · Module Engineering · Version 1.0 · Published 2026-07-27 · Status: Published*
+
+## Abstract
+
+Modules are the unit of distribution, permissioning, and isolation in Orivon.
+A module is a WASM artifact described by a manifest, verified on
+installation, and run inside the runtime sandbox with a fixed set of
+capabilities. This paper specifies the module lifecycle, the manifest
+contract, the capability model, and the distribution pipeline, and argues that
+a capability-based module system is the mechanism that makes an open ecosystem
+safe.
+
+## Background
+
+Every extension ecosystem faces the same question: how do you let third-party
+code extend a platform without letting it break the platform or its users?
+Historically, the answers have been trust-based (browser extensions run with
+the browser's privileges) or language-based (plugins written in a restricted
+language). Both fail in practice: trust-based systems get exploited, and
+language-based systems restrict what developers can build.
+
+The module system adopts a different answer: capability-based, sandbox-forced
+permissioning. Modules are *structurally incapable* of exceeding their grants,
+regardless of how they are written.
+
+## Problem Statement
+
+The module system must solve:
+
+1. **Safe extension.** Any developer must be able to extend the platform
+   without the platform trusting them.
+2. **Predictable permissioning.** A module's powers must be knowable before it
+   runs, by the user and by the platform.
+3. **Reliable lifecycle.** Modules load, activate, deactivate, and unload
+   without destabilizing the platform.
+4. **Trustworthy distribution.** The module the user installs must be exactly
+   the module the developer published.
+5. **Interoperation.** Modules must cooperate through explicit, safe
+   interfaces.
+
+## Motivation
+
+The open-ecosystem promise of the [Orivon Whitepaper](/docs/research/orivon-whitepaper)
+depends entirely on this system. If modules could exceed their grants, the
+platform would be no safer than today's extension ecosystems. If modules could
+not be verified, distribution would be a supply-chain risk. The module system
+is therefore not a convenience; it is the load-bearing mechanism of the entire
+platform.
+
+## Architecture
+
+### The manifest
+
+Every module ships a manifest that declares its contract:
+
+| Field | Purpose |
+| --- | --- |
+| `name`, `version` | Identity. |
+| `type` | `module` or `application`. |
+| `entry` | WASM entry point. |
+| `apiVersion` | API contract version. |
+| `permissions` | Maximum capabilities requested. |
+| `icons`, `locales` | Presentation metadata. |
+
+The manifest is validated against a published schema. See the
+[Manifest Format](/docs/api-reference/manifest-format) reference for the full
+field list.
+
+### The capability model
+
+Capabilities are the only way a module interacts with the platform:
+
+| Principle | Meaning |
+| --- | --- |
+| Least privilege | A module starts with no capabilities. |
+| Explicit grant | Every capability is requested and approved. |
+| Scoped | Capabilities carry scopes (e.g. a specific storage namespace). |
+| Revocable | The user or the platform can revoke at any time. |
+| Mechanically enforced | The runtime rejects out-of-grant calls. |
+
+### Lifecycle
+
+```
+installed → loaded → activated → active ⇄ deactivated → unloaded
+```
+
+Each transition is defined by the [Core Whitepaper](/docs/research/core-whitepaper)
+and observable through lifecycle events.
+
+### Distribution
+
+Distribution is a supply-chain process:
+
+1. **Build** — the developer compiles a WASM artifact and manifest.
+2. **Sign** — the artifact is signed by the developer's key.
+3. **Publish** — the artifact is registered in a storefront.
+4. **Verify** — the platform verifies the signature and manifest on install.
+5. **Install** — grants are requested from the user and recorded.
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Capabilities, not ambient authority | Mechanical enforcement of least privilege. |
+| Manifest as contract | Permissions are knowable before execution. |
+| WASM as module format | Same sandbox as the runtime; no second trust model. |
+| Signature verification on install | Distribution integrity without trusting the store. |
+| Lifecycle as explicit state machine | Predictable, observable module behavior. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Capability granularity vs. usability | Capability granularity | Fine-grained grants require thoughtful UX. |
+| Signed artifacts vs. convenience | Signed artifacts | Developers must manage keys. |
+| Manifest-first vs. dynamic permissioning | Manifest-first | Runtime permission escalation requires re-requesting. |
+| Storefront verification vs. open publishing | Verified publishing | Moderation overhead; offsets with decentralization research. |
+
+## Implementation Strategy
+
+1. Define the manifest schema and the capability registry.
+2. Implement signature verification and installation.
+3. Implement the lifecycle state machine in the core.
+4. Enforce capability checks in the runtime host.
+5. Publish the SDK and CLI tooling that produces verified artifacts.
+
+## Future Work
+
+- WASM component-model integration for composable modules.
+- Decentralized, storefront-independent distribution.
+- Automated capability diffing and policy review.
+- Recovery and transactional updates of installed modules.
+
+## References
+
+- Orivon, *Runtime Whitepaper*, 2026.
+- Orivon, *Core Whitepaper*, 2026.
+- Orivon, *Security Whitepaper*, 2026.
+- M. Miller, *Robust Composition: Towards a Unified Approach to Access Control
+  and Concurrency Control*, 2006.
+- WASI, *WASM Component Model* proposal.
+
+## Appendix A — Example manifest
+
+```json
+{
+  "manifest_version": 1,
+  "name": "example.wallet",
+  "version": "1.2.0",
+  "type": "application",
+  "entry": "dist/index.wasm",
+  "apiVersion": "1.0.0",
+  "permissions": [
+    {"name": "wallet.read"},
+    {"name": "wallet.sign", "scope": "transactions"}
+  ]
+}
+```
+
+## Appendix B — Capability registry excerpt
+
+| Capability | Scope example |
+| --- | --- |
+| `wallet.sign` | `transactions`, `messages` |
+| `storage.write` | `cache`, `settings`, `data` |
+| `networking.fetch` | `*` |
+| `identity.credentials` | `specific-did` |
+
+**Related:** [Module System Whitepaper](/docs/research/module-system-whitepaper) · [Module System](/docs/research/module-system) · [Permission System](/docs/research/permission-system)

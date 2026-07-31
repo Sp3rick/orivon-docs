@@ -1,0 +1,245 @@
+---
+title: "Security Architecture"
+description: "The internal design of Orivon's security: the threat model, attack surfaces, sandboxing, signing, verification, integrity and supply chain protection."
+readingTime: 15
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["technical-design", "security"]
+keywords: "security, threat model, attack surface, sandbox, signing, verification, integrity, supply chain"
+---
+
+Security is not a feature in Orivon; it is the architecture. Every design
+decision in this section exists to satisfy the security model described here.
+This page documents the threat model, the attack surfaces, and the mechanisms
+that keep the whole system honest.
+
+## The security goals
+
+Four goals organize the security work:
+
+1. **Protect identity and value.** Keys and funds are never reachable from
+   untrusted code.
+2. **Contain compromise.** A compromised context cannot reach the host, other
+   contexts, or the privileged process.
+3. **Ensure integrity.** What the system loads is exactly what was verified.
+4. **Keep secrets.** User data and behavior are not exposed to components that
+   do not need them.
+
+Every mechanism below maps to one of these goals.
+
+## The threat model
+
+The threat model states who the system defends against:
+
+| Attacker | Capability | Primary defense |
+| --- | --- | --- |
+| **Web attacker** | Serves hostile content | Sandbox, site isolation |
+| **App attacker** | Runs a hostile runtime application | Sandbox, capabilities |
+| **Module attacker** | Ships a hostile module | Verification, permissions |
+| **Malicious peer** | Serves hostile bytes on the network | Content addressing |
+| **Compromised device** | Runs code as the user | Key hierarchy, recovery |
+| **Supply chain** | Corrupts a dependency or package | Signatures, pins |
+
+The model is intentionally pessimistic: every context is treated as hostile
+until proven otherwise.
+
+## Attack surfaces
+
+The attack surfaces are the places hostile bytes meet the system. The
+architecture minimizes them:
+
+<Diagram caption="Hostile bytes enter only through sandboxed surfaces.">
+  <Flow column>
+    <DiagramNode accent>Hostile bytes</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Renderers (parse web content)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime hosts (parse modules)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Network service (parse protocols)</DiagramNode>
+  </Flow>
+</Diagram>
+
+The critical property: **the browser process has no attack surface from
+untrusted bytes.** Every surface that parses external input runs in a sandboxed
+child. This is the design rule that makes the whole system survivable.
+
+<Callout type="warning" title="Security">
+  The browser process must never grow an untrusted parsing surface. If a feature
+  needs to parse external input, it must be implemented in a sandboxed child
+  process. This rule has no exceptions.
+</Callout>
+
+## Defense in depth
+
+Security is layered so that no single bug is sufficient for compromise:
+
+<Stack
+  layers={[
+    {label: 'OS sandbox (seccomp / AppContainer / seatbelt)', accent: true},
+    {label: 'Process isolation (site isolation, per app)'},
+    {label: 'Engine isolation (V8 / WASM instances)'},
+    {label: 'Capability checks (policy per call)'},
+    {label: 'Consent surfaces (signing, permissions)'},
+  ]}
+/>
+
+An attacker must defeat every layer. The [Sandbox](/docs/technical-design/sandbox)
+page documents the isolation layers in detail.
+
+## Sandboxing
+
+Sandboxing is the mechanical enforcement of isolation. Its rules:
+
+1. No direct syscalls from sandboxed contexts.
+2. No host filesystem or raw sockets.
+3. No process creation or privilege elevation.
+4. Every privileged action brokered by a privileged process.
+
+The sandbox makes capabilities enforceable. Without it, a permission grant is
+just a suggestion. See [Sandbox](/docs/technical-design/sandbox).
+
+## Signing and verification
+
+Signing is how the system establishes who produced something:
+
+| Signed thing | Who signs | What it proves |
+| --- | --- | --- |
+| **Module package** | The module author | The package came from that identity |
+| **DDoc** | The identity's controllers | The identity controls its keys |
+| **Session tokens** | The identity | The session belongs to the identity |
+| **Credential** | An issuer | The issuer made a statement |
+
+Verification checks a signature against the signer's public key, which comes
+from a verified DDoc. The chain always terminates at identity, never at a
+self-asserted key.
+
+## Integrity and content addressing
+
+Integrity is enforced by content addressing:
+
+- Content is addressed by its hash, so the address is the integrity claim.
+- A read verifies the bytes against the address before use.
+- A tampered byte is a different address, which fails verification.
+
+This makes both storage and networking safe against substitution. A malicious
+peer can serve bytes, but it cannot serve different bytes than the address
+promises. See [Storage Engine](/docs/technical-design/storage-engine).
+
+## Isolation
+
+Isolation operates at every level:
+
+<CardGrid columns={2}>
+  <Card title="Between contexts">
+    Site isolation separates origins into separate processes.
+  </Card>
+  <Card title="Between applications">
+    Runtime applications are separate contexts with separate grants.
+  </Card>
+  <Card title="Between services">
+    Network and storage run in their own processes.
+  </Card>
+  <Card title="Between processes and keys">
+    No process other than the wallet touches keys.
+  </Card>
+</CardGrid>
+
+Isolation is what makes a compromise survivable: the attacker's reach is bounded
+by the boundary they are inside.
+
+## Supply chain security
+
+The supply chain is the highest value target for a modern attacker, because a
+corrupted dependency is trusted everywhere. The defenses:
+
+<Steps>
+  <Step title="Sign">
+    Every package is signed by its author identity.
+  </Step>
+  <Step title="Pin">
+    Every dependency is pinned to a content address at install time.
+  </Step>
+  <Step title="Verify">
+    The lockfile is verified before resolution; nothing resolves unpinned.
+  </Step>
+  <Step title="Review">
+    Permission diffs on update trigger re-consent.
+  </Step>
+</Steps>
+
+The [Module Architecture](/docs/technical-design/module-architecture) page
+documents the dependency model this protects.
+
+## Dependency verification
+
+Dependency verification is the concrete enforcement of supply chain policy:
+
+<Diagram caption="Every dependency is verified before it is linked.">
+  <Flow column>
+    <DiagramNode>Dependency requested</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Lockfile pin check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Content hash check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Signature check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Verified dependency</DiagramNode>
+  </Flow>
+</Diagram>
+
+Verification happens per dependency, per load. There is no "trusted once, use
+forever" path, because a pinned address is immutable but the environment is
+not.
+
+## Crash containment
+
+Security and stability meet in crash containment. A compromised or failing
+context is terminated and replaced:
+
+1. The context's process is killed.
+2. The crash is reported with sanitized diagnostics.
+3. Other contexts and the browser process continue untouched.
+
+Containment is what makes failures recoverable. See
+[Error Handling](/docs/technical-design/error-handling).
+
+## Security notes
+
+- The browser process has no untrusted attack surface, by construction.
+- Verification is always chained to identity; there are no self-signed trust
+  anchors.
+- Integrity is enforced by address, making substitution impossible.
+
+## Performance notes
+
+- Verification is cached per address and per identity; repeated checks are
+  cache hits.
+- The sandbox filter is applied once at process start.
+- Defense in depth adds no per-keystroke cost because layers are static
+  boundaries, not dynamic checks.
+
+<Callout type="success" title="Best practice">
+  When reviewing a change, ask three questions: does it grow an untrusted
+  parsing surface? Does it add a bypass of verification or policy? Does it
+  weaken an isolation boundary? If any answer is yes, the change needs redesign.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes memory safe components for the highest risk parsers,
+  cooperative sandbox verification in CI, and formal verification of the policy
+  core. See [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Sandbox](/docs/technical-design/sandbox): the mechanical isolation layer.
+- [Module Loader](/docs/technical-design/module-loader): verification in action.
+- [Permission System](/docs/technical-design/permission-system): enforcement by capability.
+
+## Further reading
+
+- [Testing Architecture](/docs/technical-design/testing-architecture): how security is tested.
+- [Error Handling](/docs/technical-design/error-handling): crash containment.
+- [Identity Layer](/docs/technical-design/identity-layer): the root of trust.

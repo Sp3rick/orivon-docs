@@ -1,0 +1,147 @@
+---
+title: "Storage API"
+description: "Reference for the Storage API: key-value store, files, collections, quotas and encryption."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["api-reference", "storage-api"]
+keywords: "storage api, key value store, put get remove, files, collections, quota, encryption, list"
+---
+
+The Storage API provides the package-scoped persistence layer: an encrypted
+key-value store, a file store and named collections. All data is scoped to the
+package and the active identity profile.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: StorageFacade
+
+### `storage.put(key, value, options?)`
+
+Writes a value. Resolves when the write is durably committed.
+
+```ts
+await app.storage.put('settings', {theme: 'dark'});
+await app.storage.put('avatar', imageBytes, {encrypt: true});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `key` | `string` | Namespaced key, `[a-z0-9.-]+` up to 255 chars. |
+| `value` | `StorageValue` | JSON-serializable value or `Uint8Array`. |
+| `options.encrypt` | `boolean \| undefined` | Encrypt at rest. Default `true` for bytes, `false` for JSON. |
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_INVALID_KEY` · `ERR_QUOTA_EXCEEDED` · `ERR_INPUT_TOO_LARGE`
+
+### `storage.get(key)`
+
+Reads a value. Resolves `undefined` when the key does not exist.
+
+**Returns:** `Promise<StorageValue \| undefined>`
+
+### `storage.remove(key)`
+
+Deletes a key. No-op when the key does not exist.
+
+**Returns:** `Promise<void>`
+
+### `storage.list(options?)`
+
+Lists keys with pagination.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `options.prefix` | `string \| undefined` | Filter by key prefix. |
+| `options.cursor` | `string \| undefined` | Pagination cursor. |
+| `options.limit` | `number \| undefined` | Max results. Default `100`. |
+
+**Returns:** `Promise<Page<{key: string, size: number}>>`
+
+### `storage.getBytesUsed()`
+
+Returns the bytes currently used by this package against its quota.
+
+**Returns:** `Promise<number>`
+
+### `storage.clear()`
+
+Removes all keys owned by this package. Requires `storage.clear` permission.
+
+**Returns:** `Promise<void>`
+
+## Files
+
+### `storage.createFile(name, data?)`
+
+Creates a file handle. Files are addressed by name within the package
+namespace.
+
+**Returns:** `Promise<FileHandle>`
+
+### `storage.readFile(name)`
+
+Reads a file.
+
+**Returns:** `Promise<Uint8Array>`
+
+**Throws:** `ERR_NOT_FOUND`
+
+### `storage.writeFile(name, data)`
+
+Overwrites a file.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_QUOTA_EXCEEDED`
+
+### `storage.removeFile(name)`
+
+Deletes a file.
+
+**Returns:** `Promise<void>`
+
+## Collections
+
+### `storage.createCollection(name, options?)`
+
+Creates or opens a named collection for grouping related keys.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Collection name. |
+| `options.indexed` | `string[] \| undefined` | Field paths to index for queries. |
+
+**Returns:** `Promise<Collection>`
+
+### `Collection`
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `put` | `(id, doc) => Promise<void>` | Upsert a document. |
+| `get` | `(id) => Promise<Record<string, unknown> \| undefined>` | Read one document. |
+| `remove` | `(id) => Promise<void>` | Delete a document. |
+| `query` | `(query, options?) => Promise<Page<Record<string, unknown>>>` | Filtered query. |
+
+## Quotas
+
+| Scope | Default quota |
+| --- | --- |
+| Package key-value store | 10 MB |
+| Package file store | 100 MB |
+| Collection | 100 MB |
+| Encrypted values | counted against the same quota |
+
+Quota exhaustion rejects with `ERR_QUOTA_EXCEEDED`. The caller should surface
+the condition and let the user free space or grant a larger quota.
+
+## Storage events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `storage:changed` | `{key}` | A key was written or removed. |
+| `storage:file-changed` | `{name}` | A file was written or removed. |
+| `storage:quota-exceeded` | `{scope, used, limit}` | A quota was exceeded. |
+
+**Related:** [Security API](/docs/api-reference/security-api) · [Schemas](/docs/api-reference/schemas) · [Error Codes](/docs/api-reference/error-codes)

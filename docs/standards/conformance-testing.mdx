@@ -1,0 +1,174 @@
+---
+title: "Conformance Testing"
+description: "How Orivon verifies conformance: validation suites, automated testing, compatibility testing, certification, compliance badges and the future testing framework."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 27
+tags: ["standards", "conformance"]
+keywords: "conformance testing, validation suites, automated testing, compatibility, certification, compliance badges, test framework"
+---
+
+Conformance testing is how the ecosystem proves that implementations honor
+their specifications. A specification that cannot be tested is a wish; a
+specification with a passing test suite is a contract. This page defines the
+conformance testing model: the suites, the automation, and the framework that
+will make it a tool anyone can run.
+
+## The role of a validation suite
+
+A validation suite is a set of automated checks that verify an implementation
+against the normative text of a specification. Each suite is bound to one
+specification and one version:
+
+- **OSP-006 v1.0.0** has its own suite, and so does every other version.
+- Suites encode the MUST and MUST NOT requirements as executable checks.
+- Passing the suite is the evidence of conformance that
+  [Compliance](/docs/standards/compliance) requires.
+
+<Diagram caption="A suite verifies an implementation against the specification.">
+  <Flow column>
+    <DiagramNode>Specification (normative text)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Conformance suite (executable)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implementation under test</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Automated testing
+
+Automation is what makes conformance practical:
+
+<CheckList
+  items={[
+    'Suites run from the command line, with a single entry point.',
+    'Results are reported per check, so a failure names the exact requirement.',
+    'Suites run in CI, catching drift on every commit.',
+    'Suites pin the specification version they test against.',
+    'Suites are deterministic: the same implementation and version give the same result.',
+  ]}
+/>
+
+Automation removes the human from the loop for the parts that are checkable, and
+leaves the loop for the parts that are not, like security review.
+
+## Compatibility testing
+
+Beyond checking the text, conformance includes interoperability: does an
+implementation actually work with the others?
+
+| Test | What it verifies |
+| --- | --- |
+| **Self conformance** | The implementation meets every MUST and MUST NOT |
+| **Version handling** | Version markers and unknown versions are honored |
+| **Interop matrix** | Two independent implementations exchange data correctly |
+| **Reference interop** | An implementation interoperates with the reference implementation |
+
+Compatibility testing is where formats, encodings and protocols prove
+themselves. Two implementations that both pass their own suites must also pass
+interop with each other, because that is what users experience.
+
+## Certification
+
+Certification ties the suite to the badge:
+
+<Steps>
+  <Step title="Run">
+    The official suite runs against the submitted implementation.
+  </Step>
+  <Step title="Record">
+    Results are recorded with the suite version and the environment.
+  </Step>
+  <Step title="Interop">
+    Interoperability tests run against the reference implementation.
+  </Step>
+  <Step title="Issue">
+    A passing submission receives a compliance badge naming the specification,
+    version, suite and date.
+  </Step>
+</Steps>
+
+Certification is defined as part of [Compliance](/docs/standards/compliance)
+and produces the badges described there. The suite results are public, so any
+certification can be re-run and verified.
+
+## Compliance badges
+
+A badge is the certified output of the process, and it is precise by
+construction:
+
+```text
+OSP-004 Module System: Certified
+Version: 1.0.0
+Suite: conformance-osp-004 v1.0.0
+Result: 482/482 checks passed
+Date: 2026-07-31
+```
+
+A badge without a specification, version, suite or result count is a decoration,
+not a badge. The format is defined so that badges can be compared and audited.
+
+## The future testing framework
+
+The conformance infrastructure is currently defined as a model, not yet shipped
+as a tool. The planned framework:
+
+<CardGrid columns={2}>
+  <Card title="Command line tool">
+    One command runs any suite: `orivon-conform osp-006@1.0.0 ./implementation`.
+  </Card>
+  <Card title="Registry of suites">
+    Suites are versioned and published alongside the specifications they test.
+  </Card>
+  <Card title="CI integration">
+    The tool exits non-zero on any failure, so it drops into existing pipelines.
+  </Card>
+  <Card title="Public results">
+    Certifications are published with their result logs for independent review.
+  </Card>
+</CardGrid>
+
+The framework is tracked on the [Roadmap](/docs/standards/roadmap). Until it
+ships, conformance suites exist as definitions and the model above governs how
+they will behave.
+
+<Callout type="warning" title="Nothing is certified yet">
+  No specification is Accepted, so no suite has been published and no
+  certification has been issued. This page is the definition of the system, not
+  a record of completed certifications. See the
+  [accepted specifications](/docs/standards/accepted-specifications) page.
+</Callout>
+
+## Validation philosophy in practice
+
+The philosophy stated in [Compliance](/docs/standards/compliance) becomes
+concrete here:
+
+<CardGrid columns={2}>
+  <Card title="Public by default">
+    Suites and results are open, so compliance is auditable by anyone.
+  </Card>
+  <Card title="Versioned forever">
+    A suite for an old version stays runnable, so old claims stay checkable.
+  </Card>
+  <Card title="Deterministic">
+    Same input, same output; no suite result depends on the day it runs.
+  </Card>
+  <Card title="Fail loudly">
+    A suite never passes "mostly". Partial conformance is reported as partial.
+  </Card>
+</CardGrid>
+
+These properties are what make certification meaningful instead of ceremonial.
+
+<Callout type="success" title="Best practice">
+  Build your implementation with conformance in mind: keep the specification's
+  requirement IDs in your test names. When a suite ships, mapping your tests to
+  its checks becomes a matter of matching IDs, not archaeology.
+</Callout>
+
+## Related pages
+
+- [Compliance](/docs/standards/compliance): the levels and process the suite serves.
+- [Specification Registry](/docs/standards/specification-registry): which documents need suites.
+- [Roadmap](/docs/standards/roadmap): when the testing framework ships.

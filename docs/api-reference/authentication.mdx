@@ -1,0 +1,112 @@
+---
+title: "Authentication"
+description: "How packages authenticate to Orivon services: session tokens, attestation, capability tokens, permissions and the security model."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["api-reference", "authentication"]
+keywords: "authentication, session token, capability token, attestation, grants, permissions, security"
+---
+
+Authentication in the Orivon platform answers **who is calling** (the package
+identity), **on whose behalf** (the user session) and **with what authority**
+(the grants). The runtime enforces all three on every API call.
+
+## Authentication model
+
+Every API call carries three pieces of context:
+
+| Context | Source | Verified by |
+| --- | --- | --- |
+| Package identity | Signed manifest | Runtime at install time |
+| User session | Session token | Identity layer at call time |
+| Authority | Capability grant | Permissions layer at call time |
+
+A package cannot present credentials it does not hold. The runtime issues and
+rotates every token below; package code never manages raw keys for this layer.
+
+## Session tokens
+
+A **session token** identifies the active user session on whose behalf a call
+runs. It is obtained by identity providers and attached automatically by the
+runtime:
+
+```ts
+const session = await app.identity.getSession();
+// session.token is managed by the runtime, never serialized by the caller
+```
+
+| Property | Value |
+| --- | --- |
+| Type | `string` (opaque, URL-safe) |
+| Lifetime | 8 hours default, refreshed on activity |
+| Scope | One device and one identity profile |
+| Revocation | Immediate on sign-out, account recovery or explicit revoke |
+
+Sessions are not credentials for offline use. A package that needs background
+authority must declare the capability and hold a grant, not a stored token.
+
+## Capability tokens
+
+Long-lived authority is expressed as **capability tokens**. A capability token
+is a signed, self-contained grant that binds a package, a set of
+[permission descriptors](/docs/api-reference/permissions-api) and an expiry.
+
+```json
+{
+  "cap": "v1",
+  "package": "com.example.backup",
+  "permissions": [
+    { "name": "storage.read", "scope": "backup" }
+  ],
+  "expiresAt": "2027-01-01T00:00:00Z"
+}
+```
+
+- Capability tokens are bound to the issuing package identity; they cannot be
+  replayed by another package.
+- They are verified against the issuing identity's public key each time they
+  are presented.
+- They expire and can be revoked before expiry with `ERR_GRANT_REVOKED`.
+
+## Permissions
+
+Authentication establishes identity; **permissions** establish authority. Every
+sensitive API checks the caller's grants before executing:
+
+```ts
+const state = await app.permissions.check({name: 'wallet.sign'});
+if (state === PermissionState.Granted) {
+  await app.wallet.sign(payload);
+}
+```
+
+| State | Meaning |
+| --- | --- |
+| `Granted` | The caller may proceed |
+| `Prompt` | The user must be asked before the first use |
+| `Denied` | The caller may not proceed; a call rejects with `ERR_PERMISSION_DENIED` |
+
+See [Permissions API](/docs/api-reference/permissions-api) for the full
+descriptor grammar and the request flow.
+
+## Security considerations
+
+- **Never log tokens.** Session and capability tokens must not be written to
+  logs, telemetry or crash reports.
+- **Do not store raw credentials.** Use the [Security API](/docs/api-reference/security-api)
+  key storage and the wallet's secret storage instead.
+- **Scope grants narrowly.** Declare the smallest set of permissions your
+  package needs; excess grants are rejected by review tooling.
+- **Honor revocation.** Handle `ERR_GRANT_REVOKED` and `ERR_SESSION_EXPIRED`
+  by degrading gracefully, never by retrying in a tight loop.
+- **Bound identity.** When a call requires a specific user, verify
+  `app.identity.getSession()` before performing the operation, and re-check
+  after any user-initiated switch of account.
+
+<Note title="Local tooling">
+  Local development and the CLI operate in a trust-on-first-use mode for the
+  current machine. The CLI does not ship session tokens to remote services and
+  stores its device credential in the OS keychain through the
+  [Security API](/docs/api-reference/security-api).
+</Note>

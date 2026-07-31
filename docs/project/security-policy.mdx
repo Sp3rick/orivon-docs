@@ -1,0 +1,208 @@
+---
+title: "Security Policy"
+description: "Orivon security policy: principles, vulnerability reporting, patch process, incident response, and dependency management."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["project", "security", "policy", "vulnerability", "incident response"]
+keywords: "security policy, vulnerability reporting, patch process, incident response, dependency management"
+---
+
+Orivon takes security seriously. This policy defines our security principles,
+how to report vulnerabilities, how we patch and disclose issues, and how we
+manage supply chain security.
+
+## Security principles
+
+| Principle | Implementation |
+| --- | --- |
+| **Capability-based by default** | No ambient authority; every action requires an explicit, auditable capability. |
+| **Memory safety first** | Core runtime in Rust; WASM sandbox enforces isolation; unsafe code minimized and audited. |
+| **Defense in depth** | Sandbox + capability enforcement + code review + fuzzing + formal verification. |
+| **Secure supply chain** | Signed releases (Cosign/Sigstore), SBOMs, dependency scanning, provenance attestation. |
+| **Transparent disclosure** | Coordinated vulnerability disclosure with public advisories and credit. |
+| **Privacy by design** | No telemetry by default; user controls all data sharing; local-first architecture. |
+| **Least privilege** | Modules, processes, and users operate with minimal necessary capabilities. |
+| **Continuous validation** | CI security gates on every PR; nightly fuzzing; periodic third-party audits. |
+
+## Vulnerability reporting
+
+### How to report
+**Email:** security@orivon.dev  
+**PGP Key:** Available at [security@orivon.dev](https://orivon.dev/.well-known/pgp-key) or Keybase
+
+### What to include
+- Description of the vulnerability and its impact.
+- Steps to reproduce or proof-of-concept code.
+- Affected components and versions.
+- Any known mitigations or workarounds.
+- Your preferred disclosure timeline.
+
+### Safe harbor
+We support **good-faith security research** and will not pursue legal action
+against researchers who:
+- Make a good-faith effort to avoid privacy violations and data destruction.
+- Only interact with accounts/systems they own or have explicit permission to test.
+- Report findings promptly through our disclosure channel.
+- Give us reasonable time to remediate before public disclosure.
+
+### Scope
+| In Scope | Out of Scope |
+| --- | --- |
+| Orivon runtime, browser, core, SDKs | Third-party services (Discord, GitHub, etc.) |
+| Module sandbox and capability system | Social engineering, phishing, physical attacks |
+| Cryptographic implementations | DoS on public infrastructure (report to provider) |
+| Identity and naming systems | Issues in downstream/ecosystem projects |
+| Release signing and supply chain | Theoretical attacks without proof-of-concept |
+
+## Disclosure process
+
+<Steps>
+  <Step title="Receive & Acknowledge">
+    Security team acknowledges report within **48 hours**. Assigns tracking ID.
+  </Step>
+  <Step title="Triage">
+    Initial severity assessment within **5 business days**. Researcher informed of status.
+  </Step>
+  <Step title="Investigate & Fix">
+    Root cause analysis; fix developed in private fork. Researcher updated weekly.
+  </Step>
+  <Step title="Coordinate Release">
+    Fix tested; release prepared for all supported versions (see [Version Support](/docs/project/version-support)).
+    Target: **7 days for Critical/High**, **30 days for Medium/Low**.
+  </Step>
+  <Step title="Public Disclosure">
+    Security advisory published on GitHub Advisories, mailing list, and newsletter.
+    CVE requested. Researcher credited (unless anonymous requested).
+  </Step>
+  <Step title="Post-Incident">
+    Retrospective for Critical/High issues. Process improvements documented.
+  </Step>
+</Steps>
+
+### Severity classification (CVSS 4.0 aligned)
+
+| Severity | CVSS Range | Examples | Target Fix |
+| --- | --- | --- | --- |
+| **Critical** | 9.0–10.0 | Sandbox escape, RCE, key compromise, supply chain compromise | 24–48 hours |
+| **High** | 7.0–8.9 | Privilege escalation, capability bypass, significant data exposure | 72 hours |
+| **Medium** | 4.0–6.9 | DoS, info leak, logic bypass, partial capability bypass | 7 days |
+| **Low** | 0.1–3.9 | Minor info leak, defense-in-depth gap | Next release cycle |
+
+## Patch process
+
+### Supported versions
+Security patches are backported to all versions in **Active**, **Maintenance**, and **LTS** support per [Version Support Policy](/docs/project/version-support).
+
+### Patch release types
+| Type | Trigger | Content | Version Bump |
+| --- | --- | --- | --- |
+| **Emergency** | Critical vulnerability actively exploited | Minimal fix only | PATCH (e.g., 1.2.0 → 1.2.1) |
+| **Security** | High/Medium vulnerability | Fix + any required mitigations | PATCH |
+| **Scheduled** | Low severity, bundled improvements | Fixes + non-breaking improvements | PATCH |
+
+### Release artifacts
+All security releases include:
+- Signed binaries (Cosign/Sigstore, keyless).
+- SBOM (CycloneDX + SPDX).
+- Provenance attestation (SLSA Level 3 target).
+- Updated checksums and verification instructions.
+- GitHub Security Advisory with CVE.
+
+### Verification
+Users can verify any release:
+```bash
+# Verify binary signature
+cosign verify-blob --signature <sig> --cert <cert> <binary>
+
+# Verify SBOM
+cosign verify-attestation --type spdx <image>
+
+# Check GitHub Advisory
+gh api repos/OrivonBrowser/orivon-runtime/security-advisories
+```
+
+## Incident response
+
+### Security incident definition
+Any event that compromises or potentially compromises:
+- Confidentiality, integrity, or availability of Orivon systems.
+- User data or credentials.
+- Build/release infrastructure.
+- Cryptographic keys or signing infrastructure.
+
+### Response team
+- **Security Lead** (Area Maintainer) — coordinates technical response.
+- **TSC Chair** — authorizes emergency releases, external communication.
+- **Foundation Director (when formed)** — legal, regulatory, insurance coordination.
+- **Communications Lead** — public messaging, user notification.
+
+### Response phases
+| Phase | Actions | Target |
+| --- | --- | --- |
+| **Detect** | Monitoring alerts, reporter disclosure, anomaly detection | Continuous |
+| **Assess** | Scope, impact, severity classification | 1 hour |
+| **Contain** | Revoke keys, isolate systems, disable features | 4 hours |
+| **Eradicate** | Root cause removal, patch development | Per severity |
+| **Recover** | Verified release, monitoring restoration | Per severity |
+| **Learn** | Retrospective, process improvement, documentation | 30 days |
+
+### Communication
+- **Users:** Email (if account data affected), newsletter, blog, social.
+- **Enterprise:** Direct contact for known enterprise deployments.
+- **Public:** Security advisory, transparency report entry.
+- **Regulators:** As required by law (GDPR 72h, etc.).
+
+## Dependency management
+
+### Supply chain security
+| Control | Implementation |
+| --- | --- |
+| **Dependency scanning** | `cargo audit`, `npm audit`, OSV.dev — every PR + daily scheduled |
+| **Allowed licenses** | Permissive only (Apache-2.0, MIT, BSD, ISC); copyleft blocked |
+| **Pinned versions** | `Cargo.lock`, `package-lock.json` committed; Dependabot for updates |
+| **Provenance** | SLSA Level 3 build provenance for all artifacts |
+| **SBOM** | CycloneDX JSON + SPDX generated for every release |
+| **Vulnerability database** | OSV, GitHub Advisory Database, NVD — automated matching |
+
+### Update policy
+| Dependency Type | Update Cadence | Review |
+| --- | --- | --- |
+| **Security fixes** | Immediate (automated PR) | Security WG auto-merge for patch versions |
+| **Minor/patch** | Weekly batch | Automated tests + maintainer review |
+| **Major** | Per-release planning | Design doc + TSC approval if breaking |
+
+### Prohibited dependencies
+- Copyleft licenses (GPL, AGPL, LGPL) in runtime/browser/Core.
+- Unmaintained crates/packages (>2 years no releases, no security response).
+- Dependencies with known unfixed critical vulnerabilities.
+- Binary blobs without source or reproducible build.
+
+## Security tooling
+
+| Tool | Purpose | Integration |
+| --- | --- | --- |
+| **cargo audit / npm audit** | Known vulnerability detection | CI + scheduled |
+| **Clippy / rustfmt** | Rust linting/formatting | CI (blocking) |
+| **Miri** | Undefined behavior detection | Nightly CI |
+| **Fuzzing (cargo-fuzz / libFuzzer)** | Input validation, parser testing | Nightly CI (OSS-Fuzz target) |
+| **Kani / Prusti** | Formal verification (critical paths) | Per-component |
+| **Cosign / Sigstore** | Signing, verification, attestation | Release automation |
+| **Syft / Grype** | SBOM generation, vulnerability scanning | Release automation |
+| **Dependabot / Renovate** | Automated dependency updates | Daily PRs |
+
+## Security contacts
+
+| Role | Contact | PGP |
+| --- | --- | --- |
+| **Security Team** | security@orivon.dev | [Key](https://orivon.dev/.well-known/pgp-key) |
+| **Security Lead (Maintainer)** | Listed in governance repo | — |
+| **TSC Chair** | tsc-chair@orivon.dev | — |
+| **Foundation (when formed)** | foundation@orivon.dev | — |
+
+<Callout type="success" title="Security is everyone's responsibility">
+  If you see something, say something. The security@orivon.dev alias reaches
+  the security team directly. We prefer false positives over missed issues.
+</Callout>
+
+**Related:** [Trust Center](/docs/project/trust-center) · [Version Support Policy](/docs/project/version-support) · [Responsible Disclosure](/docs/contributors/responsible-disclosure) · [Release Lifecycle](/docs/project/release-lifecycle) · [Compliance](/docs/project/compliance)

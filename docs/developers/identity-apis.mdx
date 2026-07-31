@@ -1,0 +1,174 @@
+---
+title: "Identity APIs"
+description: "The identity APIs your code uses for identities, DDoc documents, authentication, sessions and recovery."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["developers", "identity-apis"]
+keywords: "identity APIs, identity, DDoc, did:orivon, authentication, sessions, recovery"
+---
+
+Identity is the root of trust in the ecosystem. The identity APIs let your
+code read identities, authenticate users and manage sessions. This page
+explains the model and how to use it correctly.
+
+## What the identity APIs are
+
+The identity APIs provide:
+
+<CheckList
+  items={[
+    'Reading the current user identity.',
+    'Resolving and verifying identities (DDoc documents).',
+    'Starting and ending authenticated sessions.',
+    'Requesting identity proof for the current context.',
+    'Participating in recovery flows.',
+  ]}
+/>
+
+An identity is a DDoc based identifier (`did:orivon:...`). The format and
+lifecycle are documented in [Identity Layer](/docs/technical-design/identity-layer).
+
+## Why they exist
+
+Everything in the ecosystem anchors to identity: signatures, permissions,
+storage encryption and consent. The identity APIs exist so that anchoring is
+standard and verifiable, and so applications never handle identity internals
+by hand.
+
+## Reading the current identity
+
+Most applications just need to know who is running them:
+
+```ts
+const identity = await app.identity.current();
+console.log(identity.id); // did:orivon:z6Mkq...
+```
+
+This is a common operation. It does not prove anything by itself; it tells you
+who the current context belongs to.
+
+## Resolving and verifying identities
+
+To learn about another identity, resolve and verify it:
+
+```ts
+const doc = await app.identity.resolve('alice.orivon');
+const verified = await app.identity.verify(doc);
+
+if (verified.ok) {
+  console.log(verified.publicKeys);
+}
+```
+
+Resolution goes through the [naming stack](/docs/developers/dns-apis), and
+verification checks the DDoc's signatures. A resolved identity is not a
+verified one; always verify before relying on it.
+
+<Diagram caption="Resolve then verify: never trust resolution alone.">
+  <Flow column>
+    <DiagramNode>Name</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Resolve to DDoc</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Verify signatures</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Trusted identity</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Authentication
+
+Authentication proves that the current session is authorized by the identity:
+
+```ts
+const proof = await app.identity.authenticate({
+  challenge: randomChallenge,
+});
+```
+
+The runtime signs the challenge with the session key. The result is what other
+services verify when you interact with them. The mechanism is challenge
+signature authentication, described in
+[Identity Layer](/docs/technical-design/identity-layer).
+
+## Sessions
+
+Sessions are how identity state flows through the runtime:
+
+```ts
+const session = await app.session.current();
+if (session.identity.id === 'did:orivon:z6Mkq...') {
+  // handle the known identity
+}
+```
+
+Sessions are short lived and automatically refreshed. Treat them as ephemeral
+state, never as durable credentials.
+
+<Callout type="warning" title="Sessions are not storage">
+  Do not persist session objects or session keys. A persisted session is a
+  stolen session. Re-derive sessions through the identity APIs on demand.
+</Callout>
+
+## Recovery
+
+Recovery restores access when keys are lost. Applications should handle the
+state gracefully:
+
+```ts
+if (identity.recoveryRequired) {
+  app.ui.render(
+    <view>This identity needs recovery. Launch recovery.</view>,
+  );
+}
+```
+
+Recovery itself is a wallet concern; see
+[Wallet APIs](/docs/developers/wallet-apis).
+
+## When to use the identity APIs
+
+| You need to | Use |
+| --- | --- |
+| Know who is running you | `app.identity.current()` |
+| Trust another identity | `resolve` then `verify` |
+| Prove identity to a service | `app.identity.authenticate(...)` |
+| Check the session | `app.session.current()` |
+| Handle lost keys | Recovery flows |
+
+If your application personalizes content or stores data per user, the identity
+APIs are central. If your application is purely utility, you may not need them.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Trusting an unresolved identity">
+    A name is not proof. Resolve and verify before relying on another
+    identity.
+  </Card>
+  <Card title="Persisting sessions">
+    Sessions are ephemeral by design. Re-derive them on demand.
+  </Card>
+  <Card title="Treating identity as authentication">
+    Knowing who is running you is not the same as authenticating. Use
+    `authenticate` when you need proof.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Verify, then trust. Make `verify` a mandatory step for any identity that
+  grants your application access to data or performs actions on your behalf.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The identity APIs are specified in the
+  [Identity System draft](/docs/standards/osp-008-identity-system) and defined
+  by [Identity Layer](/docs/technical-design/identity-layer).
+</Callout>
+
+## Related pages
+
+- [Wallet APIs](/docs/developers/wallet-apis): the keys behind identity.
+- [DNS APIs](/docs/developers/dns-apis): resolving identity names.
+- [Identity Example](/docs/developers/examples/identity-example): a complete example.

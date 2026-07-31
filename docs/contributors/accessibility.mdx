@@ -1,0 +1,122 @@
+---
+title: "Accessibility"
+description: "Accessibility expectations for Orivon: accessible code, accessible UI and accessible documentation, with the standards to follow."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 23
+tags: ["contributors", "quality"]
+keywords: "accessibility, accessible code, accessible UI, accessible documentation"
+---
+
+Accessibility is not a feature for a few users; it is how every user gets a
+good experience. Orivon holds code, UI and documentation to accessibility
+standards, and accessibility is checked in review like any other
+requirement.
+
+<Callout type="info" title="Why it matters">
+  A web built for everyone must work for everyone. Accessibility failures
+  exclude real users, and they are bugs just like crashes.
+</Callout>
+
+## Accessible code
+
+Code accessibility starts with the runtime and services:
+
+<CheckList
+  items={[
+    'Semantic UI: use the right elements, not divs for everything.',
+    'Keyboard navigation works for every interactive element.',
+    'Focus is visible and moves predictably.',
+    'Screen reader announcements carry state changes.',
+    'Color is never the only signal.',
+  ]}
+/>
+
+## The accessibility checklist
+
+| Check | Pass |
+| --- | --- |
+| Keyboard | Every flow is reachable and operable by keyboard |
+| Focus | Focus indicators are visible; focus order is logical |
+| Semantics | Landmarks, headings and roles are used correctly |
+| Contrast | Text and controls meet contrast requirements |
+| Text | Resizable text does not break layout |
+| Motion | Reduced motion preferences are respected |
+| Labels | Every control has a name |
+| Errors | Errors are announced and recoverable |
+
+## Accessible UI
+
+UI components in the browser carry the visible burden:
+
+<Accordion title="Keyboard first">
+  Design the flow with a keyboard before a mouse. If a flow is painful by
+  keyboard, it fails, whatever the screen reader situation.
+</Accordion>
+
+<Accordion title="Announcing changes">
+  Dynamic content, toasts and dialogs announce themselves to assistive
+  technology. A change the screen reader misses is a change the user missed.
+</Accordion>
+
+<Accordion title="Motion and flashing">
+  Respect reduced motion preferences, and avoid flashing content that can
+  trigger seizures.
+</Accordion>
+
+## Accessible documentation
+
+The documentation must be readable by everyone:
+
+<CheckList
+  items={[
+    'Write in plain language and short sentences.',
+    'Every image and diagram has a text alternative.',
+    'Use real heading structure for navigation.',
+    'Tables have headers and are used for data, not layout.',
+    'Link text describes the destination.',
+    'Color contrast in diagrams and callouts meets standards.',
+  ]}
+/>
+
+See [Documentation Standards](/docs/contributors/documentation-standards).
+
+## Testing accessibility
+
+Accessibility is tested, not hoped:
+
+| Method | Covers |
+| --- | --- |
+| Automated checks | Contrast, labels, landmarks |
+| Keyboard pass | Full flows by keyboard |
+| Screen reader pass | Announcements and order |
+| Zoom and resize | Layout survives magnification |
+| Motion check | Reduced motion is respected |
+
+Automated checks catch a fraction. Manual passes catch the rest, and the
+community encourages contributors to run them on their changes.
+
+<Callout type="success" title="Best practice">
+  Test your change the way a screen reader user would. If you cannot reach a
+  screen reader immediately, at minimum run the keyboard pass and check the
+  semantic structure of what you added.
+</Callout>
+
+## Reporting accessibility bugs
+
+Accessibility problems are bugs:
+
+<CheckList
+  items={[
+    'Report them through the normal [bug process](/docs/contributors/bug-reports).',
+    'Describe the user impact, not just the symptom.',
+    'Include the assistive technology used, if relevant.',
+    'A fix that improves accessibility improves the product for everyone.',
+  ]}
+/>
+
+## Related pages
+
+- [Design Contributions](/docs/contributors/design-contributions): accessible design.
+- [Documentation Standards](/docs/contributors/documentation-standards): accessible writing.
+- [Code Reviews](/docs/contributors/code-reviews): accessibility in review.

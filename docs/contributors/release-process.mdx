@@ -1,0 +1,165 @@
+---
+title: "Release Process"
+description: "How Orivon releases happen: version planning, release candidates, stable releases, changelog generation, tagging and publishing."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["contributors", "workflow"]
+keywords: "release process, release candidates, stable releases, changelog, tagging, publishing"
+---
+
+Releases are how the work reaches users. A good release process is
+predictable: everyone knows what is coming, what is in it, and when it is
+done. This page explains the Orivon release process end to end.
+
+<Callout type="info" title="Versioning rules">
+  Orivon follows semantic versioning as defined in
+  [Versioning](/docs/standards/versioning). This page is the process around
+  those rules.
+</Callout>
+
+## The release timeline
+
+<Diagram caption="The release lifecycle.">
+  <Flow column>
+    <DiagramNode accent>Version planning</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Development and integration</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Release candidate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Stabilization</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Stable release and tag</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Version planning
+
+Each release starts by deciding what it contains:
+
+| Decision | Who decides |
+| --- | --- |
+| Version number | Maintainers, per semantic versioning |
+| Scope | The roadmap and merged work |
+| Timing | Community discussion and dependencies |
+| Breaking changes | The standards process and migration notes |
+
+A breaking change requires the version's major bump and documented
+migration. See [Versioning](/docs/standards/versioning).
+
+## Release candidates
+
+Before a stable release, candidates are cut for testing:
+
+```text
+v0.2.0-rc.1
+v0.2.0-rc.2
+```
+
+<CheckList
+  items={[
+    'Candidates are tagged and tested by the community.',
+    'Only bug fixes and polish land after the first candidate.',
+    'Conformance and security testing run on candidates.',
+    'Blocking issues restart the candidate cycle.',
+  ]}
+/>
+
+A release advances to stable when it meets the quality bar, not on a
+calendar.
+
+## Stable releases
+
+The stable release is the version users get:
+
+<Steps>
+  <Step title="Freeze">
+    The release branch is frozen to stabilization fixes.
+  </Step>
+  <Step title="Verify">
+    Full test, conformance and security verification.
+  </Step>
+  <Step title="Changelog">
+    Generate and review the changelog.
+  </Step>
+  <Step title="Tag and publish">
+    Tag the version and publish artifacts.
+  </Step>
+  <Step title="Announce">
+    Release notes and community announcement.
+  </Step>
+</Steps>
+
+## Changelog generation
+
+The changelog is built from merged pull requests and issues:
+
+| Section | Content |
+| --- | --- |
+| Added | New features |
+| Changed | Behavior changes |
+| Fixed | Bug fixes |
+| Removed | Deprecated or removed features |
+| Security | Security related fixes |
+
+Every significant PR is expected to describe itself for the changelog, so
+generation stays mechanical. Contributors are credited in the notes.
+
+## Tagging
+
+Releases are tagged with the version:
+
+```sh
+git tag -a v0.2.0 -m "Release v0.2.0"
+```
+
+| Tag | Meaning |
+| --- | --- |
+| `v0.2.0` | Stable release |
+| `v0.2.0-rc.1` | Release candidate |
+| `v0.2.1` | Patch on the stable line |
+
+Tags point to the exact commit that shipped, so any release is reproducible.
+
+## Publishing
+
+Publishing makes the release available:
+
+<CardGrid columns={2}>
+  <Card title="CLI and SDK">
+    Published to the package registries with checksums.
+  </Card>
+  <Card title="Runtime and browser">
+    Released as distributable artifacts with signatures.
+  </Card>
+  <Card title="Standards">
+    Accepted specifications are published through the registry.
+  </Card>
+  <Card title="Announcements">
+    Release notes reach users through the community channels.
+  </Card>
+</CardGrid>
+
+## Hotfix releases
+
+Urgent production fixes ship as patch releases on the stable line:
+
+```text
+v0.2.1 (fixes a critical bug in v0.2.0)
+```
+
+See [Branching Strategy](/docs/contributors/branching-strategy) for the
+hotfix path. Hotfixes follow the same verification, but with a deliberately
+small scope.
+
+<Callout type="success" title="The goal">
+  A release should be boring. If the process produces surprises, the process
+  is the bug, and fixing it is a contribution worth making.
+</Callout>
+
+## Related pages
+
+- [Branching Strategy](/docs/contributors/branching-strategy): where releases branch.
+- [Continuous Integration](/docs/contributors/continuous-integration): the pipeline behind releases.
+- [Versioning](/docs/standards/versioning): the version rules.

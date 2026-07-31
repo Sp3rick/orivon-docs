@@ -1,0 +1,133 @@
+---
+title: "Naming System"
+description: "Decentralized naming in the ecosystem: human readable names that resolve to identities and content without a central registry."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["ecosystem", "naming", "DNS"]
+keywords: "naming, DNS, resolution, names, addresses, decentralized, namespaces"
+---
+
+Names are how people reach things. The classic web reaches them through DNS, a
+system with central points of control. The ecosystem's Naming System keeps the
+familiar behavior, human readable names that resolve to addresses, while
+removing the central registry. This page explains how it works.
+
+## Why naming matters
+
+Every identity, application and piece of content in the ecosystem has an
+address: a long, unmemorable identifier. People cannot work with addresses
+directly. They need names.
+
+<CardGrid columns={2}>
+  <Card title="Names are for humans">
+    `alice.orivon` is shareable and memorable; a 64 character hash is not.
+  </Card>
+  <Card title="Names stay stable">
+    An application's name stays the same even when its storage or network
+    details change.
+  </Card>
+  <Card title="Names carry trust">
+    A name you recognize is the first step of trusting what it points to.
+  </Card>
+  <Card title="Names are decentralized">
+    No single authority can revoke, censor or sell the mapping.
+  </Card>
+</CardGrid>
+
+## How resolution works
+
+Resolution is the act of turning a name into an address. The flow is short and
+fully verifiable:
+
+<Diagram caption="A name resolves through decentralized records to a signed DDoc address.">
+  <Flow column>
+    <DiagramNode>Name: alice.orivon</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Naming records (decentralized)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Address of the DDoc</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Signed DDoc</DiagramNode>
+  </Flow>
+</Diagram>
+
+1. You type or click a name.
+2. The browser asks the naming network for the records that map that name.
+3. The records point to an address.
+4. The address resolves to the signed DDoc or content, which is verified before
+   anything is displayed.
+
+The key property: every step is verifiable, and no step depends on a single
+central server.
+
+## Namespaces
+
+Names live in namespaces so that different communities can manage their own
+rules. A name like `alice.orivon` belongs to the `orivon` namespace; an
+organization or community can operate its own namespace with its own policies.
+
+<Callout type="info" title="Did you know?">
+  Namespaces are how the ecosystem scales beyond a single naming community. The
+  browser resolves any namespace that follows the standard, the same way it
+  resolves the core one.
+</Callout>
+
+## The relationship to DNS
+
+The ecosystem does not force a choice between decentralized names and classic
+DNS. It supports both:
+
+<CardGrid columns={2}>
+  <Card title="Existing sites">
+    Normal domains continue to resolve through DNS exactly as they do today.
+  </Card>
+  <Card title="Decentralized names">
+    Names in ecosystem namespaces resolve through the decentralized network.
+  </Card>
+  <Card title="Hybrid entries">
+    A name can map to both a classic site and a decentralized one, and the
+    browser shows which it resolved.
+  </Card>
+</CardGrid>
+
+This keeps backward compatibility, which is one of the ecosystem's core rules,
+while giving decentralized names room to grow.
+
+## Security and abuse
+
+Any naming system that gains value attracts abuse: squatting, typosquatting and
+confusingly similar names. The ecosystem addresses this with a combination of
+mechanisms:
+
+<CheckList
+  items={[
+    'Names are registered with evidence of ownership or intent, not silently claimed.',
+    'Confusingly similar names are flagged in search and in the address bar.',
+    <><a href="/docs/ecosystem/web3-score">Web3 Score</a> applies to named identities, so a name history is visible.</>,
+    <><a href="/docs/ecosystem/governance">Governance</a> provides a dispute path for abusive registrations.</>,
+  ]}
+/>
+
+## Naming and identity
+
+The Naming System and [Identity](/docs/ecosystem/identity) work together. A name
+is a stable, human friendly handle; the identity is the verifiable subject
+behind it. This separation lets you keep the same identity while changing which
+name you present, or keep a name while rotating the keys behind it.
+
+<Callout type="success" title="Next">
+  Names and identities are only useful if users can judge what they point to.
+  That is the [Web3 Score](/docs/ecosystem/web3-score).
+</Callout>
+
+## Related pages
+
+- [Identity](/docs/ecosystem/identity): the subjects that names resolve to.
+- [Web3 Score](/docs/ecosystem/web3-score): trust signals attached to names.
+- [Networking](/docs/ecosystem/networking): the decentralized infrastructure resolution runs on.
+
+## Further reading
+
+- [Governance](/docs/ecosystem/governance): how naming disputes are settled.
+- [Glossary](/docs/introduction/glossary): terms used across this section.

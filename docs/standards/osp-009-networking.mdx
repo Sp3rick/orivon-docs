@@ -1,0 +1,102 @@
+---
+title: "OSP-009: Networking"
+description: "Draft specification for networking: the network service, transports, HTTP variants, peer communication and blockchain RPC adapters."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["standards", "osp-009", "networking"]
+keywords: "OSP-009, networking, network service, HTTP, QUIC, P2P, NAT traversal, blockchain RPC"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Every byte that crosses the network does so through one service. This draft
+defines the network service, its transports and its adapters.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-009 |
+| Title | Networking |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Networking |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The network service owns all sockets. It speaks classic HTTP over TLS, the
+modern HTTP variants, and peer to peer transports with NAT traversal, plus
+adapters for blockchain RPC. The reference design is the
+[Networking Stack](/docs/technical-design/networking-stack) page.
+
+## Purpose
+
+Centralizing networking makes it possible to apply privacy, integrity and
+policy in one place. A single service means no component talks to the network
+untracked, and every connection can be owned, pooled and governed uniformly.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The network service and socket ownership.',
+    'HTTP over TLS, and the newer transport variants.',
+    'Peer to peer transport and NAT traversal.',
+    'Blockchain RPC and WebSocket adapters.',
+    'Connection pooling and the unified request lifecycle.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Content addressed data semantics (covered by OSP-010).',
+    'Name resolution (covered by the DNS category).',
+    'Cryptographic primitives (covered by the Cryptography category).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-010 Storage](/docs/standards/osp-010-storage): content transport for storage.
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): identity for peer auth.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): integrity of transport.
+
+## Related specifications
+
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): connection and message events.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): the service boundary.
+
+## Implementation status
+
+The reference implementation includes the network service with socket
+ownership, transport adapters and pooling. The draft tracks the design at
+0.1.0. No conformance suite has been published yet.
+
+## Future work
+
+- Custom transport registration.
+- Mesh routing between devices.
+- Standardized privacy routing options.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Networking Stack](/docs/technical-design/networking-stack): the reference design.

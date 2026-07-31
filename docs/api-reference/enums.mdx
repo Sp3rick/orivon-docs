@@ -1,0 +1,87 @@
+---
+title: "Enums"
+description: "Reference for every enum used across the Orivon APIs: values, semantics and usage."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 23
+tags: ["api-reference", "enums"]
+keywords: "enums, enum reference, constants, states, PermissionState, TxStatus, AppState, ModuleState, LogLevel"
+---
+
+Enums are string-backed constant sets. Store and pass them as strings; the
+enum object is provided for documentation and type safety only.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Enum index
+
+| Enum | Values | Used by |
+| --- | --- | --- |
+| `PermissionState` | `Granted`, `Prompt`, `Denied` | [Permissions API](/docs/api-reference/permissions-api) |
+| `ModuleState` | `Loaded`, `Active`, `Inactive`, `Failed` | [Module API](/docs/api-reference/module-api) |
+| `AppState` | `Foreground`, `Background`, `Suspended`, `Terminated` | [Application API](/docs/api-reference/application-api) |
+| `TxStatus` | `Pending`, `Confirmed`, `Failed`, `Reverted` | [Wallet API](/docs/api-reference/wallet-api) |
+| `LogLevel` | `Debug`, `Info`, `Warn`, `Error` | [Runtime API](/docs/api-reference/runtime-api) |
+| `WindowState` | `Normal`, `Minimized`, `Maximized`, `Fullscreen` | [Application API](/docs/api-reference/application-api) |
+| `ConnectionType` | `Offline`, `Wifi`, `Ethernet`, `Cellular`, `Unknown` | [Networking API](/docs/api-reference/networking-api) |
+| `DnsRecordType` | `A`, `AAAA`, `TXT`, `CNAME` | [DNS API](/docs/api-reference/dns-api) |
+
+## Value semantics
+
+### `PermissionState`
+
+| Value | String | Meaning |
+| --- | --- | --- |
+| `Granted` | `"granted"` | Caller may proceed. |
+| `Prompt` | `"prompt"` | First use requires consent. |
+| `Denied` | `"denied"` | Caller may not proceed. |
+
+### `ModuleState`
+
+| Value | String | Meaning |
+| --- | --- | --- |
+| `Loaded` | `"loaded"` | Loaded, not active. |
+| `Active` | `"active"` | Running and receiving events. |
+| `Inactive` | `"inactive"` | Loaded but deactivated. |
+| `Failed` | `"failed"` | Activation failed; no events delivered. |
+
+### `TxStatus`
+
+| Value | String | Meaning |
+| --- | --- | --- |
+| `Pending` | `"pending"` | Submitted, not yet mined. |
+| `Confirmed` | `"confirmed"` | Mined and confirmed. |
+| `Failed` | `"failed"` | Rejected by the network. |
+| `Reverted` | `"reverted"` | Mined but reverted. |
+
+## Usage
+
+```ts
+import { PermissionState } from '@orivon/sdk';
+
+const state = await app.permissions.check({name: 'wallet.sign'});
+switch (state) {
+  case PermissionState.Granted:
+    break;
+  case PermissionState.Prompt:
+    await app.permissions.request([{name: 'wallet.sign'}]);
+    break;
+  case PermissionState.Denied:
+    throw new Error('wallet.sign unavailable');
+}
+```
+
+## Comparing values
+
+Values compare as strings:
+
+```ts
+state === 'granted' || state === PermissionState.Granted; // equivalent
+```
+
+<Note title="Serialization">
+  Enums serialize to their string form. Never store the numeric position of a
+  member — member order is not part of the contract and may change.
+</Note>
+
+**Related:** [Types](/docs/api-reference/types) · [Methods](/docs/api-reference/methods) · [Objects](/docs/api-reference/objects)

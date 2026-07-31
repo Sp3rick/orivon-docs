@@ -1,0 +1,135 @@
+---
+title: "Bug Reports"
+description: "How to report bugs effectively: a structured report, what to include, and the lifecycle of a report from submission to fix."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["contributors", "issues"]
+keywords: "bug reports, reporting bugs, reproduction, bug lifecycle"
+---
+
+A bug report is the first step toward a fix. A well-written report saves
+hours of maintainer time and dramatically increases the chance your bug gets
+fixed. This page explains what makes a bug report effective and what happens
+to it after you file it.
+
+<Callout type="info" title="Start with the template">
+  Use the [bug report template](/docs/contributors/templates/bug-report) when
+  you open your issue. It asks for exactly what the triage process needs.
+</Callout>
+
+## What a good report contains
+
+A bug report answers five questions:
+
+| Question | Example |
+| --- | --- |
+| What did you do? | Ran `orivon run` on a module with an invalid manifest |
+| What happened? | The CLI printed an internal error trace |
+| What did you expect? | A readable validation error with the offending field |
+| What is the environment? | CLI 0.1.0, Windows 11, Node 22 |
+| Is it reproducible? | Yes, with the attached minimal module |
+
+## The reproduction is the core
+
+The single most valuable part of a report is a minimal reproduction:
+
+<CheckList
+  items={[
+    'Strip the reproduction to the smallest case that fails.',
+    'Include the exact commands and input.',
+    'Paste the full error output, not a summary.',
+    'Attach the minimal module or repository when the case is complex.',
+    'State whether the bug is deterministic or intermittent.',
+  ]}
+/>
+
+<Callout type="success" title="Best practice">
+  If you can write a failing test that reproduces the bug, do it. A failing
+  test is the perfect reproduction: it is exact, repeatable and becomes a
+  regression test when the fix lands.
+</Callout>
+
+## The report anatomy
+
+```markdown
+### Summary
+The runtime suspends a module that holds an open subscription.
+
+### Environment
+- OS: Linux 6.8
+- Runtime version: 0.2.0
+- SDK version: 0.1.0
+
+### Steps to reproduce
+1. Create a module that subscribes to `storage.changed`.
+2. Wait 5 minutes of inactivity.
+3. Observe the module is suspended and the subscription is dropped.
+
+### Expected behavior
+The subscription survives suspension, or re-subscribes on activation.
+
+### Actual behavior
+The subscription is silently dropped, and no event is delivered after
+reactivation.
+
+### Additional context
+A failing test is attached in this PR.
+```
+
+## What not to include
+
+<CardGrid columns={2}>
+  <Card title="Secrets and logs with secrets">
+    Never include keys, tokens or personal data. Redact anything sensitive.
+  </Card>
+  <Card title="Guessing the cause">
+    Report the symptom and reproduction, not a speculative root cause.
+  </Card>
+  <Card title="Multiple bugs in one report">
+    One bug per report keeps each issue actionable.
+  </Card>
+</CardGrid>
+
+## The lifecycle of a report
+
+<Diagram caption="From report to fix.">
+  <Flow column>
+    <DiagramNode accent>Bug filed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Triaged and reproduced</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Labeled, scoped, scheduled</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Fixed with regression test</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Closed with reference to the fix</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Stage | What happens |
+| --- | --- |
+| Filed | You submit the report |
+| Triage | Maintainers reproduce and label it |
+| Scoped | The bug is confirmed and sized |
+| Fixed | A contributor fixes it with a test |
+| Released | The fix ships in a release |
+| Closed | The issue links the fix and closes |
+
+## After you file
+
+- Reply to questions on your report; details usually come from you.
+- If the fix needs information, provide it promptly.
+- If you can, fix the bug yourself and link the PR to the issue.
+
+<Callout type="success" title="Fix it yourself">
+  Reporting is the first step, but the fastest path to a fix is often your
+  own. A bug report plus a fix PR is the ideal contribution: clear problem,
+  verified solution. See [Good First Issues](/docs/contributors/good-first-issues).
+</Callout>
+
+## Related pages
+
+- [Bug report template](/docs/contributors/templates/bug-report): the form to use.
+- [Issue Guidelines](/docs/contributors/issue-guidelines): when and how to file.
+- [Responsible Disclosure](/docs/contributors/responsible-disclosure): security issues are different.

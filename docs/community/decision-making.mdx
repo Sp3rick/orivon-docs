@@ -1,0 +1,175 @@
+---
+title: "Decision Making"
+description: "How decisions are made in the Orivon project: proposal process, lazy consensus, voting thresholds, appeals, and decision records."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["community", "governance", "decision making", "voting", "proposals"]
+keywords: "decision making, proposals, voting, lazy consensus, appeals, orivon governance"
+---
+
+Every significant decision in Orivon follows a documented process. This page
+describes that process: how proposals work, when voting happens, and how
+disagreements are resolved.
+
+## Decision tiers
+
+Not all decisions are equal. The project uses three tiers:
+
+| Tier | Scope | Examples | Process |
+| --- | --- | --- | --- |
+| **Operational** | Day-to-day | Merging a PR, triaging an issue | Maintainer discretion |
+| **Project** | Feature, policy, process | Adding a feature, changing release cadence | Decision proposal |
+| **Foundational** | Governance, licensing, standards | Changing governance, licensing, standards process | Decision proposal + vote |
+
+<Callout type="note" title="When in doubt, propose">
+  If you are not sure whether a decision needs a proposal, open one. The cost
+  of a lightweight proposal is low; the cost of an undocumented decision is
+  high.
+</Callout>
+
+## The decision proposal process
+
+All project and foundational decisions go through a **decision proposal**
+(also called an RFC or design doc):
+
+<Steps>
+  <Step title="Draft">
+    The author writes a proposal with: problem statement, proposed solution,
+    alternatives considered, risks, and migration plan. Use the proposal
+    template.
+  </Step>
+  <Step title="Open for comment">
+    The proposal is posted to the discussion forum with the `proposal` tag.
+    Minimum comment period: 14 days for project decisions, 30 days for
+    foundational decisions.
+  </Step>
+  <Step title="Discuss and iterate">
+    The community comments. The author updates the proposal in response.
+    Discussion is public and threaded.
+  </Step>
+  <Step title="Call for consensus">
+    When discussion settles, the author (or a maintainer/TSC member) calls
+    for consensus. This starts the voting or lazy-consensus window.
+  </Step>
+  <Step title="Decide">
+    - **Project decisions:** Lazy consensus. If no TSC member objects within
+      7 days, the proposal is accepted.
+    - **Foundational decisions:** Recorded vote. Supermajority (≥2/3) of
+      eligible TSC members required.
+  </Step>
+  <Step title="Record">
+    The outcome (accepted, rejected, deferred) is recorded in the decision
+    log with the final proposal, vote counts (if any), and rationale.
+  </Step>
+</Steps>
+
+<Diagram caption="Decision proposal lifecycle">
+  <Flow column>
+    <DiagramNode accent>Draft</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Comment period</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Iterate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Call for consensus</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Decide</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Record</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Lazy consensus
+
+For project decisions, the project uses **lazy consensus**:
+
+- The proposal is accepted if no TSC member objects within 7 days.
+- An objection must include a rationale and a suggested alternative.
+- If an objection is raised, the proposal moves to discussion and may be
+  revised or escalated to a vote.
+
+This balances speed with accountability: silence is consent, but any member
+can force a deeper review.
+
+## Voting
+
+### Eligibility
+
+Voting eligibility is tied to contribution, not to affiliation or payment:
+
+- **TSC members** vote on foundational decisions.
+- **Maintainers** elect the TSC.
+- **Working group chairs** may be consulted but do not vote unless also TSC
+  members.
+
+### Vote mechanics
+
+| Decision type | Electorate | Threshold | Period |
+| --- | --- | --- | --- |
+| TSC election | Maintainers | Simple majority | 14 days |
+| Foundational decision | TSC members | Supermajority (≥2/3) | 14 days |
+| Standards ratification | TSC members | Supermajority (≥2/3) | 14 days |
+| Governance amendment | TSC members | Supermajority (≥2/3) | 30 days |
+
+Votes are **public**: individual votes and the final tally are published.
+Abstentions are recorded and do not count toward the threshold.
+
+### Tie-breaking
+
+In the event of a tie in a TSC election, a runoff is held between the tied
+candidates within 7 days.
+
+## Appeals
+
+Anyone may appeal a decision within 30 days of its recording:
+
+<Steps>
+  <Step title="File appeal">
+    Submit a written appeal to the TSC with new evidence, a procedural error
+    claim, or a conflict-of-interest claim.
+  </Step>
+  <Step title="Review">
+    The TSC reviews the appeal in a public meeting. The original decision
+    stands unless the TSC votes to overturn (supermajority).
+  </Step>
+  <Step title="Final">
+    The appeal outcome is final and recorded. No further appeal within the
+    project.
+  </Step>
+</Steps>
+
+For ecosystem-level disputes (naming, content), see
+[Ecosystem Governance](/docs/ecosystem/governance).
+
+## Decision records
+
+Every accepted proposal becomes a **decision record** (ADR-style):
+
+- Immutable once recorded.
+- Stored in the project's decision log.
+- Includes: title, status, date, decision makers, rationale, alternatives,
+  vote count (if any), and links to discussion.
+
+Decision records are the project's institutional memory. Search them before
+proposing something that may have been decided.
+
+## Quick reference: when to use what
+
+| Situation | Use |
+| --- | --- |
+| Fix a bug, add a test | Open a PR (operational) |
+| Add a feature, change a config default | Decision proposal (project) |
+| Change release process, add a dependency policy | Decision proposal (project) |
+| Change governance, license, standards process | Decision proposal (foundational) |
+| Ratify a standard | Decision proposal (foundational) |
+| Elect TSC | Election (maintainers vote) |
+| Disagree with a TSC decision | Appeal (within 30 days) |
+
+<Callout type="success" title="The process is yours">
+  The decision process is not a wall — it is a tool. If it feels heavy for a
+  particular decision, propose a lighter process for that class of decisions.
+  The community owns the process.
+</Callout>
+
+**Related:** [Governance](/docs/community/governance) · [Technical Steering Committee](/docs/community/technical-steering-committee) · [Ecosystem Governance](/docs/ecosystem/governance)

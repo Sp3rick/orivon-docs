@@ -1,0 +1,212 @@
+---
+title: "DNS Architecture"
+description: "The internal design of the Orivon naming stack: the resolution pipeline, resolver providers, caching and fallback behavior."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["technical-design", "dns"]
+keywords: "DNS, naming, resolution, resolver, providers, caching, fallback, DDoc"
+---
+
+Names are how users reach the web, and resolution is the machinery behind every
+name. Orivon resolves classic domains, decentralized names and identity names
+through one pipeline. This page documents the naming stack: how resolution
+works, the providers behind it, caching and fallback.
+
+## The naming stack's place
+
+Resolution runs inside the network service, next to the sockets it feeds. It is
+a service: it answers "what does this name point to?" and returns a connectable
+target.
+
+<Diagram caption="Resolution converts a name into a target the network service can use.">
+  <Flow column>
+    <DiagramNode>Name input</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Naming service (resolve)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Target: address or DDoc</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Resolution pipeline
+
+Every name, regardless of type, goes through the same pipeline:
+
+<Steps>
+  <Step title="Normalize">
+    The name is normalized: case, punycode and namespace detection.
+  </Step>
+  <Step title="Classify">
+    The pipeline decides which provider class owns the name: classic DNS,
+    decentralized naming, or identity naming.
+  </Step>
+  <Step title="Resolve">
+    The owning provider resolves the name to a target.
+  </Step>
+  <Step title="Verify">
+    The target is verified where the provider supports it (DDoc signatures,
+    content hashes).
+  </Step>
+  <Step title="Cache">
+    The result is stored in the resolution cache with its TTL.
+  </Step>
+</Steps>
+
+<Diagram caption="The unified resolution pipeline.">
+  <Flow column>
+    <DiagramNode>Normalize</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Classify</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Resolve (provider)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Verify</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Cache</DiagramNode>
+  </Flow>
+</Diagram>
+
+The uniformity is the point: the browser does not care whether a name is a
+domain, a decentralized name or an identity name. It asks the naming service and
+gets a verified target.
+
+## Resolver providers
+
+Resolution is delegated to providers, each owning one class of names:
+
+| Provider | Resolves | Verification |
+| --- | --- | --- |
+| **ClassicDns** | Domains and hostnames | DNSSEC where available |
+| **OrivonNaming** | Decentralized names like `alice.orivon` | DDoc signatures and content hashes |
+| **IdentityNaming** | Identity addresses | DDoc verification |
+| **CustomProvider** | Third party namespaces | Provider defined |
+
+Providers implement a resolver interface. The naming service routes by class and
+never hardcodes a provider's internals.
+
+## Classification
+
+Classification decides which provider handles a name. The rules are explicit:
+
+<CheckList
+  items={[
+    'Names with a classic TLD go to ClassicDns.',
+    'Names in a known decentralized namespace go to OrivonNaming.',
+    'Names that are already addresses skip resolution and go to verification.',
+    'Unknown namespaces go to CustomProvider if registered, otherwise fail.',
+  ]}
+/>
+
+Classification is data driven, so new namespaces can be added without code
+changes to the pipeline.
+
+## Caching
+
+Resolution results are cached to make name lookup fast:
+
+- Entries are cached per name with a TTL derived from the result's freshness.
+- Verified DDoc results are cached longer, because they are content addressed
+  and cannot silently change.
+- Cache misses that fail are cached as negative results with a short TTL, to
+  avoid hammering dead names.
+- The cache lives in the network service and is shared across the browser.
+
+Caching is what keeps the [Performance](/docs/technical-design/performance)
+navigation budget: most navigations never touch a provider.
+
+## Fallback
+
+Fallback is how the pipeline keeps working when a provider is unavailable:
+
+1. **Provider fallback.** If the primary provider for a class is unreachable, a
+   secondary provider for the same class is tried.
+2. **Cache fallback.** If all providers fail, a cached result is returned with a
+   staleness marker.
+3. **Failure fallback.** If nothing is available, resolution fails with a typed
+   error that names the failing provider.
+
+<Diagram caption="Fallback order from fresh result to failure.">
+  <Flow column>
+    <DiagramNode accent>Provider result</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Secondary provider</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Stale cache</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Failure</DiagramNode>
+  </Flow>
+</Diagram>
+
+Fallback never silently downgrades security: a DNSSEC validated result is never
+replaced by an unvalidated one, and a verified DDoc is never replaced by an
+unverified response.
+
+## Privacy
+
+Resolution is a privacy surface: every name you look up says where you go. The
+naming stack mitigates this:
+
+- Decentralized lookups avoid central surveillance points by design.
+- Classic lookups can route through privacy preserving resolvers.
+- The cache prevents repeated lookups of the same name.
+
+See the ecosystem [Networking](/docs/ecosystem/networking) page for the user
+facing privacy story.
+
+## Future providers
+
+The provider model is designed to absorb the ecosystem's future:
+
+<CardGrid columns={2}>
+  <Card title="New namespaces">
+    Registered at runtime through the classification table.
+  </Card>
+  <Card title="Aggregation">
+    A provider that queries several sources and merges results.
+  </Card>
+  <Card title="Delegated resolution">
+    Authorized resolvers that answer on behalf of a namespace.
+  </Card>
+</CardGrid>
+
+Each is a provider implementation, not a change to the pipeline. See
+[Future Improvements](/docs/technical-design/future-improvements).
+
+## Security notes
+
+- Resolution results are verified where the provider supports it; verification
+  is never skipped for cache hits.
+- Fallback never downgrades security guarantees.
+- Negative caching prevents attacker controlled retry storms against providers.
+
+## Performance notes
+
+- The cache removes provider round trips from the hot path.
+- Provider calls are async and off the main thread.
+- Parallel lookup across provider classes avoids serializing independent
+  resolutions.
+
+<Callout type="success" title="Best practice">
+  When adding a namespace, ship a provider plus a classification entry. Bypassing
+  the pipeline with a special case in the browser is how resolution bugs creep
+  in.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes delegated resolution, aggregation providers and
+  per namespace privacy policies, all tracked under
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Identity Layer](/docs/technical-design/identity-layer): what DDoc names resolve to.
+- [Networking Stack](/docs/technical-design/networking-stack): the sockets resolution feeds.
+- [Sandbox](/docs/technical-design/sandbox): why resolution runs in one service.
+
+## Further reading
+
+- [Communication Bus](/docs/technical-design/communication-bus): how resolution is requested.
+- [Logging](/docs/technical-design/logging): resolution observability.
+- [Testing Architecture](/docs/technical-design/testing-architecture): how resolution is tested.

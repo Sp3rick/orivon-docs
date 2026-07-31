@@ -1,0 +1,140 @@
+---
+title: "Core API"
+description: "Reference for the Core API: platform information, module management, task scheduling and system diagnostics."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["api-reference", "core-api"]
+keywords: "core api, platform info, module management, scheduler, tasks, diagnostics, system info"
+---
+
+The Core API exposes the services of the core runtime: platform metadata,
+module lifecycle management, cooperative task scheduling and system
+diagnostics. It is reached through the `app.core` facade.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: CoreFacade
+
+### `core.info()`
+
+Returns metadata about the running platform.
+
+```ts
+const info = await app.core.info();
+// info = {name: 'orivon', version: '1.0.2', build: 'abc1234', target: 'x86_64' }
+```
+
+**Returns:** `Promise<CoreInfo>`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Always `"orivon"` for the reference runtime. |
+| `version` | `string` | Runtime version string. |
+| `build` | `string` | Source build identifier. |
+| `target` | `string` | Host architecture/OS triple. |
+
+### `core.systemInfo()`
+
+Returns host resource information. Requires the `core.system` permission.
+
+**Returns:** `Promise<SystemInfo>`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `cpu` | `number` | Approximate CPU load percentage. |
+| `memory` | `MemoryUsage` | Total, used and available bytes. |
+| `storage` | `StorageUsage` | Device storage total and free bytes. |
+
+### `core.getMemoryUsage()`
+
+Returns the memory footprint of the current package.
+
+**Returns:** `Promise<MemoryUsage>` — `{heapUsed, heapTotal, external}` in bytes.
+
+### `core.listModules()`
+
+Lists packages that are currently loaded in the runtime.
+
+**Returns:** `Promise<ModuleInfo[]>`
+
+### `core.loadModule(id)`
+
+Loads a module by package identifier, resolving its manifest and activating it
+if it declares auto-activation.
+
+```ts
+await app.core.loadModule('com.example.feeds');
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier of the module. |
+
+**Returns:** `Promise<ModuleInfo>`
+
+**Throws:** `ERR_MODULE_NOT_FOUND` · `ERR_MODULE_INCOMPATIBLE` · `ERR_PERMISSION_DENIED`
+
+### `core.unloadModule(id)`
+
+Unloads a module, running its `deactivate` hook.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_MODULE_NOT_FOUND` · `ERR_PERMISSION_DENIED`
+
+### `core.schedule(task, when)`
+
+Registers a cooperative one-shot or recurring task.
+
+```ts
+const handle = await app.core.schedule(
+  () => app.storage.put('heartbeat', Date.now()),
+  {everyMs: 60_000},
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `task` | `() => void \| Promise<void>` | Work to run. |
+| `when` | `ScheduleSpec` | `{delayMs?}` one-shot or `{everyMs?}` recurring. |
+
+**Returns:** `Promise<TaskHandle>` — cancel with `handle.cancel()`.
+
+**Throws:** `ERR_INVALID_ARGUMENT` when neither `delayMs` nor `everyMs` is set.
+
+### `core.cancelTask(handle)`
+
+Cancels a pending task. Recurring tasks stop after the current run completes.
+
+**Returns:** `Promise<void>`
+
+## Types
+
+### `ModuleInfo`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier. |
+| `version` | `string` | Package version. |
+| `state` | `ModuleState` | `loaded` \| `activating` \| `active` \| `deactivating` \| `unloaded`. |
+| `permissions` | `Grant[]` | Grants currently held. |
+
+### `ScheduleSpec`
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `delayMs` | `number` | `*` | Run once after this delay. |
+| `everyMs` | `number` | `*` | Run recurring on this interval. |
+| `name` | `string` | no | Label used in diagnostics. |
+
+## Core events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `module:loaded` | `ModuleInfo` | A module finished loading. |
+| `module:unloaded` | `{id}` | A module finished unloading. |
+| `module:state-changed` | `ModuleInfo` | A module changed lifecycle state. |
+| `core:low-memory` | `MemoryUsage` | Memory pressure threshold crossed. |
+
+**Related:** [Module API](/docs/api-reference/module-api) · [Runtime API](/docs/api-reference/runtime-api) · [Error Codes](/docs/api-reference/error-codes)

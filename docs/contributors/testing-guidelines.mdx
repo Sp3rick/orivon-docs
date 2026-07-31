@@ -1,0 +1,145 @@
+---
+title: "Testing Guidelines"
+description: "The Orivon testing guidelines: unit, integration, regression, performance and security tests, and the testing matrix."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["contributors", "quality"]
+keywords: "testing guidelines, unit tests, integration tests, regression tests, performance tests, security tests"
+---
+
+Tests are how the platform earns trust. This page explains the test types
+the project expects, when each applies, and the bar for merging changes.
+
+<Callout type="info" title="Start with the developer guide">
+  The [Testing](/docs/developers/testing) developer page explains the runtime
+  testing model in depth. This page is the contributor-level expectation.
+</Callout>
+
+## The test pyramid
+
+<Diagram caption="The test pyramid: many fast unit tests, fewer slow end-to-end tests.">
+  <Flow column>
+    <DiagramNode accent>End-to-end (few)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Integration (some)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Unit (many)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Unit tests
+
+Unit tests verify one behavior in isolation. They are the majority of the
+suite:
+
+```ts
+test('greet uses the provided name', () => {
+  expect(greet('world')).toBe('Hello, world!');
+});
+```
+
+Unit tests run fast and fail with precision. New logic ships with unit tests
+covering the behavior and its edge cases.
+
+## Integration tests
+
+Integration tests verify components working together. They load real
+artifacts with mocked external services:
+
+| Test | Verifies |
+| --- | --- |
+| Module loads and answers | The package contract |
+| Service interaction | Permission and service boundaries |
+| Lifecycle | Activation and deactivation behavior |
+
+See [Testing](/docs/developers/testing) for the integration model.
+
+## Regression tests
+
+A bug fix is not done until a regression test proves it:
+
+```text
+A failing test that reproduces the bug, merged with the fix.
+The test fails before the fix and passes after it.
+```
+
+The regression test is the fix's receipt: it proves the bug is gone and
+guards against its return.
+
+<Callout type="success" title="Best practice">
+  Write the regression test before the fix, watch it fail, then make it pass.
+  A test that only ever passed is a test that never proved anything.
+</Callout>
+
+## Performance tests
+
+Changes that affect the hot path carry performance expectations:
+
+<CheckList
+  items={[
+    'Profile before and after the change.',
+    'Keep startup and interaction within the budgets.',
+    'Add a benchmark when the change is performance sensitive.',
+    'Watch memory: no leaks in repeated operations.',
+  ]}
+/>
+
+See [Performance](/docs/developers/performance) for the budgets.
+
+## Security tests
+
+Security is tested like a feature, not an afterthought:
+
+| Test | Covers |
+| --- | --- |
+| Permission denial | Denied access raises, never silently succeeds |
+| Sandbox escape attempts | Boundary holds |
+| Input validation | Malformed input is rejected |
+| Secret handling | Secrets never leak to logs or storage |
+
+See [Security Policy](/docs/contributors/security-policy).
+
+## The testing matrix
+
+The matrix shows what a change is expected to carry:
+
+| Change type | Unit | Integration | Regression | Performance | Security |
+| --- | --- | --- | --- | --- | --- |
+| Bug fix | Yes | Where relevant | **Required** | If hot path | Where relevant |
+| New feature | Yes | Yes | No | If hot path | Review |
+| Refactor | Yes | Yes | No | Watch | Review |
+| Docs | No | No | No | No | No |
+
+## Test quality
+
+Tests must be maintained like code:
+
+<CheckList
+  items={[
+    'Assert behavior, not implementation details.',
+    'Name tests for what they verify.',
+    'Keep tests fast and deterministic.',
+    'Avoid testing your own mocks.',
+    'Delete tests that stop adding value.',
+  ]}
+/>
+
+<Callout type="warning" title="Coverage is a floor">
+  Coverage reports find untested code; they do not measure test value. A
+  test that asserts the wrong thing is worse than no test. Prefer meaningful
+  coverage of behavior over a high number.
+</Callout>
+
+## CI and testing
+
+The [continuous integration](/docs/contributors/continuous-integration)
+pipeline runs the full suite on every change. Your local run should match:
+if it passes locally but fails in CI, investigate the difference rather than
+rerunning blindly.
+
+## Related pages
+
+- [Testing](/docs/developers/testing): the runtime testing model.
+- [Continuous Integration](/docs/contributors/continuous-integration): the pipeline.
+- [Coding Standards](/docs/contributors/coding-standards): test expectations in review.

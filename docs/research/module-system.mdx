@@ -1,0 +1,121 @@
+---
+title: "Module System"
+description: "In-depth paper on the Orivon module system: manifests, capabilities, lifecycle, distribution, and inter-module communication."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["research", "architecture-paper", "module-system"]
+keywords: "module system, manifests, capabilities, lifecycle, distribution, messaging, inter-module communication"
+---
+
+*Orivon Research Group · Module Engineering · Version 1.0 · Published 2026-06-24 · Status: Published*
+
+## Overview
+
+The module system is the mechanism by which third-party code extends the
+platform: a contract (manifest), a runtime contract (capabilities), a
+lifecycle, and a distribution pipeline. This paper analyses the module system
+in depth.
+
+## The manifest contract
+
+The manifest is the module's public contract. It declares identity, entry
+points, and *maximum* capabilities.
+
+| Field | Contract role |
+| --- | --- |
+| `name`, `version` | Unique identity. |
+| `type` | `module` or `application`. |
+| `entry` | WASM entry point. |
+| `apiVersion` | The API contract the module targets. |
+| `permissions` | Capabilities the module may request. |
+| `distribution` | Storefront and update metadata. |
+
+The manifest is validated against a published schema; invalid manifests never
+reach the user.
+
+## Capability negotiation
+
+### Flow
+
+```
+module declares maximum (manifest)
+    ▼
+user reviews requested capabilities
+    ▼
+grants recorded in registry
+    ▼
+runtime enforces at dispatch
+```
+
+### Scopes
+
+Capabilities can carry scopes that narrow their meaning:
+
+| Scope | Example |
+| --- | --- |
+| Storage namespace | `storage.write` → `cache` only. |
+| Signing purpose | `wallet.sign` → `transactions` only. |
+| Resource set | `identity.credentials` → specific DID. |
+
+## Lifecycle in the core
+
+The lifecycle is owned by the [core](/docs/research/core-architecture), not by
+the module:
+
+| State | Meaning | Entry conditions |
+| --- | --- | --- |
+| `loaded` | Binary validated, instance not run. | Install + signature check. |
+| `active` | Running, receiving events. | `activate()` resolved. |
+| `deactivated` | Suspended, events not delivered. | `deactivate()` called. |
+| `failed` | Terminal failure. | Activation error, fatal fault. |
+
+Lifecycle events are published for observability:
+`module:loaded`, `module:activated`, `module:deactivated`,
+`module:state-changed`.
+
+## Inter-module communication
+
+Modules communicate only through the platform, never through shared memory:
+
+| Mechanism | Use |
+| --- | --- |
+| Message passing | Asynchronous, JSON-serializable payloads. |
+| Request/response | Correlated reply envelopes. |
+| Publish/subscribe | Broadcast within a domain. |
+
+This guarantees that modules never acquire ambient authority over each other.
+
+## Distribution pipeline
+
+| Stage | Guarantee |
+| --- | --- |
+| Build | Reproducible artifacts. |
+| Sign | Developer key over artifact + manifest. |
+| Publish | Registry metadata, immutable versions. |
+| Verify | Signature + manifest validation on install. |
+| Update | Signed updates, transactional apply. |
+
+## Security considerations
+
+- Capabilities are the only authority; none is ambient.
+- Signature verification is independent of the storefront.
+- Inter-module messages are capability-gated and auditable.
+- Manifest validation prevents privilege confusion at load.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Install time | Streaming verification, parallel validation. |
+| Startup | Lazy instantiation of non-critical modules. |
+| Messaging | Zero-copy envelope transport within the runtime. |
+| Update footprint | Delta-based updates. |
+
+## Open questions
+
+- Component-model composability of modules.
+- Decentralized storefronts independent of a central registry.
+- Automated capability policy review in CI.
+
+**Related:** [Module System Whitepaper](/docs/research/module-system-whitepaper) · [Permission System](/docs/research/permission-system) · [Module API](/docs/api-reference/module-api)

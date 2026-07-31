@@ -1,0 +1,151 @@
+---
+title: "Code Reviews"
+description: "The Orivon code review process: the review checklist, constructive feedback, the approval process and quality expectations."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["contributors", "workflow"]
+keywords: "code reviews, review checklist, constructive feedback, approval process"
+---
+
+Code review is where the codebase stays trustworthy. Every change is
+reviewed by someone who did not write it, and that distance catches the bugs,
+the risks and the missed tests. Reviewing well is a skill, and this page
+teaches it.
+
+<Callout type="info" title="Anyone can review">
+  You do not need to be a maintainer to review. A thoughtful review from a
+  newcomer often catches the assumption everyone else missed.
+</Callout>
+
+## The review checklist
+
+When you review a change, check it against:
+
+| Area | What to verify |
+| --- | --- |
+| Correctness | Does it do what it claims, including edge cases? |
+| Tests | Do the tests cover the behavior and the failure paths? |
+| Security | No permission, sandbox or data exposure regressions |
+| Performance | No obvious hot path or memory regressions |
+| Style | Follows the [coding standards](/docs/contributors/coding-standards) |
+| Scope | Does exactly one thing, nothing unrelated |
+| Docs | User-visible changes update the documentation |
+
+## The review flow
+
+<Diagram caption="The pull request lifecycle.">
+  <Flow column>
+    <DiagramNode accent>PR opened</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>CI runs checks</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Review and discussion</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Author addresses feedback</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Approval and merge</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Giving constructive feedback
+
+Feedback should make the change better and the author more capable:
+
+<CheckList
+  items={[
+    'Comment on the code, not the person.',
+    'Explain the why behind each request.',
+    'Separate required changes from suggestions.',
+    'Recognize what the author did well.',
+    'Keep comments specific and actionable.',
+  ]}
+/>
+
+Compare these:
+
+```text
+Avoid. "This is wrong. Rewrite it."
+
+Better. "The retry loop here can double count deliveries if the process
+crashes between the write and the ack. An idempotency key on the payload
+would make replay safe. Want me to sketch it?"
+```
+
+<Callout type="success" title="The standard">
+  A review request should be specific, explain its reasoning, and be
+  reversible. "Change X to Y because Z" gives the author everything they
+  need to act or to counter with good reason.
+</Callout>
+
+## Receiving feedback
+
+Being reviewed well is as important as reviewing well:
+
+| Do | Avoid |
+| --- | --- |
+| Respond to every comment | Taking feedback personally |
+| Push back with evidence | Arguing without data |
+| Fix or explain promptly | Letting reviews stall |
+| Thank the reviewer | Dismissing the effort |
+
+The author owns the change; the reviewer owns the trust. Both need to work.
+
+## The approval process
+
+Review ends in one of these states:
+
+| State | Meaning |
+| --- | --- |
+| Approve | The change meets the bar and can merge |
+| Request changes | Required fixes before approval |
+| Comment | Discussion without blocking |
+
+Rules:
+
+- Approval is given only when the change is genuinely ready.
+- Requested changes are re-reviewed after they land.
+- Two or more reviews are welcome on risky changes.
+- Maintainers have final authority on merge.
+
+## Quality expectations
+
+The bar for merge is quality, not perfection:
+
+<CheckList
+  items={[
+    'Correct today, not merely plausible.',
+    'Tested for the behavior it changes.',
+    'Understandable by a future reader.',
+    'Small enough that the review was thorough.',
+  ]}
+/>
+
+Perfection is not the goal: good, merged code beats ideal, unmerged code.
+
+## Becoming a reviewer
+
+The path to reviewing regularly:
+
+<Steps>
+  <Step title="Review small PRs">
+    Start with docs and simple fixes; the checklist is the same.
+  </Step>
+  <Step title="Ask to be added">
+    Express interest in the community; maintainers welcome reviewers.
+  </Step>
+  <Step title="Learn the patterns">
+    Read past reviews to learn what the project cares about.
+  </Step>
+  <Step title="Review consistently">
+    Reliable reviewers become the trusted core of the project.
+  </Step>
+</Steps>
+
+See [Mentorship](/docs/contributors/mentorship) for support along the way.
+
+## Related pages
+
+- [Pull Requests](/docs/contributors/pull-requests): the author side of review.
+- [Coding Standards](/docs/contributors/coding-standards): what reviewers enforce.
+- [Mentorship](/docs/contributors/mentorship): growing as a reviewer.

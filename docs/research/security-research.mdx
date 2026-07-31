@@ -1,0 +1,105 @@
+---
+title: "Security Research"
+description: "Active security research: threat modeling, sandbox design, attack surfaces, supply-chain security, module verification, and permission isolation."
+readingTime: 28
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["research", "security-research"]
+keywords: "security research, threat modeling, sandbox design, attack surface, supply chain security, module verification, permission isolation"
+---
+
+*Orivon Research Group · Security Research · Status: Active Research*
+
+This area tracks the security problems the platform must solve and the open
+research questions that remain. Unlike the [Security Whitepaper](/docs/research/security-whitepaper),
+which states the current model, this page records the *work in progress*:
+hypotheses, experiments, and questions that are still being investigated.
+
+## Threat modeling
+
+### Method
+
+Threat models are maintained per subsystem and updated with every
+architectural change. Each model records assets, adversaries, attack
+surfaces, and mitigations.
+
+| Element | Practice |
+| --- | --- |
+| Assets | Keys, credentials, data, device integrity. |
+| Adversaries | Malicious modules, sites, supply chain, insiders. |
+| Surfaces | Host interfaces, parsers, distribution, IPC. |
+| Mitigations | Mapped to the layered defense in the [Security Model](/docs/research/security-model). |
+
+### Open questions
+
+- Which adversarial models are insufficiently covered by current testing?
+- How should threat models be published for community review?
+
+## Sandbox design
+
+The sandbox is detailed in the [Runtime Whitepaper](/docs/research/runtime-whitepaper).
+Research focuses on strengthening it.
+
+| Research topic | Question |
+| --- | --- |
+| Formal verification | Can capability confinement be mechanically proven? |
+| Hardware isolation | Does memory tagging materially raise the bar? |
+| Side channels | Which microarchitectural channels matter for WASM? |
+| GC integration | How does the WASM GC proposal interact with bounds? |
+
+## Attack surfaces
+
+| Surface | Priority | Status |
+| --- | --- | --- |
+| Host interface | Critical | Fuzzed continuously. |
+| WASM validators | Critical | Corpus-based fuzzing. |
+| Manifest parser | High | Schema-validated. |
+| Message router | High | Property-based tests. |
+| DNS resolver | Medium | Input fuzzing. |
+| Rendering parsers | High | Engine-upstreamed fuzzing. |
+
+## Supply-chain security
+
+Research on distribution integrity beyond signing:
+
+| Topic | Direction |
+| --- | --- |
+| Reproducible builds | Independent byte-for-byte verification. |
+| Transparency logs | Append-only record of published artifacts. |
+| Trusted toolchain | Signed SDKs and compilers. |
+| Dependency graphs | Verified, pinned, policy-checked. |
+
+## Module verification
+
+Moving from "signature verified" to "behavior verified":
+
+| Level | Meaning |
+| --- | --- |
+| Signature verification | The artifact is what was published. |
+| Static analysis | Capability usage is consistent with the manifest. |
+| Behavioral testing | Sandboxed probing of claimed behavior. |
+| Formal verification | Proofs about the artifact's semantics (research). |
+
+## Permission isolation
+
+| Question | Status |
+| --- | --- |
+| Cross-module grant confusion | Mitigated by scoped descriptors; research continues. |
+| Revocation propagation | Immediate; testing for edge cases. |
+| Delegation semantics | Open — can grants be safely delegated? |
+| Timing side channels in checks | Under investigation. |
+
+## Future security research
+
+- Post-quantum cryptography migration.
+- Hardware-anchored root of trust for the core.
+- Economic analysis of vulnerability markets.
+- Formal verification of the complete capability path.
+
+<Danger title="Scope">
+  None of the items on this page constitute a promise. They are research
+  directions with hypotheses to test. Do not build production integrations on
+  them.
+</Danger>
+
+**Related:** [Security Whitepaper](/docs/research/security-whitepaper) · [Security Model](/docs/research/security-model) · [WASM Research](/docs/research/wasm-research)

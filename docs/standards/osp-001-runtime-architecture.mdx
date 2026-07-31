@@ -1,0 +1,107 @@
+---
+title: "OSP-001: Runtime Architecture"
+description: "Draft specification for the runtime host: the process that executes Orivon modules, its lifecycle, execution environment and service relationship."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["standards", "osp-001", "runtime"]
+keywords: "OSP-001, runtime, runtime host, WASM, module execution, lifecycle"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+The runtime host is the process that executes Orivon modules. This draft
+defines its lifecycle, its execution environment, and how it relates to the
+core services.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-001 |
+| Title | Runtime Architecture |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Runtime |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The runtime host isolates each module in its own sandboxed process, provides a
+WebAssembly execution environment, and brokers all privileged access through
+the core services. It is the execution counterpart to the
+[Technical Design](/docs/technical-design/runtime-architecture) of the same
+name.
+
+## Purpose
+
+Modules run untrusted code on the user's machine. They need an environment that
+is fast, sandboxed, and unable to reach keys or the host without authorization.
+The runtime host is that environment. Without it, every module would be a
+privilege escalation.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The runtime host process and its lifecycle.',
+    'Module initialization, activation and termination.',
+    'The WebAssembly execution environment.',
+    'Service proxies and the module to core service boundary.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'How modules are packaged (covered by OSP-004 and OSP-005).',
+    'How module code is granted capabilities (covered by OSP-006).',
+    'The browser surfaces that host runtime applications (covered by OSP-003).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-004 Module System](/docs/standards/osp-004-module-system): what runs inside the host.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): the services the host calls.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): the sandbox guarantees.
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): how access is granted.
+
+## Related specifications
+
+- [OSP-005 Package Manifest](/docs/standards/osp-005-package-manifest): the manifest the host consumes.
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): runtime events.
+- [OSP-014 Configuration](/docs/standards/osp-014-configuration): runtime configuration scopes.
+
+## Implementation status
+
+The reference implementation includes a runtime host with process isolation, a
+sandboxed WASM environment and lifecycle enforcement. The draft tracks the
+current reference design at version 0.1.0. No conformance suite has been
+published yet; see [Conformance Testing](/docs/standards/conformance-testing).
+
+## Future work
+
+- Process sharing for identical runtime applications.
+- Snapshotting for instant application restore.
+- GPU surface integration for runtime rendering.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): the reference design.

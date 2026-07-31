@@ -1,0 +1,184 @@
+---
+title: "Standards Roadmap"
+description: "The plan for the Orivon standards program: review of drafts, first acceptances, the conformance framework, and future categories."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 28
+tags: ["standards", "roadmap"]
+keywords: "roadmap, standards, drafts, acceptance, conformance framework, categories, plan"
+---
+
+The standards program is deliberate: drafts first, review, then acceptance, and
+only then the machinery of certification. This page lays out where the program
+is, where it is going, and what it will take to get there.
+
+## Where the program is
+
+The current state in one view:
+
+<StatGrid>
+  <Stat value="15" label="Drafts published" />
+  <Stat value="0" label="Accepted" />
+  <Stat value="0" label="Conformance suites shipped" />
+  <Stat value="0.1.0" label="Baseline version" />
+</StatGrid>
+
+Every specification is a 0.1.0 draft. The program is in the phase where the
+drafts are being hardened against the reference implementation. See
+[Draft Specifications](/docs/standards/draft-specifications).
+
+## The plan
+
+The roadmap is organized in phases. Each phase has a goal and a definition of
+done:
+
+<Timeline
+  phases={[
+    {
+      period: 'Phase 1',
+      title: 'Harden the drafts',
+      status: 'current',
+      children:
+        'Review OSP-001 to OSP-015 against the reference implementation. Fix mismatches, tighten normative language, and revise versions as details settle.',
+      checks: [
+        {text: 'Resolve open discussion items across all fifteen drafts'},
+        {text: 'Align drafts with the reference implementation'},
+        {text: 'Complete considerations sections on every draft'},
+      ],
+    },
+    {
+      period: 'Phase 2',
+      title: 'First acceptance',
+      status: 'future',
+      children:
+        'Move the first specifications from Draft to Accepted, starting with the foundations the rest depend on.',
+      checks: [
+        {text: 'Accept the foundation specifications (runtime, core, module system)'},
+        {text: 'Publish the first conformance suites'},
+        {text: 'Freeze versions at 1.0.0 for accepted documents'},
+      ],
+    },
+    {
+      period: 'Phase 3',
+      title: 'Conformance framework',
+      status: 'future',
+      children:
+        'Ship the conformance testing tool and the registry of suites, so third party implementations can verify themselves.',
+      checks: [
+        {text: 'Ship the conformance command line tool'},
+        {text: 'Publish suites for every accepted specification'},
+        {text: 'Open the certification process to third parties'},
+      ],
+    },
+    {
+      period: 'Phase 4',
+      title: 'Grow the registry',
+      status: 'future',
+      children:
+        'Add specifications for categories without documents and extend the accepted set as implementation and ecosystem grow.',
+      checks: [
+        {text: 'Add DNS, CLI, developer tools and API specifications'},
+        {text: 'Deprecate and replace any superseded documents through the lifecycle'},
+        {text: 'Establish long-term support windows for accepted versions'},
+      ],
+    },
+  ]}
+/>
+
+## Sequencing logic
+
+The order is not arbitrary. It follows dependencies:
+
+<Diagram caption="The dependency order of the standards work.">
+  <Flow column>
+    <DiagramNode accent>Foundations (runtime, core, modules)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Surfaces (wallet, identity, permissions)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Network and data (networking, storage, events)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Tooling (SDK, conformance, CLI)</DiagramNode>
+  </Flow>
+</Diagram>
+
+Each layer must be accepted before the layer that builds on it can be
+meaningfully certified. The [draft series](/docs/standards/draft-specifications)
+already reflects this order in its numbering.
+
+## Category coverage
+
+The category map shows where documents exist and where they are planned:
+
+| Category | Current document | Planned |
+| --- | --- | --- |
+| Runtime | OSP-001 | - |
+| Core | OSP-002 | - |
+| Browser | OSP-003 | - |
+| Modules | OSP-004 | - |
+| Package Format | OSP-005 | - |
+| Permissions | OSP-006 | - |
+| Wallet | OSP-007 | - |
+| Identity | OSP-008 | - |
+| Networking | OSP-009 | - |
+| Storage | OSP-010 | - |
+| Events | OSP-011 | - |
+| SDK | OSP-012, OSP-015 | - |
+| Security | OSP-013 | - |
+| Configuration | OSP-014 | - |
+| Cryptography | - | Phase 4 |
+| DNS | - | Phase 4 |
+| CLI | - | Phase 4 |
+| Developer Tools | - | Phase 4 |
+| APIs | - | Phase 4 |
+| User Experience | - | Phase 4 |
+
+Categories without a document are future work, not oversights. The full
+category list is on the [registry](/docs/standards/specification-registry).
+
+## What could change the plan
+
+Roadmaps are plans, not prophecies. The plan adjusts when:
+
+<CardGrid columns={2}>
+  <Card title="Implementation learns">
+    If the reference implementation reveals a design gap, the affected draft is
+    revised before acceptance.
+  </Card>
+  <Card title="Community priorities shift">
+    Heavily requested categories can move earlier in the plan.
+  </Card>
+  <Card title="Specifications converge">
+    Adjacent drafts may merge, which changes the sequence.
+  </Card>
+  <Card title="Security demands">
+    A security finding can pull a security or cryptography specification
+    forward.
+  </Card>
+</CardGrid>
+
+The lifecycle gates in [Specification Lifecycle](/docs/standards/specification-lifecycle)
+are the mechanism that absorbs these changes without chaos.
+
+## How to help
+
+The roadmap is public and participation is open:
+
+- **Review drafts** and file issues against their normative text.
+- **Test assumptions** by building against a draft and reporting what breaks.
+- **Propose changes** through the lifecycle, from idea to draft.
+- **Contribute to conformance** when the framework ships.
+
+The [overview](/docs/standards/overview) explains the contribution process from
+start to finish.
+
+<Callout type="success" title="Definition of done for the program">
+  The standards program is mature when the foundations are Accepted, the
+  conformance framework ships, and a third party can implement, certify and
+  interoperate using only public documents.
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the work in Phase 1.
+- [Accepted Specifications](/docs/standards/accepted-specifications): the goal of Phase 2.
+- [Conformance Testing](/docs/standards/conformance-testing): the goal of Phase 3.

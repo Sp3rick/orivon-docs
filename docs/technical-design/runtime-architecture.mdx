@@ -1,0 +1,326 @@
+---
+title: "Runtime Architecture"
+description: "The internal design of the Orivon runtime: initialization, module discovery, execution, the WASM engine, scheduling, threading and shutdown."
+readingTime: 15
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["technical-design", "runtime"]
+keywords: "runtime, WASM, scheduling, events, threading, memory, lifecycle, resource management, execution"
+---
+
+The runtime is the engine that executes applications and modules. It runs
+classic web content, WebAssembly, and the Orivon runtime APIs, all inside a
+sandboxed process. This page explains how the runtime is built, from the moment
+a process starts to the moment it shuts down.
+
+## What the runtime owns
+
+The runtime host process owns three things and nothing else:
+
+1. **Execution.** The engines that run code: a JavaScript engine for web
+   content and a WebAssembly engine for runtime applications.
+2. **The runtime APIs.** Identity, storage, payments and naming exposed to
+   applications as a checked surface.
+3. **Sandbox enforcement.** The OS-level and language-level isolation around
+   every execution context.
+
+The runtime owns no keys, no authoritative identity state and no policy. Those
+live in core services. The runtime is the executor, not the authority.
+
+<Diagram caption="The runtime process mediates between sandboxed code and core services.">
+  <Flow column>
+    <DiagramNode dim>Sandboxed code (app, module, page)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Runtime host process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core API</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Core services</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Initialization
+
+The runtime process is spawned by the browser process and goes through a strict
+initialization sequence:
+
+<Steps>
+  <Step title="Start">
+    The process boots with a minimal profile: no network, no filesystem, no
+    namespaces until requested.
+  </Step>
+  <Step title="Connect">
+    It registers with the communication bus and receives its process identity
+    and a signed policy context from the browser process.
+  </Step>
+  <Step title="Validate">
+    It verifies the policy context signature before trusting anything it was
+    told.
+  </Step>
+  <Step title="Sandbox">
+    It applies its own sandbox profile (seccomp, AppContainer or seatbelt) and
+    drops privileges before any untrusted code is loaded.
+  </Step>
+  <Step title="Ready">
+    It signals readiness. The browser process will only hand it work after this
+    signal.
+  </Step>
+</Steps>
+
+The order matters: the sandbox is applied before code loading, and connectivity
+is established before any API is usable.
+
+## Runtime lifecycle
+
+The runtime process has a small lifecycle. It is created for a task, serves that
+task, and is torn down cleanly.
+
+<Diagram caption="The runtime process lifecycle.">
+  <Flow column>
+    <DiagramNode>Idle (fresh)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Initializing</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Active (serving)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Draining</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Terminated</DiagramNode>
+  </Flow>
+</Diagram>
+
+| State | Meaning |
+| --- | --- |
+| **Idle** | Started, sandboxed, waiting for work |
+| **Initializing** | Loading the first application or module |
+| **Active** | Executing one or more tasks |
+| **Draining** | Finished work, persisting state, refusing new work |
+| **Terminated** | Process exited cleanly |
+
+## Module discovery and loading
+
+The runtime does not discover modules itself. Discovery is the job of the
+module service in the core. The runtime receives a **load plan**: the module
+address, its content hash, and the verified permission set.
+
+<Steps>
+  <Step title="Verify">
+    The runtime fetches the module bytes from the storage service and verifies
+    the content hash against the address.
+  </Step>
+  <Step title="Resolve">
+    Dependencies are resolved against the verified lockfile produced by the
+    module service. See [Module Architecture](/docs/technical-design/module-architecture).
+  </Step>
+  <Step title="Sandbox">
+    A new execution context is created with the module's capability set.
+  </Step>
+  <Step title="Instantiate">
+    The module is compiled and instantiated in the context.
+  </Step>
+  <Step title="Activate">
+    The runtime calls the module's activate hook and hands it the API handles
+    for its permissions.
+  </Step>
+</Steps>
+
+Loading is covered in detail on the
+[Module Loader](/docs/technical-design/module-loader) page.
+
+## Execution and the WASM runtime
+
+Runtime applications are compiled to WebAssembly and executed by the WASM
+engine. The engine enforces three properties:
+
+1. **Structured control flow.** No arbitrary jumps; memory safety is enforced
+   by the engine.
+2. **Bounded memory.** Each instance has a memory budget that cannot be
+   exceeded.
+3. **Capability calls.** The application can only call exported runtime
+   functions that were granted to it.
+
+Classic web content runs in the JavaScript engine with the standard web
+platform, exactly as in a classic browser. The two engines coexist in the same
+process but in separate execution contexts, so a WASM application cannot reach
+into a page's JavaScript state.
+
+## Sandboxing in the runtime
+
+The runtime applies isolation at three levels:
+
+<Diagram caption="Three layers of isolation: OS process, engine context, and capability check.">
+  <Stack
+    layers={[
+      {label: 'OS process sandbox (seccomp / AppContainer / seatbelt)'},
+      {label: 'Engine context (per application or module)'},
+      {label: 'Capability check (every runtime API call)', accent: true},
+    ]}
+  />
+</Diagram>
+
+See [Sandbox](/docs/technical-design/sandbox) for the guarantees and the
+threat model, and [Permission System](/docs/technical-design/permission-system)
+for how capabilities are granted.
+
+## Scheduling
+
+The runtime scheduler decides which execution contexts run and when. The
+design goals are fairness across tabs and applications, and no single
+application starving the process.
+
+- Each context gets a scheduling budget.
+- Background tabs and suspended applications are throttled to near zero.
+- Timers and interval throttling follow the same policy as the browser.
+- The WASM engine runs on the worker pool, never on the main thread, so a
+  compute-heavy module does not block input handling.
+
+## Events
+
+Applications and modules observe the world through events, not by polling. The
+runtime relays events from the communication bus into each context's event
+loop:
+
+| Event | Example |
+| --- | --- |
+| **Lifecycle** | `suspended`, `resumed`, `shutdown` |
+| **State** | `session-changed`, `network-changed` |
+| **Capability** | `permission-granted`, `permission-revoked` |
+| **Wallet** | `balance-changed`, `transaction-confirmed` |
+
+Events are delivered only if the context holds the corresponding permission, so
+an application cannot subscribe to events it was not granted.
+
+## Threading model
+
+The runtime process uses the same thread model as every other process, plus one
+addition:
+
+| Thread | Responsibility |
+| --- | --- |
+| **Main thread** | Lifecycle, scheduling, API dispatch |
+| **IO thread** | IPC and network IO |
+| **Worker pool** | Blocking work: crypto, compression, hashing |
+| **WASM threads** | Parallel execution of WASM modules, strictly sandboxed |
+
+All runtime API calls arrive on the IO thread and are dispatched to the main
+thread, which serializes access to shared state. This removes data races at the
+architecture level rather than chasing them with locks.
+
+## Memory ownership
+
+The runtime is written in Rust, so ownership is enforced by the language:
+
+- Every execution context owns its memory; contexts do not share mutable state.
+- Capability handles are typed and cannot be forged.
+- The WASM engine provides bounds checked access for guest memory.
+- At the process level, the sandbox enforces a hard memory limit per context.
+
+See [Memory Management](/docs/technical-design/memory-management) for the full
+model, including the JavaScript side.
+
+## Resource management
+
+Every expensive resource is a tracked entity:
+
+<CardGrid columns={2}>
+  <Card title="Memory">
+    Budgets per context and per process, enforced at allocation time.
+  </Card>
+  <Card title="CPU">
+    Scheduling budgets and timer throttling.
+  </Card>
+  <Card title="Sockets">
+    Counted and capped per context through the network service.
+  </Card>
+  <Card title="Storage">
+    Quotas enforced by the storage service, never by the runtime itself.
+  </Card>
+</CardGrid>
+
+When a context exceeds a budget, the runtime first throttles it, then suspends
+it, and only as a last resort terminates it. Terminating is reported to the
+[Error Handling](/docs/technical-design/error-handling) pipeline.
+
+## Shutdown
+
+Shutdown happens in the reverse order of startup:
+
+1. **Suspend.** All contexts are told to suspend and to persist state.
+2. **Drain.** In-flight API calls complete or are cancelled with an explicit
+   error.
+3. **Flush.** The runtime flushes any writes through the storage service.
+4. **Seal.** The process releases its sandbox handles and exits.
+
+A runtime host that crashes is replaced by the browser process, which restarts
+it and restores the suspended state from storage.
+
+## Error recovery
+
+The runtime distinguishes three classes of failure:
+
+| Class | Example | Recovery |
+| --- | --- | --- |
+| **Recoverable** | A transient network error | Retry with backoff inside the API |
+| **Context failure** | An application panics | Suspend the context, report, keep the process alive |
+| **Process failure** | A sandbox violation | Terminate the process, restart, restore state |
+
+The rule is that one broken application must never take down other applications
+in the same process. See [Error Handling](/docs/technical-design/error-handling).
+
+## Performance goals
+
+The runtime has explicit, measured performance goals:
+
+<CheckList
+  items={[
+    'Cold start of a runtime application under the startup budget defined in Performance.',
+    'Main thread never blocked by application compute; input handling stays responsive.',
+    'WASM execution within a defined overhead factor of native code.',
+    'Memory per idle context near zero after suspension.',
+  ]}
+/>
+
+## Security notes
+
+- The sandbox is applied before any untrusted code is loaded, and never lifted.
+- Capabilities are enforced per call; holding an API handle is not enough, each
+  call is checked against the current policy.
+- The runtime never holds keys or authoritative identity state, which shrinks
+  the value of a compromised runtime process.
+
+## Performance notes
+
+- WASM runs off the main thread so heavy compute is isolated from input.
+- Throttling keeps background work near zero, which directly reduces battery and
+  CPU use.
+- The worker pool is bounded; oversubscription is prevented by the scheduler.
+
+<Callout type="warning" title="Security">
+  Never add a capability path that bypasses the per-call check. A capability
+  handle that implicitly trusts its holder reintroduces the privilege
+  escalation that the three layer sandbox exists to prevent.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  When extending the runtime, keep the executor/authority split intact: the
+  runtime executes, core services decide. If a new feature needs a decision, ask
+  the policy broker instead of deciding inside the runtime.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  The runtime will follow the WebAssembly GC proposal to reduce engine overhead,
+  and may move to a pooled process model so cold starts become warm starts.
+  See [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Module Loader](/docs/technical-design/module-loader): how modules enter the runtime.
+- [Sandbox](/docs/technical-design/sandbox): the isolation the runtime relies on.
+- [Process Model](/docs/technical-design/process-model): where the runtime host sits.
+
+## Further reading
+
+- [Application Lifecycle](/docs/technical-design/application-lifecycle): the life of an application.
+- [Memory Management](/docs/technical-design/memory-management): ownership across the runtime.
+- [Performance](/docs/technical-design/performance): the runtime performance budget.

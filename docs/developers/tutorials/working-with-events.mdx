@@ -1,0 +1,139 @@
+---
+title: "Tutorial: Working with Events"
+description: "Publish, subscribe, and reason about event delivery in a reactive module, step by step."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.6
+tags: ["developers", "tutorials"]
+keywords: "events tutorial, publish, subscribe, event delivery"
+---
+
+Events are how packages talk without knowing each other. This tutorial
+builds a reactive module that publishes and subscribes, and digs into how
+delivery works.
+
+<Callout type="info" title="Prerequisites">
+  The [quick start](/docs/developers/quick-start), and the
+  [Events](/docs/developers/events) guide.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new feed --template module
+```
+
+## Step 2: Declare the manifest
+
+`orivon.toml`:
+
+```toml
+[package]
+name = "feed"
+version = "0.1.0"
+description = "A module that reacts to events"
+
+[interface]
+methods = ["post", "history"]
+
+[permissions]
+storage = ["read", "write"]
+```
+
+## Step 3: Publish an event
+
+```ts
+export async function post(input: {message: string}) {
+  const event = {type: 'feed.posted', payload: {message: input.message, by: author}};
+  app.events.emit(event);
+  await app.storage.put(`post:${Date.now()}`, JSON.stringify(event));
+  return {posted: true};
+}
+```
+
+## Step 4: Subscribe and react
+
+```ts
+export function activate() {
+  const sub = app.events.subscribe('feed.posted');
+  sub.on('event', (event) => {
+    app.log.info('feed activity', {message: event.payload.message});
+  });
+  return () => sub.close();
+}
+```
+
+## Step 5: Filter subscriptions
+
+Subscribe to a subset:
+
+```ts
+const mine = app.events.subscribe('feed.posted', {by: author});
+mine.on('event', (event) => notify(event.payload));
+```
+
+## Step 6: Once for one
+
+```ts
+export async function waitFor(input: {type: string}) {
+  const event = await app.events.once(input.type);
+  return {received: event.payload};
+}
+```
+
+## Step 7: Delivery guarantees
+
+<Diagram caption="Events are published, routed by topic, and delivered.">
+  <Flow column>
+    <DiagramNode accent>Publisher emits</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Routed by topic</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Filtered subscriptions</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Subscribers react</DiagramNode>
+  </Flow>
+</Diagram>
+
+Events are delivered with the guarantees described in the
+[Events](/docs/developers/events) guide. Your module should be written to
+replay safely: reacting to the same event twice should not corrupt state.
+
+## Step 8: History
+
+```ts
+export async function history() {
+  const stored = await app.storage.list('post:');
+  return stored.map((entry) => JSON.parse(entry));
+}
+```
+
+Because events are written to storage as they happen, history can be rebuilt
+at any time. See [Storage APIs](/docs/developers/storage-apis).
+
+## Step 9: Run it
+
+```sh
+orivon build
+orivon run --call feed post '{"message":"hello feed"}'
+orivon run --call feed history '{}'
+```
+
+## What you built
+
+- A module that publishes, subscribes and reacts.
+- Filtered subscriptions for the events that matter.
+- Durable history from stored events.
+
+<Callout type="success" title="Extend it">
+  Combine with [permissions](/docs/developers/tutorials/using-permissions) so
+  posting requires the right grant, and read the
+  [communication bus](/docs/technical-design/communication-bus) design for
+  delivery internals.
+</Callout>
+
+## Related pages
+
+- [Events](/docs/developers/events): the full guide.
+- [Communication Bus](/docs/technical-design/communication-bus): the design.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

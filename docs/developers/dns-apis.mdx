@@ -1,0 +1,154 @@
+---
+title: "DNS APIs"
+description: "The DNS and naming APIs your code uses to resolve names, work with resolver providers and handle resolution results."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["developers", "dns-apis"]
+keywords: "DNS APIs, naming, resolve, resolver providers, classification, caching"
+---
+
+Names are how users and code reach the world. The DNS APIs let your code
+resolve names to verified targets through the unified naming stack. This page
+explains the model and the provider extension point.
+
+## What the DNS APIs are
+
+The DNS (naming) APIs provide:
+
+<CheckList
+  items={[
+    'Resolving names to targets and identities.',
+    'Working with the resolution cache.',
+    'Registering resolver providers.',
+    'Handling resolution results and failures.',
+  ]}
+/>
+
+The naming stack is documented in
+[DNS Architecture](/docs/technical-design/dns-architecture).
+
+## Why they exist
+
+Names come in many kinds: classic domains, decentralized names and identity
+names. The naming stack unifies them behind one pipeline, so your code resolves
+any name the same way and gets a verified target, regardless of kind.
+
+## Resolving a name
+
+The basic operation:
+
+```ts
+const result = await app.dns.resolve('alice.orivon');
+```
+
+The result tells you what the name points to and whether it was verified:
+
+```ts
+if (result.verified) {
+  const target = result.target;
+} else {
+  // the name resolved but could not be verified
+}
+```
+
+<Diagram caption="Resolution goes through one pipeline for every name kind.">
+  <Flow column>
+    <DiagramNode accent>Name</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Classify</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Resolve (provider)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Verify</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Target</DiagramNode>
+  </Flow>
+</Diagram>
+
+Your code does not classify the name; the pipeline does. See
+[DNS Architecture](/docs/technical-design/dns-architecture) for the pipeline.
+
+## The cache
+
+Resolution results are cached, and the APIs expose the cache:
+
+```ts
+const cached = await app.dns.peek('alice.orivon');
+if (cached) {
+  // use the cached, verified result
+} else {
+  const fresh = await app.dns.resolve('alice.orivon');
+}
+```
+
+Using the cache avoids repeated provider round trips. The cache is shared and
+never silently downgrades verification.
+
+## Resolver providers
+
+The extension point is the resolver provider:
+
+```ts
+app.dns.registerProvider({
+  namespaces: ['example'],
+  resolve: async (name) => target,
+});
+```
+
+A provider owns a namespace and answers resolution. Providers are how the
+ecosystem adds new name kinds. See
+[Creating a DNS Provider](/docs/developers/tutorials/creating-a-dns-provider)
+for a full tutorial.
+
+<Callout type="warning" title="Providers must verify">
+  A provider that returns unverified targets is a security risk. Providers are
+  responsible for returning targets the resolution pipeline can verify, and
+  consumers must check the `verified` flag before trusting a result.
+</Callout>
+
+## When to use the DNS APIs
+
+| You need to | Use |
+| --- | --- |
+| Turn a name into a target | `app.dns.resolve(...)` |
+| Check the cache first | `app.dns.peek(...)` |
+| Add a namespace | `app.dns.registerProvider(...)` |
+| Resolve an identity | `app.identity.resolve(...)` instead |
+
+For identity names specifically, prefer the
+[Identity APIs](/docs/developers/identity-apis), which add verification on top
+of resolution.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Ignoring the verified flag">
+    A resolved name is not a trusted target until it is verified.
+  </Card>
+  <Card title="Re-resolving hot names">
+    Let the cache work. Use `peek` before `resolve` for repeated lookups.
+  </Card>
+  <Card title="Special casing name kinds">
+    The pipeline handles classification. Special cases in your code defeat the
+    unified model.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Always consume resolution as verified or unverified, and branch on it. The
+  verified flag is the contract; ignoring it is how resolution bugs become
+  security bugs.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The naming stack is documented in [DNS Architecture](/docs/technical-design/dns-architecture),
+  and the ecosystem story is on the
+  [Naming System](/docs/ecosystem/naming-system) page.
+</Callout>
+
+## Related pages
+
+- [Identity APIs](/docs/developers/identity-apis): identity resolution.
+- [Networking APIs](/docs/developers/networking-apis): connecting to resolved targets.
+- [DNS Provider tutorial](/docs/developers/tutorials/creating-a-dns-provider): building a provider.

@@ -1,0 +1,54 @@
+---
+title: "Template: Security Report"
+description: "The security report template for Orivon: the private reporting structure for responsible disclosure."
+readingTime: 3
+lastUpdated: "July 31, 2026"
+order: 20.1
+tags: ["contributors", "templates", "security"]
+keywords: "security report template, vulnerability report, responsible disclosure"
+---
+
+Use this template when reporting a security vulnerability. File it through
+the private security channel, not as a public issue. See
+[Responsible Disclosure](/docs/contributors/responsible-disclosure) for the
+process and expectations.
+
+<Callout type="danger" title="Private only">
+  Never paste a security report, or parts of it, into a public issue or chat
+  before a fix is released. Report privately and let the team coordinate.
+</Callout>
+
+```markdown
+### Summary
+One line describing the vulnerability.
+
+### Affected versions
+The versions the issue impacts.
+
+### Description
+What the vulnerability is and how it works.
+
+### Reproduction
+Steps and minimal inputs that demonstrate the impact.
+
+### Impact
+What an attacker could do, to whom, and how severe the result is.
+
+### Suggested fix
+A fix sketch if you have one; otherwise say what you tried.
+
+### Contact preferences
+How you would like to be credited and contacted.
+```
+
+<Callout type="success" title="The value of a good report">
+  A complete security report gets a fast, precise response. The reproduction
+  and impact assessment let the team size and fix the issue quickly, and
+  every serious finding is credited in the advisory.
+</Callout>
+
+## Related pages
+
+- [Responsible Disclosure](/docs/contributors/responsible-disclosure): the process.
+- [Security Policy](/docs/contributors/security-policy): the expectations.
+- [Security Model](/docs/ecosystem/security-model): the guarantees at risk.

@@ -1,0 +1,129 @@
+---
+title: "Example: Application Example"
+description: "A full Orivon application: UI, identity, storage and wallet combined, with the application lifecycle and module wiring."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 29.7
+tags: ["developers", "examples"]
+keywords: "application example, full application, UI, lifecycle"
+---
+
+An application is a user facing program: a UI over modules and services. This
+example combines identity, storage and the wallet into a small application,
+and shows how the pieces wire together.
+
+## Project structure
+
+```text
+my-app/
+  orivon.toml
+  src/
+    app.tsx
+    main.ts
+  public/
+    index.html
+```
+
+## The manifest
+
+```toml
+[package]
+name = "my-app"
+version = "0.1.0"
+description = "A note taking application"
+
+[application]
+entry = "src/main.ts"
+
+[permissions]
+identity = ["read", "resolve"]
+storage = ["read", "write"]
+wallet = ["sign"]
+
+[dependencies]
+ui = "ui"
+```
+
+The application entry is `main.ts`; the UI is a module it depends on. See
+[Module Manifest](/docs/developers/module-manifest) and
+[Building Your First Application](/docs/developers/building-your-first-application).
+
+## The main entry
+
+```ts
+import {render} from 'ui';
+import {NoteApp} from './app';
+
+export function main() {
+  render(NoteApp, {container: '#root'});
+}
+```
+
+`main` renders the application once the runtime has loaded its dependencies.
+
+## The application
+
+```tsx
+export function NoteApp() {
+  const [notes, setNotes] = useState([]);
+  const [identity, setIdentity] = useState(null);
+
+  useEffect(() => {
+    app.identity.resolve('me').then(setIdentity);
+    app.storage.list('note:').then(setNotes);
+  }, []);
+
+  async function saveNote(text: string) {
+    const address = await app.storage.put(JSON.stringify({text, by: identity.address}));
+    setNotes([...notes, address]);
+  }
+
+  return (
+    <div>
+      <h1>Notes for {identity?.name}</h1>
+      <textarea id="note-input" onSave={saveNote} />
+      <ul>{notes.map((note) => <li key={note}>{note}</li>)}</ul>
+    </div>
+  );
+}
+```
+
+## The flow
+
+<Diagram caption="The application runs on identity, storage and the UI module.">
+  <Flow column>
+    <DiagramNode accent>Runtime loads the app</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Identity resolves</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Storage loads notes</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>UI renders and reacts</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Identity ownership
+
+The notable property: notes belong to the identity, not the app. The app
+reads the user's identity and stores notes by address, and the user's
+identity and wallet are the user's, not the app's. See
+[Identity APIs](/docs/developers/identity-apis).
+
+## What this example teaches
+
+- Applications are UI over modules and services.
+- The runtime loads dependencies before `main` runs.
+- Data belongs to the identity, and the app is a guest.
+
+<Callout type="info" title="Next">
+  The [building an application](/docs/developers/building-your-first-application)
+  guide walks through creating this from scratch. The
+  [configuration example](/docs/developers/examples/configuration-example)
+  shows how applications stay configurable.
+</Callout>
+
+## Related pages
+
+- [Building Your First Application](/docs/developers/building-your-first-application): the guided path.
+- [Core APIs](/docs/developers/core-apis): the service surface.
+- [Examples](/docs/developers/examples): the example index.

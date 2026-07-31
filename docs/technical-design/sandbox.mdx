@@ -1,0 +1,244 @@
+---
+title: "Sandbox"
+description: "The internal design of the Orivon sandbox: process isolation, execution boundaries, resource limits and the threat model that justifies them."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["technical-design", "sandbox"]
+keywords: "sandbox, isolation, seccomp, AppContainer, seatbelt, resource limits, capabilities, threat model"
+---
+
+The sandbox is the mechanism that makes untrusted code safe to run. It is not a
+single feature but a set of enforced boundaries around every execution context:
+process isolation, restricted system access, resource limits and capability
+gating. This page explains the sandbox design and the threat model it answers.
+
+## What the sandbox protects
+
+The sandbox protects the user's system, the user's identity and data, and every
+other execution context in the browser. The threat model is blunt: web content,
+runtime applications and modules are all treated as potentially hostile from
+the moment they are loaded.
+
+<Diagram caption="Untrusted code is inside; the host, the wallet and other contexts are outside.">
+  <Flow column>
+    <DiagramNode accent>Sandboxed context (untrusted)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Sandbox boundary</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Host system</DiagramNode>
+    <DiagramNode dim>Other contexts</DiagramNode>
+    <DiagramNode dim>Wallet and keys</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The threat model
+
+A threat model defines what we defend against. The sandbox assumes an attacker
+who can execute arbitrary code inside a sandboxed context. That attacker can:
+
+- Run any instruction the context can run.
+- Use any bug in the JavaScript or WASM engine.
+- Attempt any syscall the sandbox permits.
+- Coerce a buggy or malicious application into misusing its own grants.
+
+The sandbox's job is to make the attacker's reach stop at the boundary, so the
+value of breaking out is minimized. The attacker cannot reach keys, cannot read
+other contexts, and cannot touch the host beyond what the sandbox permits.
+
+## Layers of isolation
+
+The sandbox works at several layers at once. Defense in depth means an attacker
+must defeat every layer to escape.
+
+<Diagram caption="Isolation layers from the OS up to the capability check.">
+  <Stack
+    layers={[
+      {label: 'Operating system sandbox', accent: true},
+      {label: 'Process isolation (per origin or application)'},
+      {label: 'Engine isolation (V8 / WASM instances)'},
+      {label: 'Capability check (per privileged call)'},
+    ]}
+  />
+</Diagram>
+
+| Layer | Mechanism |
+| --- | --- |
+| **OS sandbox** | seccomp-bpf and Landlock on Linux, AppContainer on Windows, seatbelt on macOS |
+| **Process isolation** | A dedicated process per origin or application |
+| **Engine isolation** | Separate engine instances with isolated heaps |
+| **Capability check** | Every privileged call re-checked by policy |
+
+## Execution boundaries
+
+Execution boundaries are the concrete rules about what code may do. In a
+sandboxed context:
+
+1. **No direct syscalls.** All system access goes through broker processes in
+   the browser or service processes.
+2. **No host filesystem.** Files are only reachable through the storage service
+   under a scoped quota.
+3. **No raw sockets.** Network access goes through the network service and is
+   subject to policy.
+4. **No process creation.** A context cannot spawn its own processes.
+5. **No elevation.** A context can never increase its own privileges.
+
+<Callout type="warning" title="Security">
+  The syscall filter is deny by default. New syscalls are only allowed after
+  review, and an allowlisted syscall is a permanent security surface. When in
+  doubt, keep it denied.
+</Callout>
+
+## Resource limits
+
+Isolation is not only about access. A hostile or buggy context must not be able
+to exhaust the machine:
+
+| Resource | Policy |
+| --- | --- |
+| **Memory** | Per context budget, enforced at allocation, hard ceiling |
+| **CPU** | Scheduling budget and timer throttling |
+| **FDS and sockets** | Counted and capped per context |
+| **Storage** | Quota per identity and per origin |
+| **Subprocesses** | None allowed |
+
+Exceeding a limit never crashes the host: the context is throttled, suspended,
+or terminated, in that order.
+
+## Filesystem access
+
+There is no direct filesystem access from a sandboxed context. Instead:
+
+<Steps>
+  <Step title="Ask">
+    The context requests storage through the storage service with a permission
+    grant.
+  </Step>
+  <Step title="Scope">
+    The storage service maps the request to an identity scoped namespace.
+  </Step>
+  <Step title="Serve">
+    The storage service reads and writes on the context's behalf, never exposing
+    the host path.
+  </Step>
+</Steps>
+
+The sandboxed context sees virtual paths under its own namespace. It has no way
+to reference paths outside, because the syscalls that would reach them are
+filtered. See [Storage Engine](/docs/technical-design/storage-engine).
+
+## Networking access
+
+Network access is equally indirect. A context cannot open sockets directly:
+
+<Diagram caption="All traffic flows through the network service, which enforces policy.">
+  <Flow column>
+    <DiagramNode dim>Sandboxed context</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Network service (policy checked)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Internet / P2P network</DiagramNode>
+  </Flow>
+</Diagram>
+
+The network service applies connection policy, DNS resolution and protocol
+rules. A context's network capabilities are the ones its grants allow, nothing
+more. See [Networking Stack](/docs/technical-design/networking-stack).
+
+## Capabilities
+
+The sandbox and the [Permission System](/docs/technical-design/permission-system)
+are two halves of one design:
+
+- The **sandbox** decides what is technically possible.
+- The **permission system** decides what is allowed.
+
+A context cannot attempt a capability it was not granted, and even granted
+capabilities are mediated by broker processes. The sandbox makes grants
+enforceable rather than advisory.
+
+## Security guarantees
+
+The sandbox provides four guarantees, stated precisely:
+
+<CheckList
+  items={[
+    'A sandboxed context cannot read or modify the host system outside its namespace.',
+    'A sandboxed context cannot access keys or identity material, because those live in privileged processes.',
+    'A sandboxed context cannot observe or interfere with another context.',
+    'A sandboxed context cannot escalate its own privileges.',
+  ]}
+/>
+
+Each guarantee is backed by a specific mechanism, and the
+[Testing Architecture](/docs/technical-design/testing-architecture) page
+documents how the guarantees are tested.
+
+## Worked example: escaping is the goal
+
+Consider an attacker who gains arbitrary code execution in a renderer through an
+engine bug. The attacker now has:
+
+- A sandboxed process with a deny by default syscall filter.
+- No ability to write host files or open sockets.
+- No process creation.
+- A separate engine instance per origin, so no other origin is reachable.
+
+To do anything valuable, the attacker must break the OS sandbox. That requires a
+kernel bug, which is a dramatically harder target than a web bug, and the
+context's grants limit what even a successful escape reaches. This is why
+defense in depth matters: no single bug is a complete compromise.
+
+## Limitations
+
+The sandbox is not a promise of perfect security. Its honest limits:
+
+- OS sandboxes depend on the host OS and kernel; they are only as strong as the
+  platform.
+- A bug in the engine or the broker process is still a serious risk, which is
+  why the browser process itself is kept clean.
+- Side channels (timing, cache) are mitigated at the platform level, not
+  eliminated.
+
+These limits drive the [Security Architecture](/docs/technical-design/security-architecture)
+design choices.
+
+## Security notes
+
+- The browser process never executes untrusted code, so an escape from one
+  sandbox does not reach the coordinator.
+- Sandbox configuration is generated at build time per platform and per
+  process role.
+- Any sandbox violation terminates the context immediately and reports it.
+
+## Performance notes
+
+- Brokered access costs one IPC hop per privileged operation, which is
+  negligible next to the security gain.
+- OS sandbox filters are applied once at process start, not per call.
+- Process per origin trades memory for isolation; the browser mitigates this
+  with tab discarding (see [Performance](/docs/technical-design/performance)).
+
+<Callout type="success" title="Best practice">
+  When a new feature needs a host resource, add it behind a broker and a
+  capability grant. Never add a syscall allowlist entry or a host handle into a
+  sandboxed context as a shortcut.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes a stricter capability based file model, memory tagging
+  on supported platforms, and cooperative sandbox verification in CI. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Security Architecture](/docs/technical-design/security-architecture): the full defense model.
+- [Permission System](/docs/technical-design/permission-system): what the sandbox enforces.
+- [Process Model](/docs/technical-design/process-model): how sandboxes map to processes.
+
+## Further reading
+
+- [Testing Architecture](/docs/technical-design/testing-architecture): how sandbox guarantees are tested.
+- [Error Handling](/docs/technical-design/error-handling): what happens on a violation.
+- [Rendering Pipeline](/docs/technical-design/rendering-pipeline): how untrusted content is decoded.

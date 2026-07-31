@@ -1,0 +1,131 @@
+---
+title: "Example: Networking Provider"
+description: "A networking provider that relays traffic between peers, manages connections and advertises routing metrics."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 29.4
+tags: ["developers", "examples"]
+keywords: "networking provider example, relay, connections, routing"
+---
+
+A networking provider carries traffic between peers: it connects, relays and
+reports. This example implements a provider with the networking services,
+from accepting a connection to advertising routing metrics.
+
+## Project structure
+
+```text
+networking-provider/
+  orivon.toml
+  src/
+    provider.ts
+    index.ts
+```
+
+## The manifest
+
+```toml
+[package]
+name = "networking-provider"
+version = "0.1.0"
+description = "Relays traffic between peers"
+
+[interface]
+methods = ["connect", "listen", "advertise"]
+
+[permissions]
+network = ["connect", "listen", "advertise"]
+```
+
+The provider can open connections, listen for incoming traffic, and advertise
+its routing. See [Networking APIs](/docs/developers/networking-apis).
+
+## The connection flow
+
+<Diagram caption="Traffic flows between peers through the provider.">
+  <Flow column>
+    <DiagramNode accent>Peer A connects</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Provider accepts and relays</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Peer B receives</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Metrics reported to the network</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The implementation
+
+```ts
+export async function listen(input: {path: string}) {
+  const server = await app.network.listen(input.path);
+  server.on('connection', (socket) => {
+    socket.on('data', (data) => {
+      console.log(`relaying ${data.length} bytes`);
+    });
+  });
+  return {status: 'listening', path: input.path};
+}
+
+export async function advertise(input: {service: string; path: string}) {
+  await app.network.advertise(input.service, input.path);
+  return {status: 'advertised'};
+}
+```
+
+## Managing connections
+
+Real providers track their connections and clean up:
+
+```ts
+const sockets = new Map();
+
+export async function connect(input: {address: string}) {
+  const socket = await app.network.connect(input.address);
+  sockets.set(socket.id, socket);
+  socket.on('close', () => sockets.delete(socket.id));
+  return {id: socket.id};
+}
+
+export function deactivate() {
+  for (const socket of sockets.values()) socket.close();
+  sockets.clear();
+}
+```
+
+Cleaning up on deactivate is what keeps providers stable under churn. See
+[Runtime APIs](/docs/developers/runtime-apis) for the lifecycle.
+
+## Reporting metrics
+
+The provider publishes routing health so the network can route around it:
+
+```ts
+app.events.emit('network.provider.metrics', {
+  provider: providerAddress,
+  connections: sockets.size,
+  bytesRelayed,
+});
+```
+
+Events are how the network learns about providers. See
+[Events](/docs/developers/events).
+
+## What this example teaches
+
+- Providers connect, relay and report.
+- Connections are resources: track and close them.
+- Metrics over events keep the network healthy.
+
+<Callout type="info" title="Next">
+  The [network tutorial](/docs/developers/tutorials/building-a-network-provider)
+  builds this up with a full traffic loop. The
+  [storage example](/docs/developers/examples/storage-example) shows a service
+  that uses these transports.
+</Callout>
+
+## Related pages
+
+- [Networking APIs](/docs/developers/networking-apis): the full surface.
+- [Networking](/docs/ecosystem/networking): the ecosystem model.
+- [Examples](/docs/developers/examples): the example index.

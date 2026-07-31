@@ -1,0 +1,130 @@
+---
+title: "Frequently Asked Questions"
+description: "Answers to the most common developer questions about Orivon: architecture, capabilities, limits, licensing, publishing and support."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 33
+tags: ["developers", "faq"]
+keywords: "faq, frequently asked questions, orivon questions, development questions"
+---
+
+Short answers to the questions developers ask most. If you do not find your
+question here, the [Troubleshooting](/docs/developers/troubleshooting) page
+covers problems, and the [Technical Design](/docs/technical-design) pages
+cover how things work.
+
+## The platform
+
+<Accordion title="What exactly is Orivon?">
+  Orivon is a Web3 operating system: a sandboxed runtime plus a set of core
+  services (identity, wallet, storage, networking, DNS) that applications
+  build on. Start with [What is Orivon](/docs/introduction/what-is-orivon).
+</Accordion>
+
+<Accordion title="How is Orivon different from a web app?">
+  In a web app, the server owns your data and your identity. In Orivon, the
+  user owns both: identity and wallet live with the user, and apps request
+  access through permissions. See [Why Orivon Exists](/docs/introduction/why-orivon-exists).
+</Accordion>
+
+<Accordion title="Is Orivon open source?">
+  Orivon is developed in the open under the Orivon Foundation. The roadmap
+  and governance are described in [Governance](/docs/ecosystem/governance).
+</Accordion>
+
+## Developing
+
+<Accordion title="What languages can I develop in?">
+  The SDK is TypeScript and compiles to the sandboxed runtime. The runtime
+  itself is Rust. See [Getting Started](/docs/developers/getting-started).
+</Accordion>
+
+<Accordion title="Do I need a wallet to develop?">
+  You need an identity to publish and to use identity related features, but
+  you can build and run locally without one. The [quick start](/docs/developers/quick-start)
+  works offline.
+</Accordion>
+
+<Accordion title="How do modules and applications differ?">
+  A module is a capability: storage, DNS, networking. An application is a user
+  facing program that combines modules. See
+  [Modules](/docs/ecosystem/modules) and the
+  [building guides](/docs/developers/building-your-first-module).
+</Accordion>
+
+<Accordion title="How do I make money from my work?">
+  Providers charge for capacity, modules can be published and used, and the
+  DAO and rewards program are described in
+  [Governance](/docs/ecosystem/governance).
+</Accordion>
+
+## Capabilities and limits
+
+<Accordion title="What can a package access?">
+  Only what its permissions allow. The runtime is a sandbox: by default a
+  package can access nothing, and each permission opens one capability. See
+  [Permissions](/docs/developers/permissions) and
+  [Sandbox](/docs/technical-design/sandbox).
+</Accordion>
+
+<Accordion title="How much storage can I use?">
+  Storage is capped by the user's provider plan, not by the platform.
+  Packages classify data as durable or reconstructible, and the provider
+  manages capacity. See [Storage APIs](/docs/developers/storage-apis).
+</Accordion>
+
+<Accordion title="Can I use traditional web APIs?">
+  The sandboxed runtime does not expose raw host APIs. It provides Orivon
+  equivalents through the core services, which are described in the
+  [API guides](/docs/developers/core-apis).
+</Accordion>
+
+<Accordion title="What happens when a user revokes a permission?">
+  The next privileged call fails with a permission error. Your code should
+  re-request or degrade gracefully. See [Permissions](/docs/developers/permissions).
+</Accordion>
+
+## Publishing
+
+<Accordion title="Where do I publish my package?">
+  Packages are published to the Orivon network by address. Publishing and
+  discovery are described in the
+  [Module system](/docs/ecosystem/modules).
+</Accordion>
+
+<Accordion title="Can I update a published package?">
+  Yes. Versioning rules define what changes are allowed between versions, and
+  upgrades are per package. See [Versioning](/docs/standards/versioning).
+</Accordion>
+
+<Accordion title="Do I need to pass conformance?">
+  Some capability classes require conformance before the network treats them
+  as certified. See
+  [Conformance Testing](/docs/standards/conformance-testing).
+</Accordion>
+
+## Support
+
+<Accordion title="Where do I get help?">
+  The [Troubleshooting](/docs/developers/troubleshooting) page covers common
+  problems. For the rest, use the community channels linked under
+  [Get Involved](/docs/standards/roadmap).
+</Accordion>
+
+<Accordion title="How do I report a bug or a spec gap?">
+  Bugs and proposals go through the standards process. See
+  [Writing Specifications](/docs/standards/writing-specifications).
+</Accordion>
+
+<Callout type="info" title="Did not find your answer?">
+  The [troubleshooting](/docs/developers/troubleshooting) page handles
+  problems, the [glossary](/docs/introduction/glossary) explains terms, and
+  the [technical design](/docs/technical-design) pages go deep on how things
+  work.
+</Callout>
+
+## Related pages
+
+- [Troubleshooting](/docs/developers/troubleshooting): problem solving.
+- [Glossary](/docs/introduction/glossary): the vocabulary.
+- [Overview](/docs/developers/overview): where to begin.

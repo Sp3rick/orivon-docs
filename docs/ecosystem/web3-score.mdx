@@ -1,0 +1,161 @@
+---
+title: "Web3 Score"
+description: "A transparent trust signal for how trustworthy, decentralized and well behaved a website or application is, shown natively in the browser."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["ecosystem", "web3-score", "trust"]
+keywords: "web3 score, reputation, trust, transparency, scoring, websites, modules"
+---
+
+The Web3 Score is a trust signal for the web. It is a transparent, verifiable
+score that tells users how trustworthy, decentralized and well behaved a
+website, application or module is. The score is shown natively in the browser,
+next to the connection information. This page explains what the score measures,
+how it is computed, and how to read it critically.
+
+## The problem the score solves
+
+On the classic web, trust is invisible. Users judge a site by its design, its
+domain, or the padlock icon, which only says the connection is encrypted, not
+that the site is honest. Scams, fake stores and phishing pages all have valid
+certificates and polished design.
+
+The ecosystem needs users to make better decisions without doing security
+research on every click. The Web3 Score is an attempt to make trust visible and
+auditable.
+
+## What the score measures
+
+The score is not a single opinion. It combines dimensions that together describe
+how a site behaves:
+
+<CardGrid columns={2}>
+  <Card title="Decentralization">
+    Does the site depend on a single server, or does it run on decentralized
+    infrastructure?
+  </Card>
+  <Card title="Ownership transparency">
+    Is there a verifiable identity behind the site, and how long has it existed?
+  </Card>
+  <Card title="Safety behavior">
+    Does the site avoid obvious abuse: malware, excessive permissions, deceptive
+    patterns?
+  </Card>
+  <Card title="Trackers and data">
+    How much does the site try to track or extract from visitors?
+  </Card>
+  <Card title="Reputation signals">
+    What do independent curators and validators say about the site?
+  </Card>
+  <Card title="Consistency">
+    Does the site behave the same way over time, or does it change behavior
+    after being trusted?
+  </Card>
+</CardGrid>
+
+## How the score is computed
+
+The score is assembled from verifiable inputs, not a private algorithm. The key
+idea is **transparency about inputs, not one secret number**:
+
+1. **Signals are collected.** Validators and curators publish their assessments
+   as signed, addressable records, the same way content is published.
+2. **Inputs are public.** Anyone can inspect the evidence behind a score.
+3. **The combination is deterministic.** Given the same inputs, the same score
+   is computed, so no one can secretly change results.
+4. **The user can drill in.** Clicking a score shows its dimensions and the
+   evidence for each.
+
+<Diagram caption="Public signals combine into a score the user can inspect and challenge.">
+  <Flow>
+    <DiagramNode dim>Curators</DiagramNode>
+    <DiagramNode dim>Validators</DiagramNode>
+    <DiagramNode dim>Behavior logs</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Verifiable signals</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Web3 Score</DiagramNode>
+  </Flow>
+</Diagram>
+
+## How users see it
+
+In the browser, the score appears in the address bar area, alongside the usual
+connection details. A click opens a breakdown showing each dimension and the
+evidence behind it. The score is always visible, never hidden behind a paywall
+or a warning dialog.
+
+<Callout type="warning" title="Watch out">
+  The score is a signal, not a guarantee. A high score means the public evidence
+  is good, not that a site can never be abused. A low score is a strong reason
+  to be careful, but legitimate new sites may score low until they build
+  evidence.
+</Callout>
+
+## What the score is not
+
+It helps to be explicit about the score's limits:
+
+<CardGrid columns={2}>
+  <Card title="Not a rating of quality">
+    A well scored site can still have a product you dislike. The score measures
+    trust behavior, not taste.
+  </Card>
+  <Card title="Not a guarantee">
+    No reputation system can predict the future. It reflects current evidence.
+  </Card>
+  <Card title="Not anonymous power">
+    Because inputs are public and the combination is deterministic, no single
+    party controls the score.
+  </Card>
+  <Card title="Not static">
+    Scores update as evidence changes. A site can repair its behavior and
+    rebuild its score.
+  </Card>
+</CardGrid>
+
+## For developers
+
+If you build for the ecosystem, the score is something you can work with:
+
+<CheckList
+  items={[
+    'Ship behind a verifiable identity so users can judge who you are.',
+    'Use decentralized infrastructure so decentralization shows in your score.',
+    'Avoid deceptive patterns and excessive permissions; they lower the safety dimensions.',
+    'Publish evidence about your behavior proactively.',
+  ]}
+/>
+
+The [SDK](/docs/ecosystem/sdk) and [Identity](/docs/ecosystem/identity) pages
+cover the tools you need.
+
+## The score and governance
+
+Scoring rules must evolve as attackers adapt. The standards behind the score
+are maintained through the same open
+[Governance](/docs/ecosystem/governance) process as everything else, so the
+community, not a company, decides how trust is measured.
+
+<Callout type="success" title="Next">
+  Underneath names, scores and wallets sit the systems that keep everything safe:
+  the [Security Model](/docs/ecosystem/security-model).
+</Callout>
+
+## Related pages
+
+- [Security Model](/docs/ecosystem/security-model): how trust signals are enforced.
+- [Identity](/docs/ecosystem/identity): the identities that earn scores.
+- [Naming System](/docs/ecosystem/naming-system): names that carry reputation.
+
+## Further reading
+
+- [Governance](/docs/ecosystem/governance): how scoring rules evolve.
+- [Modules](/docs/ecosystem/modules): how scores apply to extensions.

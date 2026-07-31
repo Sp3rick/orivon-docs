@@ -1,0 +1,304 @@
+---
+title: "Enterprise Deployment"
+description: "Recommended deployment models for Orivon in enterprise environments: architecture diagrams, operational considerations, and configuration."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["project", "enterprise", "deployment", "architecture", "operations"]
+keywords: "enterprise deployment, architecture, operations, configuration, orivon deployment"
+---
+
+This guide covers recommended deployment models for Orivon in enterprise
+environments, including architecture diagrams, infrastructure requirements,
+and operational considerations.
+
+<Callout type="info" title="Deployment guide version">
+  This guide reflects v1.2 capabilities. Enterprise-specific deployment
+  tooling (air-gapped kits, fleet management) is planned for v1.4–v1.5.
+</Callout>
+
+## Deployment architecture
+
+<Flow>
+  <DiagramNode title="Users" description="Enterprise employees, contractors" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Orivon Browser" description="Managed via MDM / Intune / Jamf" />
+  <FlowArrowDown />
+  <DiagramNode title="Enterprise Network" description="Zero-trust, egress controls" />
+  <FlowArrowDown />
+  <DiagramNode title="Internal Module Registry" description="Harbor / Artifactory / S3 + Orivon Registry" />
+  <FlowArrowDown />
+  <DiagramNode title="Identity Provider" description="Entra ID / Okta / Keycloak (OIDC/SAML)" />
+  <FlowArrowDown />
+  <DiagramNode title="Policy Engine" description="OPA / Custom / Orivon Policy Service" />
+  <FlowArrowDown />
+  <DiagramNode title="Observability Stack" description="Prometheus / Grafana / Loki / Tempo" />
+  <FlowArrowDown />
+  <DiagramNode title="Upstream (Orivon CDN)" description="Signed releases, public modules" />
+</Flow>
+
+## Model 1: Full Self-Hosted (Maximum Control)
+
+### Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Enterprise Network                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Orivon       │  │ Module       │  │ Identity     │      │
+│  │ Browser      │◄─┤ Registry     │◄─┤ Provider     │      │
+│  │ (Managed)    │  │ (Harbor/     │  │ (Entra/Okta) │      │
+│  └──────┬───────┘  │  Artifactory)│  └──────┬───────┘      │
+│         │          └──────┬───────┘         │              │
+│         │                 │                 │              │
+│         ▼                 ▼                 ▼              │
+│  ┌──────────────────────────────────────────────┐          │
+│  │           Policy Engine (OPA)                 │          │
+│  │  Capability allowlists │ Module signatures   │          │
+│  └──────────────────────────────────────────────┘          │
+│         │                 │                 │              │
+│         ▼                 ▼                 ▼              │
+│  ┌──────────────────────────────────────────────┐          │
+│  │         Observability (Prom/Grafana)          │          │
+│  └──────────────────────────────────────────────┘          │
+└─────────────────────────────────────────────────────────────┘
+                    │
+                    ▼ (Egress: Orivon CDN for upstream modules)
+         ┌─────────────────────┐
+         │   Orivon Upstream   │
+         │  (github.com/Orivon)│
+         └─────────────────────┘
+```
+
+### Components
+
+| Component | Recommended | Configuration Notes |
+| :--- | :--- | :--- |
+| **Browser** | Latest Stable (LTS preferred) | MDM-deployed; policies via JSON config |
+| **Registry** | Harbor / Artifactory / Orivon Registry | S3/GCS/Azure Blob backend; replication for HA |
+| **Identity** | Entra ID / Okta / Keycloak | OIDC for browser; SCIM for provisioning (v1.5) |
+| **Policy** | OPA (Open Policy Agent) | Rego policies for capabilities, module allowlists |
+| **Observability** | Prometheus + Grafana + Loki + Tempo | Pre-built dashboards (v1.4) |
+| **Network** | Zero-trust (Zscaler, Cloudflare, etc.) | Egress allowlist: Orivon CDN, registry, IdP |
+
+### Operational considerations
+- **Updates:** Staged rollout (canary → 25% → 100%) via MDM.
+- **Registry sync:** Automated mirror of upstream releases (cron/Operator).
+- **Policy changes:** GitOps workflow — PR → review → apply → audit log.
+- **Disaster recovery:** Registry backup (daily), policy repo backup, browser config backup.
+- **Capacity:** Registry storage ~10GB per 1000 modules; Prometheus retention 30d default.
+
+## Model 2: Registry-Only Self-Hosted (Balanced)
+
+### When to use
+- Want control over **which modules** run in environment.
+- Comfortable using **upstream browser/runtime** releases.
+- Need **policy enforcement** but not full infrastructure ownership.
+
+### Architecture
+- Browser/runtime: Auto-update from Orivon CDN (signed, verified).
+- Registry: Internal only (private modules + mirrored public).
+- Policy: Enforced at registry (allowlist) + browser (capability policy).
+
+### Trade-offs
+| Aspect | Registry-Only | Full Self-Hosted |
+| :--- | :--- | :--- |
+| **Control** | Module selection, policy | Everything |
+| **Operations** | Lower (no browser build/release) | Higher |
+| **Update speed** | Fast (upstream) | Controlled (staged) |
+| **Air-gap ready** | ❌ (needs egress for browser) | ✅ |
+
+## Model 3: Hybrid (Phased Adoption)
+
+### Phase 1: Evaluation (Registry-Only)
+- Deploy internal registry.
+- Mirror critical upstream modules.
+- Pilot with 1 team.
+
+### Phase 2: Policy Enforcement
+- Define capability policies.
+- Enforce module signing.
+- Integrate with IdP (OIDC).
+
+### Phase 3: Full Self-Hosted (if needed)
+- Build browser from source (custom branding, cert pinning).
+- Internal runtime (custom capabilities).
+- Air-gapped deployment kit.
+
+## Configuration reference
+
+### Browser policy (JSON)
+```json
+{
+  "version": "1",
+  "capabilities": {
+    "allowlist": [
+      "network:https",
+      "storage:local",
+      "identity:did:web"
+    ],
+    "denylist": [
+      "network:raw",
+      "system:exec"
+    ]
+  },
+  "modules": {
+    "allowlist": [
+      "orivon://internal/*",
+      "orivon://verified/*"
+    ],
+    "signaturePolicy": "require-signed"
+  },
+  "identity": {
+    "providers": ["did:web:corp.example.com"],
+    "autoProvision": true
+  },
+  "telemetry": {
+    "enabled": false,
+    "crashReports": false,
+    "performance": false
+  },
+  "updates": {
+    "channel": "stable",
+    "autoUpdate": true,
+    "stagedRollout": {"canary": 5, "percent": 25}
+  }
+}
+```
+
+### Registry policy (OPA Rego)
+```rego
+package orivon.registry
+
+default allow = false
+
+allow {
+  input.module.signature.valid
+  input.module.publisher in data.trusted_publishers
+  not input.module.capabilities[_] in data.forbidden_capabilities
+}
+
+trusted_publishers := {
+  "orivon://internal",
+  "orivon://verified",
+  "orivon://partner-acme"
+}
+
+forbidden_capabilities := {
+  "system:exec",
+  "network:raw",
+  "fs:unrestricted"
+}
+```
+
+## Infrastructure requirements
+
+| Component | Minimum | Recommended (Production) |
+| :--- | :--- | :--- |
+| **Registry** | 2 vCPU, 4GB RAM, 50GB SSD | 4 vCPU, 16GB RAM, 500GB NVMe, HA (3 nodes) |
+| **Policy Engine (OPA)** | 1 vCPU, 1GB RAM | 2 vCPU, 4GB RAM, HA (3 nodes) |
+| **Prometheus** | 2 vCPU, 4GB RAM, 50GB | 4 vCPU, 16GB RAM, 500GB, Thanos for long-term |
+| **Grafana** | 1 vCPU, 2GB RAM | 2 vCPU, 4GB RAM |
+| **Loki (logs)** | 2 vCPU, 4GB RAM, 100GB | 4 vCPU, 16GB RAM, 1TB |
+| **Tempo (traces)** | 2 vCPU, 4GB RAM, 50GB | 4 vCPU, 8GB RAM, 200GB |
+| **Browser (per user)** | 2 vCPU, 4GB RAM | 4 vCPU, 8GB RAM |
+
+## Kubernetes deployment (Helm)
+
+```yaml
+# values-enterprise.yaml
+orivon-registry:
+  enabled: true
+  storage: s3
+  s3:
+    bucket: corp-orivon-registry
+    region: us-east-1
+  ha: true
+  replicaCount: 3
+
+opa:
+  enabled: true
+  policies:
+    - name: capability-policy
+      source: git@github.com:corp/orivon-policies.git
+  ha: true
+
+prometheus:
+  enabled: true
+  retention: 30d
+  thanos:
+    enabled: true
+    objectStorage: s3
+
+grafana:
+  enabled: true
+  dashboards:
+    - orivon-runtime
+    - orivon-registry
+    - orivon-browser-fleet
+
+loki:
+  enabled: true
+  retention: 30d
+
+tempo:
+  enabled: true
+  retention: 7d
+```
+
+## Security hardening checklist
+
+| Area | Action | Verification |
+| :--- | :--- | :--- |
+| **Browser** | Disable dev tools in production | MDM policy |
+| **Browser** | Pin Orivon CDN cert (HPKP / Expect-CT) | `network.certificate_pinning` |
+| **Registry** | Require mTLS for all connections | OPA policy + cert-manager |
+| **Registry** | Scan all modules on upload (Grype/Trivy) | CI pipeline + admission controller |
+| **Policy** | Store policies in Git (signed commits) | GitOps + sigstore |
+| **Identity** | Enforce MFA + conditional access | IdP configuration |
+| **Network** | Egress allowlist only (Orivon CDN, registry, IdP) | Firewall/ZTNA rules |
+| **Observability** | Encrypt logs/metrics in transit + at rest | TLS + volume encryption |
+| **Updates** | Verify Cosign signatures before deploy | `cosign verify` in pipeline |
+
+## Air-gapped deployment (v1.5 planned)
+
+```bash
+# 1. Prepare air-gap bundle (on connected machine)
+orivon-airgap prepare \
+  --version v1.5.0 \
+  --modules orivon://internal/*,orivon://verified/* \
+  --output /tmp/orivon-airgap-v1.5.0.tar.gz
+
+# 2. Transfer to air-gapped environment (physical media)
+
+# 3. Deploy in air-gapped environment
+orivon-airgap deploy \
+  --bundle /tmp/orivon-airgap-v1.5.0.tar.gz \
+  --registry harbor.corp.internal \
+  --policy-repo git@git.corp.internal:orivon-policies.git
+```
+
+## Monitoring runbook (key alerts)
+
+| Alert | Severity | Action |
+| :--- | :--- | :--- |
+| `orivon_registry_down` | Critical | Check Harbor/Artifactory health; failover to replica |
+| `orivon_policy_engine_down` | Critical | Restart OPA; check policy repo sync |
+| `orivon_browser_crash_rate_high` | Warning | Check new version rollout; rollback if needed |
+| `orivon_module_load_failure_rate` | Warning | Check registry connectivity; signature verification |
+| `orivon_certificate_expiry_30d` | Warning | Renew certs (Let's Encrypt / internal CA) |
+
+## Support contacts for deployment
+
+| Issue | Contact |
+| :--- | :--- |
+| **Architecture review** | enterprise@orivon.dev |
+| **Deployment issues** | Discord `#enterprise-deploy` |
+| **Security config review** | security@orivon.dev |
+| **Compliance evidence** | compliance@orivon.dev |
+
+<Callout type="success" title="Start small, scale with confidence">
+  Begin with Registry-Only model. Validate policies, observe metrics, then
+  expand. The architecture supports incremental adoption without rewrite.
+</Callout>
+
+**Related:** [Enterprise](/docs/project/enterprise) · [Enterprise Features](/docs/project/enterprise-features) · [Professional Services](/docs/project/professional-services) · [Support](/docs/project/support) · [Compliance](/docs/project/compliance)

@@ -1,0 +1,246 @@
+---
+title: "Core Architecture"
+description: "The internal design of the Orivon core: the service layer that holds authoritative state, validates every request and exposes the Core API."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["technical-design", "core"]
+keywords: "core, services, validation, policy, registry, configuration, lifecycle, dependency injection, Core API"
+---
+
+The core is the authority of the system. It holds the state that must be true
+everywhere: identities, sessions, permissions, the module registry and policy.
+Every component reaches the core through the Core API, and the core validates
+every request before it does anything. This page explains how the core is
+structured internally.
+
+## The core's responsibility
+
+The core answers one question: "what is true right now?" It does not render, it
+does not execute applications, and it does not own sockets. It holds state and
+it decides.
+
+<CardGrid columns={2}>
+  <Card title="Authoritative state">
+    Identity, session, permission and registry state live here and nowhere else.
+  </Card>
+  <Card title="Validation">
+    Every request is checked against the caller's identity, the current policy
+    and the request schema.
+  </Card>
+  <Card title="Policy enforcement">
+    Policy decisions happen in the core, never in the component that asks.
+  </Card>
+  <Card title="API exposure">
+    The Core API is the only way in. No component reaches core internals
+    directly.
+  </Card>
+</CardGrid>
+
+<Diagram caption="The core is the single source of truth behind every component.">
+  <Flow column>
+    <DiagramNode dim>Browser process</DiagramNode>
+    <DiagramNode dim>Runtime hosts</DiagramNode>
+    <DiagramNode dim>Renderers</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Core API</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode>Core services</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Core services
+
+The core is a set of services, each owning one domain of state:
+
+| Service | Owns | Documented in |
+| --- | --- | --- |
+| **SessionService** | The active identity session and session keys | [Identity Layer](/docs/technical-design/identity-layer) |
+| **WalletService** | Keys, accounts, signing and transaction state | [Wallet Architecture](/docs/technical-design/wallet-architecture) |
+| **PolicyService** | Permissions and the evaluation of every grant | [Permission System](/docs/technical-design/permission-system) |
+| **ModuleService** | The module registry, versions and lockfiles | [Module Architecture](/docs/technical-design/module-architecture) |
+| **NamingService** | Name resolution records and cache | [DNS Architecture](/docs/technical-design/dns-architecture) |
+| **ConfigService** | Layered configuration and defaults | [Configuration](/docs/technical-design/configuration) |
+
+The services are isolated from each other. State never moves between services
+except through validated requests, which keeps the core auditable.
+
+## Request flow through the core
+
+Every call into the core follows the same path:
+
+<Steps>
+  <Step title="Authenticate">
+    The core identifies the caller from its session or verified identity.
+  </Step>
+  <Step title="Authorize">
+    The policy service checks whether the caller may perform the requested
+    operation.
+  </Step>
+  <Step title="Validate">
+    The request is validated against its schema. Malformed requests are
+    rejected before any state changes.
+  </Step>
+  <Step title="Execute">
+    The owning service performs the operation on its state.
+  </Step>
+  <Step title="Emit">
+    State changes are emitted as events on the communication bus so caches and
+    views can update.
+  </Step>
+</Steps>
+
+<Diagram caption="Every core request passes through the same validation pipeline.">
+  <Flow column>
+    <DiagramNode dim>Caller</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Authenticate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Authorize (policy)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Validate (schema)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Execute (owning service)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Emit events</DiagramNode>
+  </Flow>
+</Diagram>
+
+This uniform pipeline is what makes the core auditable: there is exactly one
+path to state, so there is exactly one place to enforce policy.
+
+## Application management
+
+The core does not run applications, but it manages them. The ModuleService
+tracks every registered application and module: its identity, version, declared
+permissions, dependency lockfile and lifecycle state. The
+[Application Lifecycle](/docs/technical-design/application-lifecycle) page
+documents the states the core tracks and who drives each transition.
+
+## API exposure and versioning
+
+The Core API is versioned at the boundary. The core can change internally
+without breaking callers, and callers can move at their own pace. API versioning
+and evolution are covered in [API Layer](/docs/technical-design/api-layer).
+
+## Communication
+
+The core communicates in two directions:
+
+1. **Inbound requests** from components over the communication bus.
+2. **Outbound events** that notify the rest of the system of state changes.
+
+The core never calls out to a component and waits; it answers and emits. This
+removes coupling and makes the core testable in isolation. See
+[Communication Bus](/docs/technical-design/communication-bus).
+
+## Dependency injection
+
+The core services are assembled through constructor injection. Each service
+declares the dependencies it needs, and the core assembler provides them. The
+rules are simple:
+
+<CheckList
+  items={[
+    'No service constructs another service; the assembler owns construction.',
+    'Dependencies are interfaces, so services can be replaced in tests.',
+    'The dependency graph is explicit and checked for cycles at startup.',
+    'The same instance is shared within the core so state is consistent.',
+  ]}
+/>
+
+<Callout type="info" title="Developer note">
+  The strict constructor injection is what makes core services independently
+  testable: a service in a unit test is just the service plus its injected
+  dependencies, with no hidden global state.
+</Callout>
+
+## Module registry
+
+The registry is authoritative state inside the ModuleService. It is persisted by
+the storage service and cached in memory. Each entry records:
+
+- The module identity and content address.
+- The verified manifest and permission declarations.
+- The dependency lockfile.
+- The installed versions and their lifecycle state.
+
+The registry is the single source of truth that the
+[Module Loader](/docs/technical-design/module-loader) consults before loading
+anything.
+
+## Configuration
+
+Each service reads its settings from the ConfigService, never from process
+globals or env vars inside the service. This keeps configuration layered and
+validated in one place. See [Configuration](/docs/technical-design/configuration).
+
+## Lifecycle management
+
+The core has its own lifecycle, independent of the components that call it:
+
+| Phase | What happens |
+| --- | --- |
+| **Assembly** | Services are constructed and their dependency graph is validated |
+| **Ready** | Services are initialized and the core starts answering requests |
+| **Steady state** | The core serves requests and emits events |
+| **Draining** | New requests are refused; in-flight requests complete |
+| **Shutdown** | State is persisted and the core exits |
+
+The core starts before any component is allowed to call it, and it is the last
+thing to shut down.
+
+## Security notes
+
+- All state access passes through authenticate, authorize, validate. There are
+  no bypass paths, including for internal callers.
+- The core never parses untrusted content; it validates structured requests
+  against schemas.
+- Events do not carry secrets; sensitive state is only returned through
+  authenticated request/response calls.
+
+## Performance notes
+
+- Validation is schema based and allocation light; it is measured on the hot
+  path.
+- The in-memory registry is the read path; persistence happens asynchronously.
+- Events are fanned out by the bus, not by the core, so the core never blocks
+  on a slow consumer.
+
+<Callout type="warning" title="Security">
+  Never add a state change that skips the validation pipeline, even for
+  "trusted" callers. The uniform pipeline is what guarantees that policy is
+  applied to every mutation, and an internal bypass is the same as a public one.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  If a new feature needs state, put the state in a core service behind a
+  validated API. If it only needs computation, keep it in the component. The
+  split is: the core holds truth, components hold logic.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  The core is expected to gain a distributed mode where core services replicate
+  state across trusted participants, enabling the ecosystem products described
+  in [Future Products](/docs/ecosystem/future-products).
+</Callout>
+
+## Related pages
+
+- [API Layer](/docs/technical-design/api-layer): the Core API boundary.
+- [Permission System](/docs/technical-design/permission-system): policy in the core.
+- [Module Architecture](/docs/technical-design/module-architecture): the registry's data model.
+
+## Further reading
+
+- [Identity Layer](/docs/technical-design/identity-layer): the session the core authenticates.
+- [Communication Bus](/docs/technical-design/communication-bus): how the core talks.
+- [Configuration](/docs/technical-design/configuration): how core services are configured.

@@ -1,0 +1,142 @@
+---
+title: "Networking"
+description: "How the ecosystem connects users and services: a decentralized network layer that replaces central points of control."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["ecosystem", "networking", "infrastructure"]
+keywords: "networking, peer to peer, P2P, transport, censorship, privacy, mesh, connectivity"
+---
+
+Every service in the ecosystem, from naming to storage to payments, depends on a
+network layer that connects participants without central servers. This page
+explains how that networking works and why it is the infrastructure that makes
+decentralization real.
+
+## Why networking is a first class layer
+
+On the classic web, "the network" is invisible plumbing that happens to be
+controlled by a small number of providers. For the ecosystem, connectivity is a
+core service, because the whole promise of the system, that no single party
+controls access, depends on it.
+
+<CardGrid columns={2}>
+  <Card title="Availability">
+    If connectivity does not depend on a central server, no central outage can
+    take the web down.
+  </Card>
+  <Card title="Censorship resistance">
+    No authority can block content by pressuring one provider.
+  </Card>
+  <Card title="Privacy">
+    Traffic does not have to pass through one observation point.
+  </Card>
+  <Card title="Portability">
+    Any device with connectivity can reach the same web.
+  </Card>
+</CardGrid>
+
+## From client server to a mesh
+
+The classic model is a hub and spoke: everyone connects to a few servers. The
+ecosystem's model is a mesh: participants connect to each other directly, and
+content and records travel through the network instead of being served from a
+center.
+
+<Diagram caption="A mesh replaces the hub and spoke model. There is no single point to attack or block.">
+  <Flow>
+    <DiagramNode dim>Server (hub)</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode>Peer</DiagramNode>
+    <FlowArrow />
+    <DiagramNode accent>Peer</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Peer</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode>Peer</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Peer</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Peer</DiagramNode>
+  </Flow>
+</Diagram>
+
+This is not an all or nothing switch. The ecosystem works in both modes: classic
+client server traffic keeps working, and peer to peer traffic adds resilience
+where it is available.
+
+## How the network layer works
+
+The networking layer provides three things on top of ordinary internet
+connections:
+
+1. **Discovery.** Finding peers and services by identity and name, without
+   central directories.
+2. **Transport.** Moving data directly between participants, with fallbacks when
+   direct connections are blocked (for example, behind strict firewalls).
+3. **Addressing.** Connecting the [Naming System](/docs/ecosystem/naming-system)
+   to live, reachable services.
+
+<Diagram caption="Names resolve to services that are reachable through the network layer.">
+  <Flow column>
+    <DiagramNode>Name</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Naming records</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Reachable service</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Security and privacy on the network
+
+The [Security Model](/docs/ecosystem/security-model) applies to the network as
+much as to applications:
+
+<CheckList
+  items={[
+    'Connections are encrypted between peers.',
+    'Traffic is content addressed, so what you fetch is verified regardless of which peer served it.',
+    'Discovery does not reveal your full browsing history to a central party.',
+    'Relay fallbacks are limited to forwarding encrypted data, never reading it.',
+  ]}
+/>
+
+## Who runs the network
+
+The network is run by its participants. Anyone can contribute capacity: storage,
+relaying and discovery. These contributions are part of the ecosystem's
+economy and are discussed under [Governance](/docs/ecosystem/governance) and the
+planned [Orivon Foundation](/docs/ecosystem/future-products).
+
+<Callout type="info" title="Did you know?">
+  Because integrity comes from content addressing, the same data can be served
+  by any number of peers. This is what makes the ecosystem resilient: there is
+  no single copy to delete.
+</Callout>
+
+## Networking and the Web3 Score
+
+How a site is hosted shows up in its [Web3 Score](/docs/ecosystem/web3-score).
+A site that runs on decentralized infrastructure scores higher on the
+decentralization dimension than one that depends on a single server, which gives
+developers a concrete incentive to use the network layer.
+
+<Callout type="success" title="Next">
+  The network moves data, but where does it live? That is the job of
+  [Storage](/docs/ecosystem/storage).
+</Callout>
+
+## Related pages
+
+- [Storage](/docs/ecosystem/storage): the data layer the network carries.
+- [Naming System](/docs/ecosystem/naming-system): names that the network resolves.
+- [Security Model](/docs/ecosystem/security-model): network encryption and integrity.
+
+## Further reading
+
+- [Core](/docs/ecosystem/core): connectivity as a core service.
+- [Governance](/docs/ecosystem/governance): who runs and maintains the network.

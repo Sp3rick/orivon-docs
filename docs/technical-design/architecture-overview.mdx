@@ -1,0 +1,223 @@
+---
+title: "Architecture Overview"
+description: "The technical design of Orivon at a glance: components, processes, services and the rules that hold the internal architecture together."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["technical-design", "architecture"]
+keywords: "technical design, architecture, components, processes, services, IPC, browser, runtime, core"
+---
+
+This page is the entry point for the Technical Design level. It defines the
+canonical component model that every other page in this section refers to: what
+the internal components are, how they are split across processes, and which
+cross-cutting services connect them. Everything you read on the following pages
+is a deeper view of the model introduced here.
+
+## The canonical component model
+
+Orivon is not one program. It is a set of components that interact through
+defined interfaces. The components form three layers, mirroring the ecosystem
+model described in Level 2, but expressed as internal building blocks.
+
+<Diagram caption="The internal component model. Each box is a separate process or a well defined service.">
+  <Stack
+    layers={[
+      {label: 'Browser process (UI, tab model, brokers)', accent: true},
+      {label: 'Renderer processes (web content, per origin)'},
+      {label: 'Runtime host processes (applications and modules)'},
+      {label: 'Core services (identity, wallet, policy, naming)'},
+      {label: 'Infrastructure services (network, storage, GPU)'},
+    ]}
+  />
+</Diagram>
+
+The five blocks in the stack are the units of trust. Everything above the
+dashed line is treated as untrusted by the browser process; everything below is
+privileged infrastructure.
+
+## Components and their responsibilities
+
+<CardGrid columns={2}>
+  <Card title="Browser process">
+    The privileged coordinator. Owns the window, tabs, navigation state, the
+    wallet broker and the policy broker. See
+    [Browser Architecture](/docs/technical-design/browser-architecture).
+  </Card>
+  <Card title="Renderer processes">
+    One per origin. Execute web content in a hardened sandbox. Contain the
+    rendering pipeline and the JavaScript engine. See
+    [Rendering Pipeline](/docs/technical-design/rendering-pipeline).
+  </Card>
+  <Card title="Runtime host processes">
+    Execute runtime applications and modules that are not classic web pages.
+    They share the sandbox model with renderers but host the runtime APIs.
+    See [Runtime Architecture](/docs/technical-design/runtime-architecture).
+  </Card>
+  <Card title="Core services">
+    Identity, wallet, policy, naming and session services. They live behind the
+    Core API and hold the system's authoritative state. See
+    [Core Architecture](/docs/technical-design/core-architecture).
+  </Card>
+  <Card title="Infrastructure services">
+    The network service, storage service and GPU process. They are isolated so
+    that handling untrusted bytes never runs in the privileged browser process.
+    See [Process Model](/docs/technical-design/process-model).
+  </Card>
+</CardGrid>
+
+## Process and thread model
+
+The process model is the backbone of the architecture. It is what makes
+sandboxing and crash isolation possible: a compromised renderer cannot read
+another tab, and a crashed tab cannot take down the browser.
+
+<Diagram caption="Processes in a running browser. Arrows are IPC connections over the communication bus.">
+  <Flow column>
+    <DiagramNode accent>Browser process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Renderer A</DiagramNode>
+    <DiagramNode>Renderer B</DiagramNode>
+    <DiagramNode>Runtime host</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Network service</DiagramNode>
+    <DiagramNode dim>Storage service</DiagramNode>
+    <DiagramNode dim>GPU process</DiagramNode>
+  </Flow>
+</Diagram>
+
+Within each process, work is divided across threads:
+
+| Thread | Role |
+| --- | --- |
+| **Main thread** | UI, input, lifecycle and the component's primary logic |
+| **IO thread** | All IPC and network IO, so no socket work blocks the main thread |
+| **Worker pool** | Blocking tasks such as hashing, compression and crypto |
+| **WASM threads** | Sandboxed parallel execution for runtime applications |
+
+The threading model is documented in detail on the
+[Process Model](/docs/technical-design/process-model) page.
+
+## The communication bus
+
+Every process talks to every other process through the communication bus: a
+typed IPC layer that sits on top of platform pipes. The bus supports two
+patterns:
+
+1. **Request/response** for method calls such as "resolve this name" or "sign
+   this payload".
+2. **Events** for notifications such as "permission revoked" or "wallet
+   balance changed".
+
+All traffic is routed through a broker in the browser process, which also
+enforces who may talk to whom. The bus is covered in depth on the
+[Communication Bus](/docs/technical-design/communication-bus) page.
+
+## The Core API
+
+Components never reach into core services directly. They call the **Core API**:
+a versioned interface exposed by the core service boundary. The Core API is the
+single authoritative way to reach identity, wallet, policy, naming and session
+state, which keeps the system testable and auditable. See
+[API Layer](/docs/technical-design/api-layer).
+
+<Diagram caption="All components reach core services only through the Core API.">
+  <Flow column>
+    <DiagramNode dim>Browser process</DiagramNode>
+    <DiagramNode dim>Renderer processes</DiagramNode>
+    <DiagramNode dim>Runtime hosts</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Core API (versioned)</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Core services</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Cross-cutting concerns
+
+Five concerns appear in every component and are designed once, in shared
+libraries, rather than reimplemented per component:
+
+<CardGrid columns={2}>
+  <Card title="Security">
+    Sandboxing, verification and integrity are enforced at the process boundary,
+    never inside the untrusted component. See
+    [Security Architecture](/docs/technical-design/security-architecture).
+  </Card>
+  <Card title="Permissions">
+    Every privileged action is a capability that must be granted and is checked
+    by the policy broker. See [Permission System](/docs/technical-design/permission-system).
+  </Card>
+  <Card title="Configuration">
+    A layered configuration store with strict validation. See
+    [Configuration](/docs/technical-design/configuration).
+  </Card>
+  <Card title="Observability">
+    Structured logs, tracing and metrics are emitted from every component. See
+    [Logging](/docs/technical-design/logging).
+  </Card>
+  <Card title="Memory">
+    Ownership is explicit, and every process enforces a memory budget. See
+    [Memory Management](/docs/technical-design/memory-management).
+  </Card>
+</CardGrid>
+
+## Design rules
+
+The internal architecture follows the same rules as the ecosystem, expressed at
+the code level:
+
+1. **Interfaces over implementations.** Every component depends on an
+   interface, so any implementation can be replaced.
+2. **Least privilege.** Each process and thread has only the capabilities its
+   role requires.
+3. **Isolation over trust.** Untrusted work happens in sandboxed processes, and
+   the browser process never parses untrusted bytes.
+4. **Fail closed.** When a component cannot verify something, it denies access.
+5. **One source of truth.** Authoritative state lives in core services, and
+   every other component holds a cache or a view, never a second copy of truth.
+
+<Callout type="success" title="Best practice">
+  Start reading the section from here, then follow the dependency order:
+  [Process Model](/docs/technical-design/process-model) before the components,
+  and [Communication Bus](/docs/technical-design/communication-bus) before the
+  services that use it. Each page links its prerequisites in the Related pages
+  section.
+</Callout>
+
+<Callout type="info" title="Developer note">
+  This documentation describes the target architecture of Orivon as an
+  engineering specification. Code that implements it is expected to match this
+  model; where an implementation differs, the difference is a bug in the
+  implementation or an accepted design exception documented in the repository.
+</Callout>
+
+## Future direction
+
+The component model is designed to be stable, but two areas are expected to
+change shape as the ecosystem grows: the runtime host may gain a dedicated
+sandboxing technology as WebAssembly evolves, and the storage service may
+fragment into separate name and blob stores. Both directions are outlined in
+[Future Improvements](/docs/technical-design/future-improvements).
+
+## Related pages
+
+- [Process Model](/docs/technical-design/process-model): how components map to processes and threads.
+- [Communication Bus](/docs/technical-design/communication-bus): how components talk.
+- [Security Architecture](/docs/technical-design/security-architecture): the trust boundaries.
+
+## Further reading
+
+- [Browser Architecture](/docs/technical-design/browser-architecture): the coordinator in detail.
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): the execution engine.
+- [Core Architecture](/docs/technical-design/core-architecture): the service layer.

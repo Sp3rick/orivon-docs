@@ -1,0 +1,138 @@
+---
+title: "Security Policy"
+description: "The Orivon security policy: security expectations, dependency management, reporting vulnerabilities and security reviews."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["contributors", "security"]
+keywords: "security policy, security expectations, dependency management, vulnerabilities, security reviews"
+---
+
+Security is the foundation of Orivon's promise. The platform is designed to
+be safe by default, and the community protects that design. This page states
+the security expectations every contributor carries.
+
+<Callout type="info" title="Security is everyone's job">
+  Security is not a role; it is a requirement of every change. If a
+  contribution can weaken the sandbox, the permissions model or user privacy,
+  it does not merge.
+</Callout>
+
+## Security expectations
+
+Every contribution must preserve these guarantees:
+
+<CheckList
+  items={[
+    'The sandbox contains untrusted code: no escapes, no weakening.',
+    'Permissions are default deny: nothing runs without a grant.',
+    'Identity and privacy hold: no data leaks, no tracking.',
+    'Content integrity holds: addresses verify content.',
+    'Secrets stay secret: nothing reaches logs, storage or code.',
+  ]}
+/>
+
+The guarantees are defined in the
+[Security Model](/docs/ecosystem/security-model) and the
+[Security Architecture](/docs/technical-design/security-architecture).
+
+## Working in security sensitive code
+
+Some directories and changes are higher risk than others:
+
+| Area | Why it is sensitive |
+| --- | --- |
+| `runtime/sandbox` | The isolation boundary itself |
+| `core/identity` | Identity and verification |
+| `core/wallet` | Keys and signing |
+| `core/permissions` | The authorization model |
+| Crypto and validation code | One mistake can be catastrophic |
+
+Changes in these areas receive extra review, require strong tests, and are
+expected to document their threat model. See
+[Coding Standards](/docs/contributors/coding-standards).
+
+## Dependency management
+
+Dependencies are an attack surface, and Orivon manages them tightly:
+
+<CheckList
+  items={[
+    'Dependencies are pinned to exact versions.',
+    'The lockfile is committed and not regenerated casually.',
+    'New dependencies are justified and reviewed.',
+    'Supply chain checks run in CI on every change.',
+    'Dependencies are updated deliberately, not reactively.',
+  ]}
+/>
+
+<Callout type="warning" title="Adding a dependency is a decision">
+  Every dependency is code you are vouching for. Before adding one, ask:
+  do we really need it? Is it maintained? Is it trustworthy? Prefer the
+  smallest dependency that does the job.
+</Callout>
+
+## Reporting vulnerabilities
+
+Security issues are handled differently from normal bugs. Never report a
+security vulnerability in a public issue.
+
+<Steps>
+  <Step title="Disclose privately">
+    Report through the private channel described in
+    [Responsible Disclosure](/docs/contributors/responsible-disclosure).
+  </Step>
+  <Step title="Do not publish">
+    Keep the issue private until a fix is available.
+  </Step>
+  <Step title="Coordinate">
+    Work with the security team on timing and disclosure.
+  </Step>
+</Steps>
+
+The disclosure policy is in
+[Responsible Disclosure](/docs/contributors/responsible-disclosure).
+
+## Security reviews
+
+Security review is part of the normal review process, scaled to risk:
+
+<CardGrid columns={2}>
+  <Card title="Routine review">
+    Every PR is checked for obvious security regressions.
+  </Card>
+  <Card title="Focused review">
+    Security sensitive changes get dedicated security review.
+  </Card>
+  <Card title="Audits">
+    High risk areas receive periodic external audits.
+  </Card>
+  <Card title="Conformance">
+    Security related standards carry conformance tests.
+  </Card>
+</CardGrid>
+
+## Security and new contributors
+
+Security work is not restricted to experts:
+
+<CheckList
+  items={[
+    'Read the security model before touching sensitive areas.',
+    'Test denial and failure paths, not just the happy path.',
+    'Report anything suspicious through disclosure, privately.',
+    'Ask in review and discussions; the community teaches safety.',
+  ]}
+/>
+
+<Callout type="success" title="The expectation">
+  If you see a security problem, you are expected to report it, not to fix
+  it silently and not to ignore it. Reporting a vulnerability responsibly is
+  a first-class contribution.
+</Callout>
+
+## Related pages
+
+- [Responsible Disclosure](/docs/contributors/responsible-disclosure): the reporting process.
+- [Security Model](/docs/ecosystem/security-model): the platform guarantees.
+- [Security Architecture](/docs/technical-design/security-architecture): the technical design.

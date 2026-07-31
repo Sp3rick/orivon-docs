@@ -1,0 +1,316 @@
+---
+title: "Browser Architecture"
+description: "The internal design of the Orivon browser process: window and tab management, navigation, permissions, wallet integration and application execution."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["technical-design", "browser"]
+keywords: "browser process, renderer, tabs, navigation, permissions, wallet, startup, shutdown, lifecycle"
+---
+
+The browser process is the privileged coordinator of Orivon. It owns the window,
+the tab model, navigation state, and the brokers that grant capabilities to
+everything else. This page explains how the browser is structured internally,
+from process topology to startup and shutdown.
+
+## The browser process and its children
+
+The browser process is the only process allowed to touch user identity, wallet
+keys and system-level resources. Everything else runs in children.
+
+<Diagram caption="The browser process coordinates renderers, runtime hosts and service processes.">
+  <Flow column>
+    <DiagramNode accent>Browser process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Tab: renderer A (origin A)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Tab: renderer B (origin B)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime host (application)</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Network service</DiagramNode>
+    <DiagramNode dim>Storage service</DiagramNode>
+    <DiagramNode dim>GPU process</DiagramNode>
+  </Flow>
+</Diagram>
+
+The browser process never executes untrusted code. It parses no web content, no
+module bytecode and no untrusted data. This is the most important property of
+the whole architecture: the privileged coordinator has no direct exposure to the
+attack surface. See [Security Architecture](/docs/technical-design/security-architecture).
+
+## Internal structure of the browser process
+
+The browser process is organized into managers, each owning one domain of
+responsibility. They communicate through the
+[Communication Bus](/docs/technical-design/communication-bus).
+
+<CardGrid columns={2}>
+  <Card title="WindowManager">
+    Owns windows, their bounds, and the menu and toolbar surface.
+  </Card>
+  <Card title="TabManager">
+    Owns the tab model: tab state, navigation history and per-tab renderer
+    assignment.
+  </Card>
+  <Card title="NavigationController">
+    Drives navigation: URL input, resolution, loading and commit.
+  </Card>
+  <Card title="RendererHost">
+    Spawns and supervises renderer processes, and proxies messages between them
+    and the rest of the system.
+  </Card>
+  <Card title="WalletBroker">
+    The browser process side of the wallet service. It mediates every signing
+    and key operation. See [Wallet Architecture](/docs/technical-design/wallet-architecture).
+  </Card>
+  <Card title="PolicyBroker">
+    Evaluates every permission check and renders the user consent surface.
+    See [Permission System](/docs/technical-design/permission-system).
+  </Card>
+  <Card title="SessionManager">
+    Owns the active identity session and session keys. See
+    [Identity Layer](/docs/technical-design/identity-layer).
+  </Card>
+  <Card title="ServiceProxy">
+    The client side of the Core API, used to reach core services. See
+    [API Layer](/docs/technical-design/api-layer).
+  </Card>
+</CardGrid>
+
+## Tab lifecycle
+
+A tab is a state machine. The browser process owns the state; the renderer is
+only the executor for the content of the active page.
+
+<Diagram caption="The tab lifecycle. A tab can leave the active state without being destroyed.">
+  <Flow column>
+    <DiagramNode>Created (empty)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Loading</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Committed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Active</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Discarded</DiagramNode>
+  </Flow>
+</Diagram>
+
+The states are:
+
+| State | Meaning |
+| --- | --- |
+| **Created** | Tab exists in the model; no content, no renderer |
+| **Loading** | Navigation in flight; renderer assigned |
+| **Committed** | Navigation committed; content being rendered |
+| **Active** | Content fully rendered and receiving input |
+| **Discarded** | Renderer torn down to save memory; state preserved for reload |
+
+Discarding is a first class state, not a failure. See
+[Performance](/docs/technical-design/performance) for the memory policy behind
+it.
+
+## Navigation flow
+
+Navigation is the core loop of the browser. Every navigation goes through the
+same pipeline, whether the target is a classic URL or a decentralized name.
+
+<Steps>
+  <Step title="Input">
+    The user types or clicks a target. The address bar normalizes it: a classic
+    URL passes through directly, a human readable name is handed to the naming
+    service. See [DNS Architecture](/docs/technical-design/dns-architecture).
+  </Step>
+  <Step title="Check">
+    The policy broker checks the target against the
+    [Web3 Score](/docs/ecosystem/web3-score) and permission state. Dangerous
+    targets are intercepted before any content is fetched.
+  </Step>
+  <Step title="Load">
+    The network service fetches the document. The browser process does not
+    handle the response bytes; the network service streams them into a fresh
+    renderer.
+  </Step>
+  <Step title="Commit">
+    On successful navigation, the browser process commits the navigation: it
+    assigns the origin, updates the tab state and the renderer starts rendering.
+  </Step>
+  <Step title="Execute">
+    The renderer runs the page under the sandbox. Any privileged request comes
+    back over the bus for policy checks and wallet consent.
+  </Step>
+</Steps>
+
+<Diagram caption="Sequence: a navigation from the address bar to commit.">
+  <Flow column>
+    <DiagramNode>Address bar</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>NavigationController</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy broker (check)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Network service (fetch)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Renderer (commit + render)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Application execution
+
+When a user opens a runtime application rather than a web page, the browser
+process creates a **runtime host** instead of a renderer. The application runs
+with the runtime APIs (identity, storage, payments) and reaches core services
+through the Core API, exactly as documented in
+[Runtime Architecture](/docs/technical-design/runtime-architecture).
+
+The browser process treats runtime applications like any other navigation: it
+owns the tab, the host is sandboxed, and the policy broker checks every
+privileged request. This uniformity is why the browser can present software,
+websites and modules through the same tab model.
+
+## Wallet integration
+
+The wallet is not part of the renderer and not part of the runtime. It is a
+core service accessed through the browser process's WalletBroker.
+
+<Diagram caption="Applications request signatures; the broker mediates; keys never leave the wallet service.">
+  <Flow column>
+    <DiagramNode dim>Application</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Renderer / runtime host</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>WalletBroker</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Wallet service (signs)</DiagramNode>
+  </Flow>
+</Diagram>
+
+The broker ensures three invariants: keys never cross the process boundary,
+every signature is preceded by a consent surface, and the application sees only
+the signature, never the key. Details are in
+[Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+## Permissions in the browser
+
+Permission requests originate in renderers and runtime hosts but are decided in
+the browser process. This split is deliberate: the component asking can never
+decide its own privileges.
+
+<Diagram caption="Requests flow up for a decision; grants flow down as capabilities.">
+  <Flow column>
+    <DiagramNode dim>Component asks</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>PolicyBroker evaluates</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>User consent (if required)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Capability granted to component</DiagramNode>
+  </Flow>
+</Diagram>
+
+See [Permission System](/docs/technical-design/permission-system) for the full
+grant and revocation model.
+
+## Networking and storage
+
+The browser process owns no sockets and no data files. The
+[Network Service](/docs/technical-design/networking-stack) and the
+[Storage Service](/docs/technical-design/storage-engine) run in their own
+processes, so network and storage work never exposes the privileged process to
+untrusted bytes.
+
+## Browser startup
+
+Startup is ordered so that no capability is available before its owner is ready:
+
+<Steps>
+  <Step title="Bootstrap">
+    The launcher starts the browser process, initializes the config store and
+    the log service.
+  </Step>
+  <Step title="Services">
+    The storage service, network service and GPU process are started and
+    connected over the bus.
+  </Step>
+  <Step title="Identity">
+    The session manager restores the active identity if a session exists, and
+    the wallet service unlocks with the user's passphrase.
+  </Step>
+  <Step title="Windows">
+    WindowManager restores the window and tab set from the session snapshot.
+  </Step>
+  <Step title="Rendering">
+    The first tab navigates to the start page or the restored URL.
+  </Step>
+</Steps>
+
+Startup performance is a measured target. See
+[Performance](/docs/technical-design/performance) for the budget and the
+techniques used to meet it.
+
+## Browser shutdown
+
+Shutdown is the reverse, and it is designed so no state is lost:
+
+1. **Persist.** The session snapshot (tabs, scroll positions, form draft state)
+   is written by the storage service.
+2. **Notify.** Runtime hosts and renderers are told to suspend.
+3. **Stop services.** Service processes flush and exit.
+4. **Lock.** The wallet and key material are re-encrypted and sealed.
+
+A crash is handled differently from a shutdown: the
+[Error Handling](/docs/technical-design/error-handling) page explains recovery
+and crash reporting.
+
+## Security notes
+
+- The browser process parses no untrusted bytes; all decoding happens in
+  sandboxed children.
+- WalletBroker and PolicyBroker are the only paths to keys and consent, which
+  makes the privileged surface small and auditable.
+- Renderers are assigned per origin (site isolation); a compromised origin
+  cannot read another origin's memory.
+
+## Performance notes
+
+- Tabs are discarded lazily to cap memory; the browser process tracks usage to
+  decide what to discard.
+- Navigation state is kept in the browser process so a discarded tab can be
+  restored without re-fetching history.
+- All IPC goes through the IO thread, so no protocol handling blocks the main
+  thread.
+
+<Callout type="warning" title="Security">
+  Never run untrusted work in the browser process, even temporarily. The
+  isolation guarantees of the whole system depend on the browser process
+  remaining clean, so new features that parse external input must be placed in
+  a sandboxed child.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  When adding a new capability to the browser, route it through the existing
+  broker pattern: a manager in the browser process that owns the capability, a
+  checked interface for clients, and a policy check before any privileged
+  action.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include per-process renderer pooling to cut navigation
+  latency, and a persistent service process set that survives browser restarts.
+  Both are tracked under [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Process Model](/docs/technical-design/process-model): how the browser process relates to its children.
+- [Communication Bus](/docs/technical-design/communication-bus): how the managers talk.
+- [Permission System](/docs/technical-design/permission-system): how the broker decides.
+
+## Further reading
+
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): what the browser spawns for applications.
+- [Wallet Architecture](/docs/technical-design/wallet-architecture): the broker's counterpart.
+- [Rendering Pipeline](/docs/technical-design/rendering-pipeline): what happens after commit.

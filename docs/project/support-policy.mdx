@@ -1,0 +1,151 @@
+---
+title: "Support Policy"
+description: "Orivon support policy: support expectations, response priorities, maintenance, and issue classification."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 27
+tags: ["project", "support policy", "expectations", "priorities", "maintenance"]
+keywords: "support policy, response priorities, maintenance, issue classification, orivon support"
+---
+
+This policy defines what users can expect from Orivon support across all
+channels — community and commercial. It sets clear expectations for response
+times, issue classification, and maintenance responsibilities.
+
+## Support scope
+
+### In Scope
+- Orivon runtime, browser, core libraries (official repositories).
+- Official SDKs (TypeScript, Rust), CLI.
+- Official module registry (`orivon://verified/*`, `orivon://internal/*`).
+- Documentation site (this site), API reference.
+- Release artifacts (binaries, packages, containers, SBOMs).
+
+### Out of Scope
+- Third-party modules (`orivon://community/*`, external registries).
+- Forks or modified distributions not released by Orivon.
+- User application code built on Orivon.
+- Third-party infrastructure (Kubernetes, cloud, networking, IdP).
+- Operating system, drivers, hardware issues.
+- Experimental/preview/nightly channels (best-effort only).
+
+## Issue classification
+
+| Priority | Criteria | Community Target | Commercial Target (Planned) |
+| :--- | :--- | :--- | :--- |
+| **P0 — Critical** | Production down, data loss, security vuln, regression in Stable | Best-effort (hours) | 1h (Premium), 4h (Pro), 24h (Std) |
+| **P1 — High** | Major feature broken, significant workflow blocked | Best-effort (days) | 4h (Premium), 8h (Pro), 48h (Std) |
+| **P2 — Medium** | Minor feature broken, workaround exists | Best-effort (weeks) | 24h (Premium), 48h (Pro), 5d (Std) |
+| **P3 — Low** | Cosmetic, enhancement, documentation | Best-effort (months) | Next release cycle |
+
+### Classification guide
+
+| If… | Then Priority |
+| :--- | :--- |
+| Security vulnerability (any severity) | **P0** — Report privately to security@orivon.dev |
+| Stable release regression affecting many | **P0** |
+| Single user blocked, no workaround | **P1** |
+| Workaround exists, impacts productivity | **P2** |
+| UI typo, doc clarification, nice-to-have | **P3** |
+| Experimental/nightly channel issue | **Best-effort only** (no priority) |
+
+## Response expectations
+
+### Community Support (Current)
+
+| Priority | Acknowledgment | Investigation | Resolution |
+| :--- | :--- | :--- | :--- |
+| **P0** | Hours (Discord/Forum) | Days | Next patch release |
+| **P1** | Days | Weeks | Next minor release |
+| **P2** | Weeks | Months | Backlog |
+| **P3** | Months | Backlog | Backlog |
+
+<Callout type="info" title="Community support is best-effort">
+  These are observed patterns, not commitments. The community includes core
+  engineers who often respond faster, but there are no guarantees.
+</Callout>
+
+### Commercial Support (Planned — 2027)
+
+| Tier | P0 Ack | P0 Resolve | P1 Ack | P1 Resolve | P2 Ack | P2 Resolve |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Standard** | 24h | 5d | 48h | 10d | 5d | Next release |
+| **Professional** | 4h | 24h | 8h | 3d | 24h | 10d |
+| **Premium** | 1h | 8h | 2h | 1d | 8h | 5d |
+
+## Maintenance responsibilities
+
+### Project Responsibilities
+| Area | Commitment |
+| :--- | :--- |
+| **Security patches** | Backported to all supported versions per [Version Support](/docs/project/version-support) |
+| **Critical bug fixes** | Backported to Active + Maintenance + LTS |
+| **Documentation updates** | Per release; critical corrections anytime |
+| **Release cadence** | Stable every 8–12 weeks; LTS annually |
+| **Deprecation notice** | Minimum 1 minor release (8–12 weeks) |
+| **Communication** | Release notes, newsletter, GitHub Releases |
+
+### User Responsibilities
+| Area | Expectation |
+| :--- | :--- |
+| **Stay on supported version** | Upgrade before EOL per [Version Support](/docs/project/version-support) |
+| **Test upgrades** | Validate in staging before production |
+| **Monitor advisories** | Subscribe to newsletter, watch GitHub Security Advisories |
+| **Report responsibly** | Use correct channel (security@ for vulns, Issues for bugs) |
+| **Provide context** | Version, platform, reproduction, logs |
+
+## Maintenance windows
+
+| Activity | Window | Communication |
+| :--- | :--- | :--- |
+| **Registry maintenance** | Monthly, 1st Sunday 02:00–04:00 UTC | 7 days advance (newsletter, status page) |
+| **Documentation deploy** | Continuous (on merge) | None (zero-downtime) |
+| **CDN / Infra updates** | As needed | 24h advance for breaking changes |
+| **Security patch release** | As needed (no fixed window) | Immediate (advisory + release notes) |
+
+## End-of-Life (EOL) Support
+
+| Phase | Duration | Support |
+| :--- | :--- | :--- |
+| **Active** | Until next Stable | Full (features, bugs, security) |
+| **Maintenance** | ~8–12 weeks after Active | Security only (P0/P1) |
+| **LTS** | 24 months from designation | Security + critical bugs |
+| **EOL** | After above | None (archive only) |
+
+**No extensions** — EOL dates are fixed. Plan upgrades accordingly.
+
+## Exclusions
+
+Orivon support does not cover:
+
+1. **Environment issues** — Your OS, kernel, drivers, container runtime, cloud config.
+2. **Network issues** — DNS, firewall, proxy, TLS interception, corporate policies.
+3. **Third-party modules** — Report to module maintainer; Orivon only for verified modules.
+4. **Custom builds** — If you build from source with modifications, you own support.
+5. **Experimental features** — Behind flags, in nightly/preview; no support.
+6. **Training/consulting** — See [Professional Services](/docs/project/professional-services).
+
+## Dispute resolution
+
+If you disagree with issue classification or response:
+
+1. **Comment on issue** — Provide additional context, impact evidence.
+2. **Escalate to maintainer** — Tag maintainer in issue.
+3. **Commercial tiers** — Use dedicated Slack / TAM.
+4. **Governance appeal** — [Decision Making Appeals](/docs/community/decision-making#appeals) for policy disputes.
+
+## Policy versioning
+
+| Version | Date | Changes |
+| :--- | :--- | :--- |
+| 1.0 | 2026-07-31 | Initial policy |
+
+**Next review:** 2027-01-31 (aligned with v2.0 LTS planning).
+
+<Callout type="success" title="Clear policy enables trust">
+  Knowing what to expect — and what not to expect — lets you plan your
+  adoption and operations with confidence. Commercial support adds contractual
+  commitments on top of this baseline.
+</Callout>
+
+**Related:** [Support](/docs/project/support) · [Service Level Objectives](/docs/project/slos) · [Version Support Policy](/docs/project/version-support) · [Security Policy](/docs/project/security-policy) · [Release Lifecycle](/docs/project/release-lifecycle)

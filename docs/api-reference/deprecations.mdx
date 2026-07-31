@@ -1,0 +1,76 @@
+---
+title: "Deprecations"
+description: "Policy and directory for deprecated API surface: timeline, migration and removal schedule."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 33
+tags: ["api-reference", "deprecations"]
+keywords: "deprecations, deprecated api, removal policy, migration, deprecated members, sunset"
+---
+
+Deprecated surface is supported but frozen: it no longer receives behavior
+changes and is scheduled for removal. See [Versioning](/docs/api-reference/versioning)
+for the governing policy.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Policy
+
+| Stage | Meaning | Supported until |
+| --- | --- | --- |
+| Deprecated | Documented, functional, frozen. | One major version after announcement. |
+| Removed | Rejects with `ERR_DEPRECATED` or is gone. | — |
+
+- Deprecations are announced in the [Changelog](/docs/api-reference/changelog).
+- Migrating code is expected during the deprecation window.
+- Runtime calls to deprecated members log a warning once per package.
+
+## Deprecated members
+
+### `core.systemInfo().platform` (deprecated 1.0)
+
+Replaced by `platform` on the root object. Removed in 2.0.
+
+### `wallet.listTransactions({from})` (deprecated 1.0)
+
+`from` is now a cursor managed by pagination. Removed in 2.0. Use the `cursor`
+field of `Page<T>`.
+
+### `networking.connect({timeoutMs})` (deprecated 1.0)
+
+Timeouts are configured via the runtime profile. Removed in 2.0.
+
+### `dns.resolve(name, {type})` filter (deprecated 1.0)
+
+Use `resolve(name)` and filter results by record type. Removed in 2.0.
+
+### `security.digest('sha1', …)` (deprecated 1.0)
+
+SHA-1 is deprecated for all new use. Removed in 2.0. Use `sha256` or stronger.
+
+## Detecting deprecated behavior
+
+Deprecated calls emit a structured warning that packages can subscribe to:
+
+```ts
+app.on('module:warning', (warning) => {
+  if (warning.kind === 'deprecated-api') {
+    app.log.warn('compat', 'deprecated API used', {member: warning.member});
+  }
+});
+```
+
+## Removal schedule
+
+| Version | Removals |
+| --- | --- |
+| 1.0 | (current) — deprecations announced only. |
+| 2.0 | All members listed above. |
+
+<Warning title="Do not build on deprecated surface">
+  Deprecated members are frozen: bugs in deprecated code are fixed only if
+  they cause data loss or security issues. Prefer the replacement documented
+  in each entry.
+</Warning>
+
+**Related:** [Versioning](/docs/api-reference/versioning) · [Changelog](/docs/api-reference/changelog) · [Error Codes](/docs/api-reference/error-codes)

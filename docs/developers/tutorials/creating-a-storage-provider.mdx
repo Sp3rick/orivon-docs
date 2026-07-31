@@ -1,0 +1,155 @@
+---
+title: "Tutorial: Creating a Storage Provider"
+description: "Implement a storage provider that pins content, verifies integrity, and charges for capacity, step by step."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.3
+tags: ["developers", "tutorials"]
+keywords: "storage provider tutorial, pinning, content addressing, capacity"
+---
+
+This tutorial builds a storage provider: a package that stores content for
+users by address, verifies integrity, and manages capacity. It is the
+provider behind the [storage example](/docs/developers/examples/storage-example),
+built step by step.
+
+<Callout type="info" title="Prerequisites">
+  The [quick start](/docs/developers/quick-start), and the
+  [storage APIs](/docs/developers/storage-apis) page.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new storage-provider --template module
+```
+
+## Step 2: Declare the manifest
+
+`orivon.toml`:
+
+```toml
+[package]
+name = "storage-provider"
+version = "0.1.0"
+description = "Pins and serves content"
+
+[interface]
+methods = ["put", "get", "pin", "delete", "capacity"]
+
+[permissions]
+storage = ["write", "read"]
+network = ["listen", "advertise"]
+
+[config]
+max_capacity_gb = 10
+price_per_gb = "0.001"
+```
+
+## Step 3: Track capacity
+
+```ts
+const usage = new Map();
+
+export async function put(input: {blob: Uint8Array}) {
+  const size = input.blob.byteLength;
+  const capacity = await usedBytes();
+  const max = app.config.get('max_capacity_gb') * 1_000_000_000;
+
+  if (capacity + size > max) {
+    return {error: 'capacity_exceeded'};
+  }
+
+  const address = await app.storage.put(input.blob);
+  await app.storage.pin(address);
+  usage.set(address, size);
+  return {address};
+}
+
+async function usedBytes() {
+  return [...usage.values()].reduce((sum, size) => sum + size, 0);
+}
+```
+
+Capacity is a business rule the provider enforces: it refuses work over its
+limit rather than degrading.
+
+## Step 4: Serve content
+
+```ts
+export async function get(input: {address: string}) {
+  const blob = await app.storage.get(input.address);
+  return {blob};
+}
+```
+
+## Step 5: Verify integrity
+
+```ts
+export async function verify(input: {address: string}) {
+  const blob = await app.storage.get(input.address);
+  const recomputed = await app.storage.addressOf(blob);
+  return {verified: recomputed === input.address};
+}
+```
+
+Content addressing makes verification exact: if the address matches, the
+content is byte for byte what was stored.
+
+## Step 6: Price for capacity
+
+```ts
+export function price(input: {bytes: number}) {
+  const price = Number(app.config.get('price_per_gb'));
+  const cost = (input.bytes / 1_000_000_000) * price;
+  return {cost: cost.toFixed(6)};
+}
+```
+
+Pricing is explicit and predictable. The user knows what capacity costs
+before committing.
+
+## Step 7: Advertise and run
+
+```ts
+export function activate() {
+  app.network.advertise('storage:provider', '/storage');
+}
+```
+
+```sh
+orivon build
+orivon run --call storage-provider put '{"blob":"data-to-store"}'
+orivon run --call storage-provider get '{"address":"0x..."}'
+```
+
+## The provider loop
+
+<Diagram caption="Put, serve, verify, charge.">
+  <Flow column>
+    <DiagramNode accent>put(blob) with capacity check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>pin by address</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>get(address) serves</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>verify proves integrity</DiagramNode>
+  </Flow>
+</Diagram>
+
+## What you built
+
+- A provider that pins, serves, verifies and prices content.
+- Capacity enforcement as a business rule.
+- Advertised service on the network.
+
+<Callout type="success" title="Extend it">
+  Add replication: store each blob in two buckets and heal on demand. The
+  [cookbook](/docs/developers/cookbook) has the storage recipes.
+</Callout>
+
+## Related pages
+
+- [Storage APIs](/docs/developers/storage-apis): the full surface.
+- [Storage](/docs/ecosystem/storage): the ecosystem model.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

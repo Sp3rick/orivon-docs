@@ -1,0 +1,120 @@
+---
+title: "API Conventions"
+description: "The uniform rules every Orivon API follows: naming, parameters, return values, error handling, async behavior and version compatibility."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["api-reference", "conventions"]
+keywords: "api conventions, parameters, return values, error handling, async, promisification, naming"
+---
+
+Every public Orivon API follows the same conventions. If you learn the rules
+below you can predict the signature of any method you have not seen before.
+
+## Naming conventions
+
+Names are stable contracts. Renames are breaking changes.
+
+| Kind | Style | Example |
+| --- | --- | --- |
+| Type, class, interface | `UpperCamelCase` | `WalletAccount`, `RequestOptions` |
+| Function, method, property | `lowerCamelCase` | `wallet.sign()`, `storage.size` |
+| Event | `domain:action` | `storage:quota-exceeded` |
+| Error | `ERR_SCREAMING_SNAKE` | `ERR_QUOTA_EXCEEDED` |
+| Enum member | `UpperCamelCase` | `PermissionState.Granted` |
+
+Acronyms are treated as words: `HttpRequest`, not `HTTPRequest`. Service
+facades are named after their domain (`app.wallet`, `app.storage`,
+`app.identity`), and each domain exposes one facade object.
+
+## Parameter conventions
+
+- Parameters are **named**, not positional, when a method accepts more than one
+  argument. They are passed as a single options object.
+- Options objects are frozen by the runtime at call time; mutating the object
+  after the call has no effect.
+- **Optional** parameters are typed `T | undefined` and omitted entirely rather
+  than passed as `undefined` when there is nothing to send.
+- Identifiers are stable strings (`string`). Where possible the runtime
+  validates the format and returns `ERR_INVALID_IDENTIFIER` otherwise.
+- Binary data is passed as `Uint8Array` (`&[u8]` in Rust). Plain strings are
+  never silently coerced to bytes.
+- Byte limits are enforced with `ERR_INPUT_TOO_LARGE`; unknown values with
+  `ERR_INVALID_ARGUMENT`.
+
+## Return value conventions
+
+- Methods that perform work return a `Promise<T>` and resolve with the result
+  type documented on the method. Synchronous getters return the value directly.
+- Methods that only signal completion resolve with `void`.
+- Methods that produce no result but have meaningful intermediate state resolve
+  with the affected object or record, not with `void`.
+- Paginated collections resolve with a `Page<T>` object containing `items`,
+  `cursor` and `hasMore`.
+- Success is represented by resolution, never by a nullable "result or error"
+  tuple. Failures are always reported through rejected promises (or thrown
+  exceptions in synchronous APIs).
+
+## Error handling
+
+All errors are instances of `OrivonError` and carry a stable machine-readable
+`code` plus a human `message`.
+
+```ts
+try {
+  await app.wallet.sign(payload);
+} catch (error) {
+  if (error instanceof OrivonError && error.code === 'ERR_PERMISSION_DENIED') {
+    // handle denial
+  }
+}
+```
+
+- Match failures on `error.code`, never on `error.message`.
+- Every public error identifier is listed in [Error Codes](/docs/api-reference/error-codes)
+  with causes and resolution.
+- Denials are errors, not silent fallbacks. An unauthorized call rejects with
+  `ERR_PERMISSION_DENIED`; a revoked grant rejects with `ERR_GRANT_REVOKED`.
+
+## Async behavior
+
+All network, storage, crypto and wallet operations are asynchronous. In
+TypeScript and JavaScript they are promisified:
+
+```ts
+const accounts = await app.wallet.listAccounts();
+```
+
+In Rust the same contract is `async`:
+
+```rust
+let accounts = app.wallet().list_accounts().await?;
+```
+
+- Promises resolve after the underlying operation is durably committed where
+  the API promises durability (for example `storage.put`, `wallet.send`).
+- There is no guarantee of call ordering across different facades; use the
+  documented events when ordering matters.
+- Methods accept an optional `signal` (`AbortSignal`) in the options object to
+  cancel in-flight work. Cancellation rejects with `ERR_ABORTED`.
+
+## Version compatibility
+
+The API a package targets is declared in its manifest. The runtime applies the
+following rules:
+
+| Declaration | Behavior |
+| --- | --- |
+| Same major, lower minor/patch | Compatible, loads normally |
+| Same major, higher minor | Rejected with `ERR_API_VERSION` until recompiled |
+| Different major | Rejected with `ERR_API_VERSION` until migrated |
+| `latest` | Accepted in development tooling only, resolved at build time |
+
+See [Versioning](/docs/api-reference/versioning) for the full policy.
+
+<Note title="Facade availability">
+  A facade is present on the `Orivon` object only when the package holds at
+  least one grant for it. Accessing an un-granted facade rejects with
+  `ERR_PERMISSION_DENIED`; checking availability is done with
+  [Permissions API](/docs/api-reference/permissions-api).
+</Note>

@@ -1,0 +1,103 @@
+---
+title: "Versioning"
+description: "How the Orivon API surface is versioned, what a breaking change is, how migration works and the compatibility guarantees you can rely on."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["api-reference", "versioning"]
+keywords: "api versioning, semantic versioning, breaking changes, migration, compatibility, manifest apiVersion"
+---
+
+The public API surface follows **Semantic Versioning** with an explicit
+compatibility policy. This page defines what the numbers mean for your
+package.
+
+## Version numbers
+
+| Component | Meaning |
+| --- | --- |
+| Major | Breaking changes to the API surface or the manifest format |
+| Minor | Additive, backward-compatible changes |
+| Patch | Backward-compatible bug fixes and internal changes |
+
+The version of the API surface is independent from the runtime release. A
+package declares its target in the manifest:
+
+```yaml
+name: "my-package"
+apiVersion: "1.0"
+```
+
+## Compatibility guarantees
+
+- **Within a major version**, code written against the surface keeps working.
+  New members may appear in minors; existing members never change meaning.
+- **Type and member removal** only happens in a new major version, and only
+  after the member has been deprecated for at least two minor releases.
+- **Behavioral fixes** that tighten security boundaries may be backported as
+  patches. A security fix can change observable behavior without changing
+  signatures.
+- **Experimental members** (annotated in this reference) are exempt from all
+  guarantees until the experimental marker is removed.
+
+## Breaking changes
+
+A change is breaking when any of the following occur:
+
+- A public type, function, method, property, event, enum member or error code
+  is removed or renamed.
+- A parameter or options field is removed, or an optional field becomes
+  required.
+- A return type changes, or a previously non-throwing path can now reject.
+- The manifest format rejects previously valid manifests.
+- The wire format of a documented schema changes incompatibly.
+
+Breaking changes are recorded in the [Changelog](/docs/api-reference/changelog)
+and flagged on the affected members before they land in a release.
+
+## Migration strategy
+
+Upgrading a package to a newer major version follows a fixed path:
+
+1. Read the [Changelog](/docs/api-reference/changelog) section for the target
+   major and identify affected calls.
+2. Update the manifest `apiVersion` and run the build tooling to surface
+   type errors:
+
+   ```bash
+   orivon build --migrate
+   ```
+
+3. Run the conformance suite for the target version:
+
+   ```bash
+   orivon test --api-version 2.0
+   ```
+
+4. Address every member flagged as removed or changed, using the replacement
+   documented on each member.
+
+The [Deprecations](/docs/api-reference/deprecations) index lists every removed
+or renamed member with its replacement and removal timeline.
+
+## Backward loading
+
+The runtime loads a package whose declared `apiVersion` is an older minor of
+the same major with no shims. Packages declaring a newer minor or a different
+major are rejected at install time with `ERR_API_VERSION`; they are never
+half-loaded.
+
+```json
+{
+  "error": {
+    "code": "ERR_API_VERSION",
+    "message": "Package 'my-package' targets API 2.0, runtime supports 1.x"
+  }
+}
+```
+
+<Note title="Tooling is version-aware">
+  `orivon create`, `orivon build` and `orivon test` pin the target API version
+  in the generated manifest, so a freshly scaffolded project always compiles
+  against a known surface. See the [CLI Reference](/docs/api-reference/cli-reference).
+</Note>

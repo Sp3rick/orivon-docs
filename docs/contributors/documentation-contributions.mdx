@@ -1,0 +1,155 @@
+---
+title: "Documentation Contributions"
+description: "How to contribute to Orivon documentation: writing, editing, proofreading, creating diagrams and updating examples."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 25
+tags: ["contributors", "documentation"]
+keywords: "documentation contributions, writing, editing, proofreading, diagrams, examples"
+---
+
+Documentation is how the platform explains itself, and it is one of the most
+accessible ways to contribute. You can write, edit, proofread, create
+diagrams and update examples, and every contribution reaches readers who
+need it.
+
+<Callout type="success" title="Everyone can contribute docs">
+  No special access is needed. The documentation is in the repository, and
+  the contribution process is the same as for code: a small branch, a clear
+  change, a pull request.
+</Callout>
+
+## Kinds of documentation work
+
+<CardGrid columns={2}>
+  <Card title="Writing">
+    New guides, tutorials and reference pages.
+  </Card>
+  <Card title="Editing">
+    Restructuring and improving existing pages.
+  </Card>
+  <Card title="Proofreading">
+    Fixing typos, grammar and consistency.
+  </Card>
+  <Card title="Diagrams">
+    Creating and maintaining architecture diagrams.
+  </Card>
+  <Card title="Examples">
+    Writing and verifying runnable examples.
+  </Card>
+  <Card title="Localization">
+    Translating docs into other languages.
+  </Card>
+</CardGrid>
+
+## Starting with documentation
+
+Begin with changes that are low risk and high value:
+
+<Steps>
+  <Step title="Find a gap">
+    Broken links, unclear sections, missing examples, outdated content.
+  </Step>
+  <Step title="Understand the standards">
+    Read the [documentation standards](/docs/contributors/documentation-standards).
+  </Step>
+  <Step title="Make the change">
+    Edit the page in the repository.
+  </Step>
+  <Step title="Preview locally">
+    Run the dev server and check your page renders.
+  </Step>
+  <Step title="Open a PR">
+    Use the [documentation change template](/docs/contributors/templates/documentation-change).
+  </Step>
+</Steps>
+
+## Writing a new page
+
+New pages follow the structure of the site:
+
+| Frontmatter | Required |
+| --- | --- |
+| `title` | Yes |
+| `description` | Yes |
+| `readingTime` | Yes |
+| `lastUpdated` | Yes |
+| `order` | Yes |
+| `keywords` | Yes |
+
+Every page answers the five questions of good documentation: what to do, why
+it matters, how to do it, what to avoid, and where to learn more.
+
+## Editing existing pages
+
+Editing is often more valuable than writing:
+
+<CheckList
+  items={[
+    'Read the page for accuracy against the current version.',
+    'Improve structure and clarity, not just wording.',
+    'Keep the scope small: one page, one improvement.',
+    'Preserve the page purpose when you restructure.',
+    'Verify links and code you touch.',
+  ]}
+/>
+
+## Proofreading
+
+Proofreading catches the small errors that erode trust:
+
+- Typos, grammar and punctuation.
+- Inconsistent terminology and capitalization.
+- Broken or stale links.
+- Frontmatter fields that are missing or outdated.
+
+Every proofread fix is a contribution, and they are some of the easiest to
+review and merge.
+
+## Creating diagrams
+
+Diagrams turn architecture into understanding:
+
+| Requirement | Detail |
+| --- | --- |
+| One idea | A diagram explains one thing |
+| Caption | Text alternative for every reader |
+| Style | Consistent with the site's conventions |
+| Accuracy | Matches the current design |
+| Contrast | Readable in all palettes |
+
+See the diagram conventions in
+[Documentation Standards](/docs/contributors/documentation-standards).
+
+## Updating examples
+
+Examples must run:
+
+<CheckList
+  items={[
+    'Test examples before submitting them.',
+    'Show expected output next to commands.',
+    'Keep examples current with the SDK versions.',
+    'Mark illustrative examples honestly.',
+    'Fix the example and the surrounding prose together.',
+  ]}
+/>
+
+<Callout type="warning" title="Examples are code">
+  An example that does not run is worse than no example, because it teaches
+  the reader a lie. Verify before you submit.
+</Callout>
+
+## Reviewing documentation
+
+Documentation changes are reviewed like any PR:
+
+- Reviewers check accuracy, clarity, structure and links.
+- A second reader is the audience: if they stumble, the page does.
+- Documentation reviewers are a recognized and valuable role.
+
+## Related pages
+
+- [Documentation Standards](/docs/contributors/documentation-standards): the conventions.
+- [Localization](/docs/contributors/localization): translating documentation.
+- [Documentation change template](/docs/contributors/templates/documentation-change): the PR form.

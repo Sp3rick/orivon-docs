@@ -1,0 +1,136 @@
+---
+title: "Core Architecture"
+description: "In-depth paper on the Orivon core: the trusted foundation, services, lifecycle, grant registry, and host interfaces."
+readingTime: 22
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["research", "architecture-paper", "core"]
+keywords: "core architecture, trust boundary, platform services, lifecycle, grant registry, host interface, ABI"
+---
+
+*Orivon Research Group · Version 1.0 · Published 2026-06-26 · Status: Published*
+
+## Overview
+
+The core is the small trusted foundation of the platform: services, module
+lifecycle, the grant registry, and host interfaces. Everything else — the
+browser, the runtime, modules — depends on it. This paper analyses the core's
+architecture and the discipline that keeps it trustworthy.
+
+## Trust boundary
+
+### What is inside
+
+| Component | Rationale |
+| --- | --- |
+| Platform services (identity, wallet, storage, networking, DNS hosts) | Shared, trust-requiring implementations. |
+| Module lifecycle | System-level state transitions. |
+| Grant registry | The authoritative permission state. |
+| Host interfaces | The ABI to the runtime and modules. |
+| System integration (processes, filesystem, keychain) | Cannot be sandboxed. |
+| Telemetry and audit | Required for accountability. |
+
+### What is outside
+
+| Component | Location |
+| --- | --- |
+| Business logic | Modules (sandboxed). |
+| Rendering | Browser renderer (sandboxed). |
+| Policy | Permission system layer. |
+| Protocol details | Service layer behind interfaces. |
+
+## Service architecture
+
+### Service layering
+
+```
+modules / browser / runtime
+        │
+        ▼
+    capability-gated API layer
+        │
+        ▼
+    service interfaces
+        │
+        ▼
+    service implementations (core)
+        │
+        ▼
+    OS + hardware
+```
+
+Services are exposed through stable interfaces; implementations can evolve
+without breaking callers. This mirrors the [API Reference](/docs/api-reference/overview)
+contract.
+
+## Module lifecycle
+
+Lifecycle is a finite state machine owned by the core:
+
+```
+unloaded → loading → loaded → activating → active ⇄ deactivated → unloaded
+                                 └──► failed
+```
+
+| Property | Design |
+| --- | --- |
+| Idempotency | Repeated transitions are safe. |
+| Failure handling | `failed` is terminal; recovery requires reload. |
+| Observability | Every transition emits a lifecycle event. |
+| Concurrency | Lifecycle transitions are serialized per module. |
+
+## Grant registry
+
+The grant registry is the single source of truth for permissions.
+
+| Operation | Description |
+| --- | --- |
+| `check` | Read current state. |
+| `grant` / `revoke` | Change state (user-approved). |
+| `snapshot` | Consistent view for auditing. |
+| `watch` | Change notifications. |
+
+Only the permission system (see [Permission System](/docs/research/permission-system))
+mutates the registry; modules read it through the API layer.
+
+## Host interfaces
+
+### ABI stability
+
+- Interfaces are versioned and additive within a version.
+- Breaking changes require a major version and a migration path.
+- The ABI is specified in the [API Reference](/docs/api-reference/overview).
+
+### Interface inventory
+
+| Interface | Consumers |
+| --- | --- |
+| Runtime host | Modules. |
+| Browser bindings | Chrome, renderer. |
+| Service APIs | All callers. |
+| Telemetry | Observability tooling. |
+
+## Security considerations
+
+- The core's code surface is CI-gated; growth requires justification.
+- Services are single implementations — no shadowing, no duplicate trust.
+- The grant registry is the enforcement anchor for the whole platform.
+- The core is memory-safe by construction (Rust), removing an entire class of
+  vulnerabilities.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Service call latency | Zero-copy interfaces where possible. |
+| Lifecycle churn | Pooled module host contexts. |
+| Registry contention | Read-optimized grant tables. |
+| Telemetry overhead | Sampled, batched, asynchronous. |
+
+## Open questions
+
+- Formal specification and proof of the lifecycle state machine.
+- Remote attestation of the core for enterprise use.
+- Migration strategy if a service must be replaced by a module.
+
+**Related:** [Core Whitepaper](/docs/research/core-whitepaper) · [Module System](/docs/research/module-system) · [Security Model](/docs/research/security-model)

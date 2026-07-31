@@ -1,0 +1,135 @@
+---
+title: "Runtime"
+description: "The layer that executes applications: the classic web stack plus the new capabilities defined by Orivon standards."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["ecosystem", "runtime", "architecture"]
+keywords: "runtime, WebAssembly, execution, sandbox, portability, web stack, applications"
+---
+
+The Runtime is the engine of the ecosystem. It is the layer that takes an
+application and actually runs it, whether that application is a classic website,
+a decentralized application, or something that behaves more like native
+software. This page explains what the runtime executes, how it stays safe, and
+why it makes applications portable.
+
+## The runtime's place in the stack
+
+The runtime sits between the browser and the core. The user rarely sees it, but
+nothing else works without it.
+
+<Diagram caption="The runtime executes what the browser presents and what the core supports.">
+  <Flow column>
+    <DiagramNode accent>Browser</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core</DiagramNode>
+  </Flow>
+</Diagram>
+
+## What the runtime executes
+
+The runtime does not invent a new programming model and abandon the old one. It
+executes the entire classic web stack:
+
+- **HTML, CSS and JavaScript** for the applications the web already has.
+- **WebAssembly** for performance critical code, from games to cryptography.
+- **New capabilities** defined by the Orivon standards, such as identity,
+  payments, storage and decentralized naming, exposed through stable APIs.
+
+This combination is deliberate. Existing web applications keep working, and new
+applications can use capabilities that a classic browser never had.
+
+## Behavior like software, portability like a URL
+
+The core design goal of the runtime is expressed in a single sentence:
+
+> Applications should behave like software while remaining as portable as a URL.
+
+What that means in practice:
+
+<CardGrid columns={2}>
+  <Card title="It is a URL">
+    Launching an application is opening a link. No installation, no store
+    approval, no platform review.
+  </Card>
+  <Card title="It is software">
+    Once running, the application can keep state, talk to the network, hold
+    identity and move value, not just render pages.
+  </Card>
+  <Card title="It is yours">
+    The application's data belongs to you and travels with your identity, not
+    with a specific device or vendor account.
+  </Card>
+  <Card title="It is replaceable">
+    Any other runtime that implements the same standards runs the same
+    applications. There is no lock in.
+  </Card>
+</CardGrid>
+
+## How the runtime keeps applications safe
+
+Security is not a wrapper around the runtime. It is part of how the runtime is
+designed. Every application runs in an isolated sandbox with least privilege:
+
+1. **Isolation.** One application cannot read another application's memory or
+   files.
+2. **Capabilities.** An application can only use the permissions it was granted,
+   and those are visible and revocable.
+3. **Narrow APIs.** The runtime exposes specific interfaces instead of letting
+   applications roam the host system.
+4. **Verifiable behavior.** Because the rules are defined by standards, a
+   runtime's behavior can be checked against them.
+
+See the [Security Model](/docs/ecosystem/security-model) for the full picture.
+
+## The runtime and the Web3 Score
+
+The runtime is also where trust signals like the
+[Web3 Score](/docs/ecosystem/web3-score) are enforced. When the browser shows a
+score for a site, the runtime is the layer that can act on it, for example by
+tightening a sandbox or blocking a dangerous capability, without the user having
+to understand the details.
+
+## What runs on the runtime
+
+<CardGrid columns={2}>
+  <Card title="Websites and web apps">
+    The existing web, preserved and extended.
+  </Card>
+  <Card title="Decentralized applications">
+    Applications that use identity, payments and storage through native APIs.
+  </Card>
+  <Card title="Modules">
+    Small, focused extensions that attach to the core and run sandboxed. See
+    [Modules](/docs/ecosystem/modules).
+  </Card>
+  <Card title="Rich media and games">
+    WebAssembly driven experiences that need performance close to native.
+  </Card>
+</CardGrid>
+
+## The runtime as a product
+
+Today the runtime ships inside the browser. It is also designed to ship on its
+own in other forms, such as a desktop runtime or a cloud runtime, so that
+applications can run outside the browser entirely. Those are planned products,
+documented under [Future Products](/docs/ecosystem/future-products).
+
+<Callout type="success" title="Next">
+  Both browser and runtime depend on the shared services of the
+  [Core](/docs/ecosystem/core).
+</Callout>
+
+## Related pages
+
+- [Core](/docs/ecosystem/core): the neutral services every application needs.
+- [Browser](/docs/ecosystem/browser): the layer that presents runtime applications.
+- [Modules](/docs/ecosystem/modules): how the runtime hosts extensions.
+
+## Further reading
+
+- [Security Model](/docs/ecosystem/security-model): sandboxing and isolation in detail.
+- [SDK](/docs/ecosystem/sdk): how developers target the runtime.

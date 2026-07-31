@@ -1,0 +1,121 @@
+---
+title: "Error Codes"
+description: "Reference for every error code returned by the Orivon APIs: meaning, causes and recommended handling."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 28
+tags: ["api-reference", "error-codes"]
+keywords: "error codes, error reference, OrivonError, ERR_ codes, error handling, rejections, exceptions, retry"
+---
+
+Every failure in the platform rejects with an `OrivonError` carrying a stable
+`code`. Codes are stable identifiers — never parse error messages; match on
+`code` (see [Classes](/docs/api-reference/classes)).
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Error object
+
+```ts
+interface OrivonError {
+  code: string;                     // stable identifier
+  message: string;                  // human-readable detail
+  details?: Record<string, unknown>; // structured context
+  cause?: unknown;                  // underlying error
+}
+```
+
+```ts
+try {
+  await app.storage.get('settings');
+} catch (error) {
+  if (isOrivonError(error) && error.code === 'ERR_PERMISSION_DENIED') {
+    // surface a grant-required state
+  } else {
+    throw error;
+  }
+}
+```
+
+## Code reference
+
+### Authentication and authorization
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_PERMISSION_DENIED` | Grant missing or denied. | Request the permission or disable the feature. |
+| `ERR_USER_DENIED` | User rejected an interactive prompt. | Do not retry automatically. |
+| `ERR_GRANT_REVOKED` | A held grant was revoked mid-operation. | Re-check and re-request. |
+| `ERR_SESSION_EXPIRED` | Session invalid or expired. | Re-authenticate. |
+| `ERR_TOKEN_INVALID` | Capability token malformed. | Re-acquire token. |
+
+### Arguments and state
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_INVALID_ARGUMENT` | Argument failed validation. | Fix the caller. |
+| `ERR_INVALID_URL` | URL malformed or disallowed. | Validate before calling. |
+| `ERR_INVALID_MNEMONIC` | Recovery phrase invalid. | Re-prompt the user. |
+| `ERR_UNSUPPORTED_ALGORITHM` | Unsupported crypto algorithm. | Use a supported one. |
+| `ERR_INVALID_STATE` | Operation invalid in current state. | Check state before retrying. |
+
+### Not found
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_NOT_FOUND` | Generic entity missing. | Treat as absent. |
+| `ERR_MODULE_NOT_FOUND` | Module or package not found. | Check identifier. |
+| `ERR_APP_NOT_FOUND` | Application not found. | Check identifier. |
+| `ERR_ACCOUNT_NOT_FOUND` | Wallet account not found. | Sync account list. |
+| `ERR_DID_NOT_FOUND` | DID not resolvable. | Check DID syntax. |
+| `ERR_TAB_NOT_FOUND` | Tab no longer exists. | Refresh tab list. |
+| `ERR_TX_NOT_FOUND` | Transaction unknown. | Treat as not tracked. |
+| `ERR_TASK_NOT_FOUND` | Scheduled task unknown. | Check handle. |
+| `ERR_KEY_NOT_FOUND` | Stored key missing. | Re-create key. |
+
+### Resource limits
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_QUOTA_EXCEEDED` | Storage quota exceeded. | Evict data or surface to user. |
+| `ERR_KEYCHAIN_UNAVAILABLE` | OS keychain unavailable. | Degrade gracefully. |
+| `ERR_TIMEOUT` | Operation timed out. | Retry with backoff. |
+| `ERR_ABORTED` | Operation aborted. | Distinguish from failure. |
+| `ERR_INSUFFICIENT_FUNDS` | Transaction cannot be funded. | Surface to user. |
+
+### Networking and DNS
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_DNS_NOT_FOUND` | Hostname unresolvable. | Surface offline state. |
+| `ERR_DNS_NAME_UNAVAILABLE` | DNS name unavailable. | Try another name. |
+| `ERR_CONNECTION_CLOSED` | Connection closed unexpectedly. | Reconnect with backoff. |
+
+### Versioning and schema
+
+| Code | Meaning | Recommended handling |
+| --- | --- | --- |
+| `ERR_API_VERSION` | API version mismatch. | Update the package. |
+| `ERR_RUNTIME_VERSION` | Runtime below requirement. | Block or update. |
+| `ERR_MANIFEST_INVALID` | Manifest failed validation. | Fix manifest. |
+
+## Retry guidance
+
+| Code | Retry? | Strategy |
+| --- | --- | --- |
+| `ERR_TIMEOUT` | yes | Exponential backoff, cap at 5 attempts. |
+| `ERR_CONNECTION_CLOSED` | yes | Backoff, max 3 attempts. |
+| `ERR_DNS_NOT_FOUND` | yes | Respect system retry policy. |
+| `ERR_QUOTA_EXCEEDED` | only after freeing space | None otherwise. |
+| `ERR_USER_DENIED` | no | Surface, never auto-retry. |
+| `ERR_INVALID_ARGUMENT` | no | Fix the caller. |
+
+## Testing errors
+
+Assert on `code`, never on `message`:
+
+```ts
+expect(error.code).toBe('ERR_QUOTA_EXCEEDED');
+```
+
+**Related:** [HTTP Status Codes](/docs/api-reference/http-status-codes) · [Classes](/docs/api-reference/classes) · [Conventions](/docs/api-reference/conventions)

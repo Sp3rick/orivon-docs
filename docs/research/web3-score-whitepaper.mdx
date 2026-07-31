@@ -1,0 +1,168 @@
+---
+title: "Web3 Score Whitepaper"
+description: "The Web3 Score paper: a transparent, user-controlled on-chain reputation score — methodology, criteria, transparency, and challenges."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["research", "whitepaper", "web3-score"]
+keywords: "web3 score whitepaper, reputation, scoring methodology, evaluation criteria, transparency, privacy, on-chain"
+---
+
+*Orivon Research Group · Version 1.0 · Published 2026-07-31 · Status: Published*
+
+## Abstract
+
+The Web3 Score measures a user's on-chain reputation in a transparent,
+user-controlled way. It aggregates verifiable on-chain signals into a single
+score that applications can trust without a centralized reputation authority.
+This paper defines the purpose of the score, the scoring methodology, the
+evaluation criteria, the transparency guarantees, and the open research
+challenges of decentralized reputation.
+
+## Background
+
+Reputation is the foundation of trust in every economy. On the open web,
+reputation is fragmented across platforms and held by intermediaries that can
+edit, sell, or delete it. On-chain activity is public and verifiable — the raw
+material for a reputation system — but raw on-chain data is not reputation;
+it must be interpreted, weighted, and protected against gaming.
+
+The Web3 Score is Orivon's answer: a reputation score derived from on-chain
+evidence, computed transparently, and controlled by the user.
+
+## Problem Statement
+
+A Web3 Score must solve:
+
+1. **Meaningfulness.** The score must predict something useful (e.g. risk of
+   default, trustworthiness of a counterparty) or it is noise.
+2. **Gaming resistance.** Sybil accounts, wash trading, and self-dealing must
+   not inflate scores.
+3. **Privacy.** Scores and the signals behind them must not force disclosure
+   of identity or activity the user wishes to keep private.
+4. **Transparency.** The computation must be auditable end to end.
+5. **Extensibility.** New signals and models must be addable without breaking
+   comparability.
+
+## Motivation
+
+The score exists to make decentralized ecosystems safer and more usable:
+
+- **For users** — a way to signal trustworthiness without sharing private
+  data.
+- **For applications** — a verifiable signal for onboarding, credit, and
+  access decisions.
+- **For the ecosystem** — a shared reputation substrate that no single
+  platform controls.
+
+It is not a credit score, not a social credit system, and not a privacy
+violation by default. These boundaries are stated in Appendix A.
+
+## Architecture
+
+### Pipeline
+
+```
+on-chain signals ──► collection ──► normalization ──► weighting ──► score
+                                                                       │
+                          audit log (all inputs published) ◄──────────┘
+```
+
+### Signal families
+
+| Family | Examples | Rationale |
+| --- | --- | --- |
+| Identity | DID age, verification level | Longevity and provenance. |
+| Financial | Transaction history, asset diversity | Solvency and behavior. |
+| Activity | Governance participation, protocol usage | Engagement and alignment. |
+| Risk | Liquidation history, failed transactions | Adverse signals. |
+
+### Scoring methodology
+
+| Step | Description |
+| --- | --- |
+| Collection | Verifiable on-chain data only. |
+| Normalization | Raw values mapped to comparable scales. |
+| Weighting | Family weights calibrated against outcomes. |
+| Aggregation | Weighted combination into `0..100` scale. |
+| Calibration | Periodic re-calibration with published methodology. |
+
+### Transparency
+
+| Guarantee | Mechanism |
+| --- | --- |
+| Deterministic | Same inputs always produce the same score. |
+| Auditable | Inputs, weights, and model version are published. |
+| Versioned | Model changes increment a published version. |
+| Explainable | Every score decomposes into per-family components. |
+
+### User control
+
+| Control | Behavior |
+| --- | --- |
+| Opt-in | Score computation and display require consent. |
+| Visibility | The user sees their own signals and score. |
+| Disclosure | Sharing the score is the user's decision, per site. |
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| On-chain signals only | Verifiability; no private-data dependency. |
+| Open methodology | Trust through auditability, not secrecy. |
+| Opt-in by default | Privacy first; the score is a tool, not a surveillance layer. |
+| Family decomposition | Explainability and debuggability. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Verifiability vs. data richness | Verifiability | Private off-chain signals are excluded. |
+| Transparency vs. gaming resistance | Transparency | Attackers can study the model; mitigated with calibration. |
+| Opt-in vs. coverage | Opt-in | Coverage grows as trust in the score grows. |
+| Simplicity vs. accuracy | Explainable simplicity | Accuracy gains from complex models are capped. |
+
+## Implementation Strategy
+
+1. Ship the pipeline with the core signal families.
+2. Publish the model and calibration methodology.
+3. Add user control surfaces (opt-in, visibility, disclosure).
+4. Add the audit log and versioned models.
+5. Run research studies on gaming resistance.
+
+## Future Work
+
+- Zero-knowledge proofs of "score ≥ threshold" without revealing the score.
+- Cross-ecosystem portability of reputation.
+- Differential privacy for aggregate statistics.
+- Economic modeling of gaming incentives.
+
+## References
+
+- C. Allen, "The path to self-sovereign identity," 2016.
+- Orivon, *Identity Whitepaper*, 2026.
+- Orivon, *Security Whitepaper*, 2026.
+- P. Resnick et al., "Reputation systems," *Communications of the ACM*, 2000.
+
+## Appendix A — What the score is not
+
+| Misconception | Reality |
+| --- | --- |
+| It is a credit score | No; it is a public, opt-in signal. |
+| It is mandatory | No; opt-in by default. |
+| It reveals identity | No; disclosure is user-controlled. |
+| It is centralized | No; methodology and model are open. |
+
+## Appendix B — Score decomposition
+
+```
+Web3 Score 0-100
+├── Identity       (20%)
+├── Financial      (35%)
+├── Activity       (30%)
+└── Risk           (15%)
+```
+
+Weights are model-versioned and published.
+
+**Related:** [Web3 Score Research](/docs/research/web3-score-research) · [Identity Whitepaper](/docs/research/identity-whitepaper) · [Identity Research](/docs/research/identity-research)

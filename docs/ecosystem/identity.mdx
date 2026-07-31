@@ -1,0 +1,151 @@
+---
+title: "Identity"
+description: "How decentralized identity works in the ecosystem: portable, user owned identities built on DDoc standards, independent of any platform."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["ecosystem", "identity", "standards"]
+keywords: "identity, DDoc, DID, verifiable credentials, portability, recovery, privacy"
+---
+
+Today your identity online is scattered across platforms. Orivon puts identity
+back in your hands: one portable identity you control, expressed through open
+standards. This page explains how identity works in the ecosystem and why it is
+the foundation for everything else.
+
+## What identity means here
+
+An identity is the set of facts that lets someone be recognized and held
+accountable online: a name, keys, reputation, credentials and preferences. In
+today's web, most of that lives inside platform accounts. In the ecosystem, it
+lives in something you own and carry with you.
+
+<CardGrid columns={2}>
+  <Card title="Portable">
+    Your identity is not tied to a browser, a company or a device. Take it
+    anywhere.
+  </Card>
+  <Card title="User owned">
+    You hold the keys. No one can delete, suspend or trade your identity.
+  </Card>
+  <Card title="Standard based">
+    Identity follows open standards, so every application can recognize you.
+  </Card>
+  <Card title="Privacy preserving">
+    You reveal only what a transaction requires, not your whole profile.
+  </Card>
+</CardGrid>
+
+## From platform accounts to self owned identity
+
+<Diagram caption="Today, identity lives inside each platform. In the ecosystem, identity is yours and platforms just reference it.">
+  <Flow>
+    <DiagramNode dim>Platform account</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Platform account</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Platform account</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode accent>Your identity</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Any application</DiagramNode>
+  </Flow>
+</Diagram>
+
+On the old web, the platforms hold your accounts and decide who you are. In the
+ecosystem, you hold an identity and applications ask to work with it. That
+reversal of control is the single most important shift the ecosystem makes.
+
+## How identity is represented
+
+Identity is expressed through the **DDoc** standard: a small, signed document
+that describes a subject and the keys it controls. The DDoc has a stable
+[address](/docs/ecosystem/naming-system) and is stored in decentralized storage,
+so it is always retrievable and always verifiable.
+
+<Diagram caption="A DDoc binds an identity to its keys and metadata.">
+  <Flow column>
+    <DiagramNode accent>Identity</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>DDoc (signed)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Address + keys + services</DiagramNode>
+  </Flow>
+</Diagram>
+
+Because the DDoc is signed, anyone can verify that a given address really is
+controlled by the identity. Because it is stored in decentralized storage, no
+single party can take it down.
+
+## Names and resolution
+
+Human readable names are the user friendly face of identity. The
+[Naming System](/docs/ecosystem/naming-system) maps names like `alice.orivon` to
+the underlying address. Users share names; applications resolve them.
+
+<Callout type="info" title="Did you know?">
+  The same resolution mechanism works for applications, modules and
+  organizations. Identity is not just for people.
+</Callout>
+
+## Verifiable credentials
+
+Beyond the base identity, the ecosystem supports verifiable credentials: signed
+statements that an issuer makes about a subject. Examples include:
+
+- A university certifies a degree.
+- A service verifies that an account is not a bot.
+- An organization issues a role or membership.
+
+Credentials are **presented selectively**. You can prove you are over eighteen
+without revealing your date of birth, and you can prove a membership without
+revealing the issuer's entire database. The [Security Model](/docs/ecosystem/security-model)
+and [Storage](/docs/ecosystem/storage) pages cover how credentials stay safe and
+where they live.
+
+## Recovery and portability
+
+Ownership brings responsibility. If you lose the keys, you lose the identity,
+so recovery is a first class feature:
+
+<Steps>
+  <Step title="Set up recovery">
+    The wallet generates recovery materials: a recovery code, split into shares,
+    or a trusted recovery contact.
+  </Step>
+  <Step title="Protect them">
+    Recovery materials are kept outside the wallet, in places the wallet cannot
+    be compromised from.
+  </Step>
+  <Step title="Recover">
+    Present enough shares or the recovery code, prove control, and derive fresh
+    keys that the DDoc is updated to recognize.
+  </Step>
+</Steps>
+
+Recovery updates the DDoc, so the same address and identity continue to work
+after the device is lost.
+
+## Identity and the Web3 Score
+
+Reputation is part of identity. The [Web3 Score](/docs/ecosystem/web3-score) is
+one of the signals a user can attach to their identity or consume about others.
+A good score is earned through behavior, not bought.
+
+<Callout type="success" title="Next">
+  Identity needs names people can remember and type. That is the job of the
+  [Naming System](/docs/ecosystem/naming-system).
+</Callout>
+
+## Related pages
+
+- [Naming System](/docs/ecosystem/naming-system): names that resolve to identity.
+- [Wallet System](/docs/ecosystem/wallet-system): the keys that protect identity.
+- [Security Model](/docs/ecosystem/security-model): how identity resists attacks.
+
+## Further reading
+
+- [Storage](/docs/ecosystem/storage): where DDoc documents and credentials live.
+- [Glossary](/docs/introduction/glossary): definitions of DDoc and related terms.

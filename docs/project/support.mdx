@@ -1,0 +1,158 @@
+---
+title: "Support"
+description: "Orivon support options: community support, documentation, issue tracking, and future commercial support."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 26
+tags: ["project", "support", "community", "documentation", "commercial"]
+keywords: "support, community support, documentation, issue tracking, commercial support, orivon support"
+---
+
+Orivon provides multiple support channels — from community-driven help to
+planned commercial support tiers. This page helps you find the right level
+of support for your needs.
+
+## Support channels
+
+| Channel | Type | Response Time | Best For |
+| :--- | :--- | :--- | :--- |
+| **Documentation** | Self-service | Instant | How-to, reference, concepts |
+| **GitHub Discussions** | Community | Hours–Days | Design questions, RFCs, usage |
+| **Forum** | Community | Hours–Days | Long-form, governance, announcements |
+| **Discord** | Community | Minutes–Hours | Quick questions, live help |
+| **GitHub Issues** | Project | Days–Weeks | Bug reports, feature requests |
+| **Security Reporting** | Private | 48h ack, 5d triage | Vulnerabilities only |
+| **Commercial Support (Planned)** | Professional | Per SLA | Production, compliance, SLA |
+
+## Current support (v1.2)
+
+### Community Support (Free, Best-Effort)
+
+**Available to everyone:**
+
+| Channel | Link | Guidelines |
+| :--- | :--- | :--- |
+| **Documentation** | This site | Start here — search first |
+| **GitHub Discussions** | `github.com/OrivonBrowser/*/discussions` | Technical questions, RFCs |
+| **Forum** | `forum.orivon.dev` | Long-form, governance, community |
+| **Discord** | `discord.gg/orivon` | `#questions`, `#general`, `#showcase` |
+| **GitHub Issues** | Per-repo `Issues` tab | Bugs, features (search first!) |
+
+**What to expect:**
+- Responses from maintainers, contributors, community members.
+- No guaranteed response time or resolution.
+- Complex issues may become [decision proposals](/docs/community/decision-making).
+- Security issues: use [Responsible Disclosure](/docs/contributors/responsible-disclosure), not public channels.
+
+### Self-Service Resources
+
+| Resource | Purpose |
+| :--- | :--- |
+| **Documentation** | Complete guides, API reference, tutorials |
+| **API Reference** | `/docs/api-reference/` — every function, type, interface |
+| **Examples** | `/docs/developers/examples/` — copy-paste starters |
+| **Cookbook** | `/docs/developers/cookbook/` — common patterns |
+| **Troubleshooting** | `/docs/developers/troubleshooting/` — known issues |
+| **FAQ** | `/docs/project/faq` and `/docs/developers/faq` |
+| **Changelog** | `/docs/api-reference/changelog` — every change |
+
+## Commercial Support (Planned for 2027)
+
+### Support Tiers (Design)
+
+| Tier | Availability | Response | Includes | Target Launch |
+| :--- | :--- | :--- | :--- | :--- |
+| **Standard** | Business hours (Mon–Fri, 9–5 UTC) | 24h initial | Triage, workaround, upgrade guidance, security advisories | 2027-H1 |
+| **Professional** | 24/7 | 4h initial | Dedicated Slack, quarterly reviews, proactive notifications, root cause analysis | 2027-H2 |
+| **Premium** | 24/7 | 1h initial | Named TAM, custom runbooks, joint roadmap planning, on-site option | 2028 |
+
+### What Commercial Support Covers
+- **Production incidents** — Browser crashes, registry downtime, module failures.
+- **Upgrade assistance** — Migration planning, testing, rollback support.
+- **Configuration review** — Policy, registry, identity, observability.
+- **Security advisories** — Early notification, patch coordination.
+- **Compliance evidence** — Questionnaire completion, artifact provision.
+
+### What Commercial Support Does NOT Cover
+- **Custom development** — Use [Professional Services](/docs/project/professional-services).
+- **Third-party infrastructure** — Your Kubernetes, cloud, network.
+- **Application code** — Your modules, integrations (consulting available separately).
+- **Training** — Separate [Training](/docs/project/professional-services#training--enablement) offerings.
+
+## Choosing the right support level
+
+| Your Situation | Recommended |
+| :--- | :--- |
+| **Evaluating Orivon** | Community + Documentation |
+| **POC / Pilot** | Community + Documentation + Discord |
+| **Production (non-critical)** | Community + Commercial Standard (when available) |
+| **Production (business-critical)** | Commercial Professional/Premium (when available) |
+| **Regulated environment** | Commercial + [Professional Services](/docs/project/professional-services) for compliance |
+| **Air-gapped / Custom** | Commercial Premium + Professional Services |
+
+## Getting help effectively
+
+### Before asking
+1. **Search documentation** — Most questions answered here.
+2. **Search GitHub Issues/Discussions** — Someone may have asked.
+3. **Check Troubleshooting** — `/docs/developers/troubleshooting/`
+4. **Check Changelog** — Your issue may be fixed in newer version.
+
+### When asking
+| Include | Why |
+| :--- | :--- |
+| **Orivon version** | `orivon --version` or `About` dialog |
+| **Platform** | OS, architecture, browser/runtime |
+| **Reproduction steps** | Minimal, complete, verifiable |
+| **Expected vs. actual** | Clear description of the gap |
+| **Logs / errors** | Relevant excerpts (redact secrets) |
+| **What you tried** | Avoid duplicate suggestions |
+
+### Good issue example
+> **Title:** Module load fails with "capability denied" on v1.2.1 Linux
+>
+> **Version:** orivon-runtime 1.2.1, orivon-browser 1.2.1
+> **Platform:** Ubuntu 24.04, x86_64
+> **Steps:**
+> 1. `orivon module install orivon://verified/crypto@1.0.0`
+> 2. `orivon run --module crypto`
+> 3. Error: `CapabilityDenied: network:https not granted`
+> **Expected:** Module should have network:https in manifest
+> **Actual:** Manifest shows capability, but runtime denies
+> **Logs:** [paste relevant runtime logs]
+> **Tried:** Reinstall, check policy, verify signature — all valid
+
+## Escalation paths
+
+| Situation | Path |
+| :--- | :--- |
+| **Critical production down** | GitHub Issue (label `critical`) + Discord `#urgent` + security@ if security |
+| **Security vulnerability** | **Only** security@orivon.dev (see [Responsible Disclosure](/docs/contributors/responsible-disclosure)) |
+| **Governance dispute** | [Decision Making](/docs/community/decision-making#appeals) |
+| **Code of Conduct** | Community WG (see [Code of Conduct](/docs/contributors/code-of-conduct)) |
+| **Commercial support issue** | Dedicated Slack channel (when subscribed) |
+
+## Support policy highlights
+
+- **No private support for free tier** — All help is public (discussions, forum, Discord).
+- **No SLA without contract** — Community support is best-effort.
+- **Security issues are private** — Never report security issues publicly.
+- **LTS versions get priority** — Security fixes backported per [Version Support](/docs/project/version-support).
+- **Upstream first** — Fixes go to `main` branch first, then backported.
+
+## Future: Support Portal (Planned)
+
+| Feature | Target |
+| :--- | :--- |
+| **Ticket portal** | 2027-H1 (Standard tier+) |
+| **Knowledge base** | 2027-H1 (integrated with docs) |
+| **Health dashboard** | 2027-H1 (per-customer) |
+| **API for integrations** | 2027-H2 (ServiceNow, Jira, PagerDuty) |
+
+<Callout type="success" title="Community support is remarkably effective">
+  The Orivon community includes the engineers who built the platform. Most
+  technical questions get expert answers within hours on Discord or Discussions.
+  For production-critical needs, commercial support is coming in 2027.
+</Callout>
+
+**Related:** [Support Policy](/docs/project/support-policy) · [Service Level Objectives](/docs/project/slos) · [Documentation](/docs/developers/overview) · [Community](/docs/community/community) · [Responsible Disclosure](/docs/contributors/responsible-disclosure)

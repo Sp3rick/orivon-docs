@@ -1,0 +1,206 @@
+---
+title: "Project Structure"
+description: "How the Orivon project is organized: repositories, documentation, standards, SDKs, and supporting projects — with diagrams showing relationships."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["project", "structure", "repositories", "architecture"]
+keywords: "orivon project structure, repositories, documentation, standards, SDKs, project organization"
+---
+
+This page explains how the Orivon project is organized at the repository and
+project level: the code repositories, documentation, standards, SDKs, and
+supporting infrastructure — and how they relate to each other.
+
+## High-level structure
+
+<Flow>
+  <DiagramNode title="Orivon Project" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Platform Repositories" description="Runtime, Browser, Core, SDK, Modules" />
+  <FlowArrowDown />
+  <DiagramNode title="Standards & Specifications" description="Module Format, Capability Model, Naming, Identity, Web3 Score" />
+  <FlowArrowDown />
+  <DiagramNode title="Documentation" description="This site: Introduction, Ecosystem, Technical Design, Standards, API Reference, Research, Community, Project, Developer Docs, Contributor Guide" />
+  <FlowArrowDown />
+  <DiagramNode title="Infrastructure" description="CI/CD, Release Automation, Package Registry, Docs Site, Forum, Discord" />
+  <FlowArrowDown />
+  <DiagramNode title="Governance" description="TSC, Working Groups, Maintainers, Foundation (Planned)" />
+</Flow>
+
+## Repository organization
+
+All code repositories live under the `OrivonBrowser` GitHub organization (or
+equivalent). The repository topology:
+
+<CardGrid columns={2}>
+  <Card title="Core Platform" to="https://github.com/OrivonBrowser">
+    <strong>orivon-runtime</strong> — WebAssembly runtime, capability sandbox, module loader<br/>
+    <strong>orivon-browser</strong> — Browser application, rendering, UI<br/>
+    <strong>orivon-core</strong> — Shared libraries: networking, storage, identity, permissions<br/>
+    <strong>orivon-modules</strong> — Official module registry and standard modules
+  </Card>
+  <Card title="Developer Tools" to="https://github.com/OrivonBrowser">
+    <strong>orivon-sdk-ts</strong> — TypeScript SDK<br/>
+    <strong>orivon-sdk-rs</strong> — Rust SDK<br/>
+    <strong>orivon-cli</strong> — Command-line interface<br/>
+    <strong>orivon-templates</strong> — Project scaffolding templates
+  </Card>
+  <Card title="Standards & Docs" to="https://github.com/OrivonBrowser">
+    <strong>orivon-standards</strong> — Specification source (Markdown/AsciiDoc)<br/>
+    <strong>orivon-docs</strong> — This documentation site (Astro/React)<br/>
+    <strong>orivon-research</strong> — Whitepapers, architecture papers, design docs
+  </Card>
+  <Card title="Infrastructure" to="https://github.com/OrivonBrowser">
+    <strong>orivon-ci</strong> — Shared CI/CD pipelines, build configs<br/>
+    <strong>orivon-release</strong> — Release automation, signing, publishing<br/>
+    <strong>orivon-registry</strong> — Package/module registry implementation<br/>
+    <strong>orivon-infra</strong> — Terraform, Kubernetes, monitoring configs
+  </Card>
+  <Card title="Ecosystem" to="https://github.com/OrivonBrowser">
+    <strong>orivon-ecosystem</strong> — Project directory, showcase, grants admin<br/>
+    <strong>orivon-community</strong> — Meetup kits, event templates, swag<br/>
+    <strong>orivon-brand</strong> — Brand assets, logos, templates
+  </Card>
+  <Card title="Governance" to="https://github.com/OrivonBrowser">
+    <strong>orivon-governance</strong> — Charters, policies, election tools, meeting minutes<br/>
+    <strong>orivon-foundation</strong> — Foundation docs, bylaws, financial reports (planned)
+  </Card>
+</CardGrid>
+
+<Callout type="note" title="Repository list is illustrative">
+  Exact repository names and organization may vary. The authoritative list is
+  in the [governance repository](https://github.com/OrivonBrowser/orivon-governance).
+</Callout>
+
+## Documentation structure
+
+This documentation site (`orivon-docs`) is organized into **levels** — each a
+major section with its own navigation group:
+
+| Level | Directory | Status | Description |
+| --- | --- | --- | --- |
+| 1 | `introduction/` | Live | What is Orivon, why it exists, vision, architecture overview |
+| 2 | `ecosystem/` | Live | Browser, runtime, core, modules, SDK, wallet, identity, naming, Web3 Score, security, networking, storage, governance |
+| 3 | `technical-design/` | Live | Architecture, browser/runtime/core/module architecture, core systems, platform, internals |
+| 4 | `standards/` | Live | Overview, authoring, registry, compliance, roadmap |
+| 5 | `api-reference/` | Live | All APIs: runtime, core, browser, module, application, wallet, identity, storage, networking, DNS, permissions, security, events, interfaces, classes, functions, methods, objects, enums, types, formats, status, tooling, resources |
+| 6 | `research/` | Live | 39 publications: whitepapers, design docs, architecture papers, research areas, future tech, experimental |
+| 7 | `community/` | Live | 39 pages: overview, mission, community, governance, maintainers, WGs, TSC, decision-making, roadmaps, philosophy, recognition, showcase, events, meetups, hackathons, grants, sponsors, partners, ecosystem, media, brand, social, newsletter, FAQ |
+| 8 | `project/` | Live | **This level** — Organization, leadership, core team, maintainers, advisors, structure, releases, trust, compliance, enterprise, support, partnerships, funding, brand, resources |
+| 9 | `developers/` | Live | Getting started, setup, guides, APIs, platform, engineering, resources |
+| 10 | `contributors/` | Live | Overview, getting started, community, contributing, quality, security, resources |
+
+<Diagram caption="Documentation levels flow from concept to contribution">
+  <Flow column>
+    <DiagramNode accent>1. Introduction</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>2. Ecosystem</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>3. Technical Design</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>4. Standards</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>5. API Reference</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>6. Research</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>7. Community</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>8. Project</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>9. Developers</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>10. Contributors</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Standards organization
+
+Standards are maintained in the `orivon-standards` repository and published
+to this site under the **Standards & Specifications** level.
+
+| Standard | Repository | Status | Spec Level |
+| --- | --- | --- | --- |
+| Module Format | `orivon-standards` | Accepted v1.0 | Core |
+| Capability Model | `orivon-standards` | Accepted v1.0 | Core |
+| Naming System | `orivon-standards` | Accepted v1.0 | Core |
+| Identity (DID) | `orivon-standards` | Accepted v1.0 | Core |
+| Web3 Score | `orivon-standards` | Accepted v1.0 | Feature |
+| Security Model | `orivon-standards` | Accepted v1.0 | Core |
+| Networking Protocols | `orivon-standards` | Draft v0.9 | Platform |
+| Storage Protocols | `orivon-standards` | Draft v0.9 | Platform |
+
+See [Specification Registry](/docs/standards/specification-registry) for the
+authoritative list with versions and links.
+
+## SDK organization
+
+| SDK | Repository | Language | Status |
+| --- | --- | --- | --- |
+| **orivon-sdk-ts** | `orivon-sdk-ts` | TypeScript | v1.x stable |
+| **orivon-sdk-rs** | `orivon-sdk-rs` | Rust | v1.x stable |
+| **orivon-cli** | `orivon-cli` | TypeScript/Rust | v1.x stable |
+
+SDKs are versioned independently but aligned with platform releases. See
+[API Reference](/docs/api-reference/overview) for the generated API docs.
+
+## Supporting projects
+
+| Project | Purpose | Repository |
+| --- | --- | --- |
+| **Package Registry** | Module discovery, publishing, resolution | `orivon-registry` |
+| **Documentation Site** | This site (Astro + React + MDX) | `orivon-docs` |
+| **Community Forum** | Discussions, RFCs, governance | `orivon-forum` (Discourse) |
+| **Chat** | Real-time coordination | Discord (managed) |
+| **CI/CD** | Build, test, release automation | `orivon-ci`, `orivon-release` |
+| **Monitoring** | Observability, alerting, status page | `orivon-infra` |
+
+## Dependency graph (simplified)
+
+<Flow>
+  <DiagramNode title="orivon-runtime" accent description="WASM runtime, sandbox" />
+  <FlowArrowDown />
+  <DiagramNode title="orivon-core" description="Networking, storage, identity, permissions" />
+  <FlowArrowDown />
+  <DiagramNode title="orivon-browser" description="Rendering, UI, platform integration" />
+  <FlowArrowDown />
+  <DiagramNode title="orivon-sdk-ts / orivon-sdk-rs" description="Developer APIs" />
+  <FlowArrowDown />
+  <DiagramNode title="orivon-cli" description="Scaffolding, build, deploy" />
+  <FlowArrowDown />
+  <DiagramNode title="orivon-modules" description="Standard modules, registry" />
+</Flow>
+
+## Cross-cutting concerns
+
+| Concern | Owner | Implementation |
+| --- | --- | --- |
+| **Security** | Security WG + Area Maintainer | Threat models, audits, disclosure, crypto review |
+| **Accessibility** | Accessibility Maintainer | WCAG 2.1 AA compliance, browser + docs |
+| **Internationalization** | Translation Leads | Docs + UI localization (planned) |
+| **Performance** | Runtime + Browser Teams | Benchmarks in CI, regression detection |
+| **Supply Chain** | Infrastructure Team | Dependency scanning, SBOM, signing, provenance |
+| **Documentation** | Documentation WG | Site, guides, API reference, research library |
+
+## Getting the code
+
+```bash
+# Clone the main platform repositories
+gh repo clone OrivonBrowser/orivon-runtime
+gh repo clone OrivonBrowser/orivon-browser
+gh repo clone OrivonBrowser/orivon-core
+gh repo clone OrivonBrowser/orivon-sdk-ts
+
+# Or clone the monorepo starter (if available)
+gh repo clone OrivonBrowser/orivon-monorepo
+```
+
+<Callout type="success" title="Structure serves the mission">
+  The repository and project structure is designed to enable parallel work,
+  clear ownership, and community contribution. If the structure creates
+  friction, the community can propose changes through the
+  [governance process](/docs/community/governance).
+</Callout>
+
+**Related:** [Organization](/docs/project/organization) · [Leadership](/docs/project/leadership) · [Maintainers](/docs/project/maintainers) · [Standards](/docs/standards/overview) · [API Reference](/docs/api-reference/overview)

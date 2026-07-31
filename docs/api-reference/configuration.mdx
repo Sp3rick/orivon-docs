@@ -1,0 +1,116 @@
+---
+title: "Configuration"
+description: "Reference for the runtime configuration format used by Orivon packages: schema, defaults and precedence."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 25
+tags: ["api-reference", "configuration"]
+keywords: "configuration, config file, configuration format, orivon.config, config schema, defaults, precedence, config overrides"
+---
+
+Configuration is authored in the package directory as `orivon.config.yaml`
+(JSON is also accepted). The runtime loads it before `activate()` and exposes
+the resolved values through the `Config` facade.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Location and loading
+
+The runtime searches, in order:
+
+1. `orivon.config.yaml`
+2. `orivon.config.json`
+3. `config/` directory containing either format
+
+Exactly one location may exist. More than one is an error:
+`ERR_INVALID_ARGUMENT`.
+
+## Schema
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | — | Package identifier. Required. |
+| `version` | `Version` | — | Package version. Required. |
+| `type` | `"module" \| "application"` | `"module"` | Package type. |
+| `entry` | `string` | `"index.js"` | Entry point. |
+| `runtime` | `string` | `"latest"` | Runtime requirement. |
+| `apiVersion` | `Version` | — | API version the package targets. Required. |
+| `permissions` | `PermissionDescriptor[]` | `[]` | Maximum capabilities. |
+| `window` | `WindowConfig` | `{}` | Window defaults. |
+| `environment` | `Record<string, string>` | `{}` | Env defaults. |
+| `settings` | `Record<string, Json>` | `{}` | Package-defined settings. |
+
+### `WindowConfig`
+
+| Field | Type | Default |
+| --- | --- | --- |
+| `title` | `string` | Package name. |
+| `width` | `number` | `1024` |
+| `height` | `number` | `768` |
+| `minWidth` | `number` | `320` |
+| `minHeight` | `number` | `240` |
+| `state` | `WindowState` | `Normal` |
+
+## Example
+
+```yaml
+name: example.wallet
+version: 1.2.0
+type: application
+entry: dist/index.js
+apiVersion: 1.0.0
+permissions:
+  - name: wallet.read
+  - name: wallet.sign
+    scope: transactions
+environment:
+  NODE_ENV: production
+window:
+  width: 1280
+  height: 800
+  state: Maximized
+settings:
+  theme: dark
+```
+
+## Precedence
+
+Resolution order, lowest to highest:
+
+1. Built-in defaults.
+2. `environment` from configuration.
+3. Environment variables (`ORIVON_<KEY>` mapped to the keys above).
+4. CLI overrides (`--config` path).
+
+See [Environment Variables](/docs/api-reference/environment-variables) for the
+full variable reference.
+
+## Reading configuration
+
+```ts
+const cfg = app.config;
+console.log(cfg.get('settings.theme'));   // 'dark'
+console.log(cfg.get('window.width'));     // 1280
+console.log(cfg.all());                   // resolved config object
+```
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `get(path)` | `Json \| undefined` | Dot-path lookup. |
+| `all()` | `Record<string, Json>` | Full resolved config. |
+| `onChange(handler)` | `() => void` | Subscribe to overrides applied at runtime. |
+
+## Validation
+
+- Unknown top-level fields are an error.
+- Unknown permission names are ignored with a `module:error` report; they are
+  never granted.
+- Type mismatches reject loading with `ERR_INVALID_ARGUMENT`.
+
+<Note title="No secrets">
+  Configuration is not a secret store. Use the
+  [Security API](/docs/api-reference/security-api) keychain for credentials;
+  configuration is shipped with the package and is readable by any process.
+</Note>
+
+**Related:** [Manifest Format](/docs/api-reference/manifest-format) · [Environment Variables](/docs/api-reference/environment-variables) · [Runtime API](/docs/api-reference/runtime-api)

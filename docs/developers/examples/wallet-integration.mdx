@@ -1,0 +1,121 @@
+---
+title: "Example: Wallet Integration"
+description: "A module that signs messages and submits transactions through the wallet APIs, with permissions, flow and explanation."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 29.2
+tags: ["developers", "examples"]
+keywords: "wallet example, wallet integration, signing, transactions"
+---
+
+This example shows how a module works with the user's wallet: requesting the
+permission, signing a message, and submitting a transaction. It is the shape
+of every payment and authorization flow.
+
+## Project structure
+
+```text
+wallet-integration/
+  orivon.toml
+  src/
+    index.ts
+```
+
+## The manifest
+
+The module needs two wallet capabilities:
+
+```toml
+[package]
+name = "wallet-integration"
+version = "0.1.0"
+description = "Signs messages and sends transactions"
+
+[interface]
+methods = ["signMessage", "sendPayment"]
+
+[permissions]
+wallet = ["sign", "send"]
+```
+
+The `wallet` permissions cover signing and sending. They are requested
+narrowly: this module can sign and send, and nothing else.
+
+<Callout type="success" title="Principle">
+  Request the narrowest permissions your feature needs. A review reads the
+  manifest as a promise of what your code will do. See
+  [Permissions](/docs/developers/permissions).
+</Callout>
+
+## The implementation
+
+`src/index.ts` uses the wallet service:
+
+```ts
+export async function signMessage(input: {message: string}) {
+  return app.wallet.sign(input.message, {from: input.account});
+}
+
+export async function sendPayment(input: {to: string; value: string}) {
+  return app.wallet.send({to: input.to, value: input.value, data: '0x'});
+}
+```
+
+## The flow
+
+<Diagram caption="A wallet operation moves through the permission gate.">
+  <Flow column>
+    <DiagramNode accent>Module calls app.wallet.*</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Permission check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>User confirmation in the wallet</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Signature or transaction</DiagramNode>
+  </Flow>
+</Diagram>
+
+The wallet prompts the user before signing or sending. Your module should
+handle the user declining:
+
+```ts
+export async function sendPayment(input: {to: string; value: string}) {
+  try {
+    return await app.wallet.send({to: input.to, value: input.value, data: '0x'});
+  } catch (error) {
+    if (error.code === 'user_canceled') {
+      return {status: 'canceled'};
+    }
+    throw error;
+  }
+}
+```
+
+## Running it
+
+```sh
+orivon build
+orivon run --call wallet-integration signMessage '{"account":"alice","message":"hello"}'
+```
+
+The runtime routes the call to the wallet, the user confirms, and the
+signature comes back in the response.
+
+## What this example teaches
+
+- Privileged operations live behind permissions and user confirmation.
+- Wallet calls can fail with `user_canceled`; handle it.
+- The module never holds keys; the wallet does.
+
+<Callout type="info" title="Next">
+  The [identity example](/docs/developers/examples/identity-example) shows how
+  the wallet and identity work together for verification. The
+  [wallet tutorial](/docs/developers/tutorials/building-a-wallet) builds a
+  full wallet flow step by step.
+</Callout>
+
+## Related pages
+
+- [Wallet APIs](/docs/developers/wallet-apis): the full surface.
+- [Permissions](/docs/developers/permissions): how grants work.
+- [Examples](/docs/developers/examples): the example index.

@@ -1,0 +1,151 @@
+---
+title: "Module API"
+description: "Reference for the Module API: module lifecycle, dynamic loading, messaging and permission requests for modules."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["api-reference", "module-api"]
+keywords: "module api, module lifecycle, load module, unload module, messaging, permission request, module manifest"
+---
+
+The Module API governs how modules are loaded, activated, messaged and granted
+permissions at runtime. Modules are the extension unit of the platform; their
+lifecycle is defined by the manifest and driven by the [Runtime API](/docs/api-reference/runtime-api)
+lifecycle hooks.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: ModuleFacade
+
+### `module.list()`
+
+Lists modules visible to the calling package.
+
+**Returns:** `Promise<ModuleInfo[]>`
+
+### `module.info(id)`
+
+Returns the module record and live state for one module.
+
+**Returns:** `Promise<ModuleInfo>`
+
+**Throws:** `ERR_MODULE_NOT_FOUND`
+
+### `module.load(id, options?)`
+
+Loads a module dynamically. Static module dependencies declared in the
+manifest load automatically; use this for optional or lazy dependencies.
+
+```ts
+const info = await app.module.load('com.example.stats', {autoActivate: true});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier of the module. |
+| `options.autoActivate` | `boolean \| undefined` | Activate immediately after load. Default `false`. |
+
+**Returns:** `Promise<ModuleInfo>`
+
+**Throws:** `ERR_MODULE_NOT_FOUND` · `ERR_MODULE_INCOMPATIBLE` · `ERR_PERMISSION_DENIED`
+
+### `module.unload(id)`
+
+Unloads a module and runs its `deactivate` hook.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_MODULE_NOT_FOUND`
+
+### `module.activate(id)` / `module.deactivate(id)`
+
+Activates or deactivates an already-loaded module.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_INVALID_STATE` if the module is not loaded.
+
+### `module.requestPermissions(descriptors)`
+
+Requests grants on behalf of the module. See [Permissions API](/docs/api-reference/permissions-api)
+for the descriptor grammar.
+
+```ts
+const result = await app.module.requestPermissions([
+  {name: 'storage.read', scope: 'cache'},
+]);
+```
+
+**Returns:** `Promise<GrantResult>`
+
+### `module.send(target, message, options?)`
+
+Sends a message to another module. Alias for
+[`app.postMessage`](/docs/api-reference/runtime-api#apppostmessagetarget-message-options).
+
+**Returns:** `Promise<void>`
+
+### `module.onMessage(handler)`
+
+Registers the inbound-message handler. One handler per package.
+
+**Returns:** `() => void`
+
+## Module lifecycle
+
+A module passes through the following states:
+
+| State | Entered when | Hooks called |
+| --- | --- | --- |
+| `loaded` | Manifest verified, sandbox ready | — |
+| `activating` | `activate` requested | — |
+| `active` | `activate()` resolves | `activate` |
+| `deactivating` | `deactivate` requested | — |
+| `unloaded` | `deactivate()` resolves | `deactivate` |
+
+```ts
+export function activate() {
+  // called when the module becomes active
+}
+
+export function deactivate() {
+  // called before the module is unloaded
+}
+```
+
+## Manifest contract
+
+The manifest declares module metadata, dependencies and grants:
+
+```yaml
+name: "com.example.stats"
+version: "1.2.0"
+apiVersion: "1.0"
+type: "module"
+permissions:
+  - { name: "storage.read", scope: "cache" }
+```
+
+The full grammar is documented in [Manifest Format](/docs/api-reference/manifest-format).
+
+## Types
+
+### `ModuleInfo`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier. |
+| `version` | `string` | Package version. |
+| `type` | `"module" \| "application"` | Package kind. |
+| `state` | `ModuleState` | See lifecycle table above. |
+| `grants` | `Grant[]` | Grants currently held. |
+
+## Module events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `module:activated` | `ModuleInfo` | Module reached `active`. |
+| `module:deactivated` | `{id, reason}` | Module left `active`. |
+| `module:error` | `{id, error}` | Module reported an uncaught error. |
+
+**Related:** [Runtime API](/docs/api-reference/runtime-api) · [Core API](/docs/api-reference/core-api) · [Manifest Format](/docs/api-reference/manifest-format) · [Permissions API](/docs/api-reference/permissions-api)

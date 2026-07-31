@@ -1,0 +1,118 @@
+---
+title: "Communication Layer"
+description: "In-depth paper on the Orivon communication layer: message passing, request/response, publish/subscribe, and cross-boundary transport."
+readingTime: 26
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["research", "architecture-paper", "communication-layer"]
+keywords: "communication layer, message passing, request/response, publish/subscribe, envelopes, IPC, module messaging"
+---
+
+*Orivon Research Group · Protocol Research · Version 1.0 · Published 2026-06-18 · Status: Published*
+
+## Overview
+
+The communication layer is the platform's nervous system: it carries messages
+between modules, between modules and services, and across process boundaries.
+It is designed so that communication is explicit, safe, and observable — there
+is no hidden or ambient communication anywhere in the platform.
+
+## Design goals
+
+| Goal | Meaning |
+| --- | --- |
+| Explicit | Communication requires an addressable endpoint and a capability. |
+| Safe | Payloads are validated; no shared memory between peers. |
+| Observable | All traffic is auditable. |
+| Uniform | One envelope model across processes and modules. |
+| Reliable | Delivery guarantees are explicit and documented. |
+
+## Envelope model
+
+Every message is an envelope:
+
+| Field | Purpose |
+| --- | --- |
+| `from`, `to` | Identifiers of sender and receiver. |
+| `id` | Correlation identifier. |
+| `type` | Message discriminator. |
+| `message` | JSON-serializable payload. |
+| `timestamp` | Ordering information. |
+| `reply` | Optional reply channel. |
+
+### Delivery guarantees
+
+| Guarantee | Level |
+| --- | --- |
+| In-order per (from, to, domain) | Default. |
+| At-least-once with dedup | For service calls. |
+| At-most-once | For fire-and-forget notifications. |
+| Exactly-once | Not provided; modeled as idempotent handlers. |
+
+## Patterns
+
+### Message passing
+
+One-way async delivery. Used for notifications and telemetry.
+
+### Request/response
+
+Correlated request and reply envelopes. Used for service calls with timeouts
+and retries.
+
+### Publish/subscribe
+
+Broadcast within a domain. Subscribers opt in; publishers never know their
+audience. Used for events (see the [Events reference](/docs/api-reference/events)).
+
+## Cross-boundary transport
+
+| Boundary | Transport |
+| --- | --- |
+| In-instance | In-process queues. |
+| Module ↔ host | Capability-gated host calls. |
+| Module ↔ module | Runtime-mediated envelopes. |
+| Process ↔ process | IPC, envelope-framed. |
+| Device ↔ device | Networking layer (see [Networking Layer](/docs/research/networking-layer)). |
+
+The same envelope model is used at every boundary, so routing and auditing
+apply uniformly.
+
+## Routing
+
+```
+sender → router → (policy + capability checks) → recipient
+                      │
+                      └── audit log
+```
+
+| Property | Design |
+| --- | --- |
+| Addressability | Modules, services, and devices have names. |
+| Policy | Capability and policy checks happen at the router. |
+| Dead letters | Undeliverable messages are quarantined. |
+| Backpressure | Flow control on bounded queues. |
+
+## Security considerations
+
+- No peer can address another without an appropriate capability.
+- Payloads are validated against schemas.
+- The router is the enforcement point; it cannot be bypassed.
+- All cross-boundary traffic is logged for audit.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Latency | Zero-copy framing within a process. |
+| Throughput | Batched, multiplexed transports. |
+| Backpressure | Bounded queues with explicit overflow behavior. |
+| Overhead | Message size limits and compression for large payloads. |
+
+## Open questions
+
+- End-to-end encryption of module-to-module messages at scale.
+- Delivery ordering under multi-device sync.
+- Backpressure semantics across process boundaries.
+
+**Related:** [Communication Bus](/docs/technical-design/communication-bus) · [Events](/docs/api-reference/events) · [Networking Layer](/docs/research/networking-layer)

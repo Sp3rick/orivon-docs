@@ -1,0 +1,242 @@
+---
+title: "Brand Guidelines"
+description: "Orivon brand guidelines: logo usage, spacing, typography, color usage, iconography, voice and tone."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 37
+tags: ["project", "brand guidelines", "logo", "colors", "typography", "voice"]
+keywords: "brand guidelines, logo usage, spacing, typography, color usage, iconography, voice and tone"
+---
+
+These guidelines ensure Orivon looks and sounds consistent across every
+touchpoint — from documentation to swag to partner integrations.
+
+## Logo
+
+### Primary logo
+The **Orivon wordmark + symbol** is the primary logo. It represents the
+union of technology (symbol) and identity (wordmark).
+
+### Logo variations
+
+| Variation | Use Case | Example |
+| :--- | :--- | :--- |
+| **Full color** | Light backgrounds (default) | ![Full color](/logos/orivon-full-color.svg) |
+| **White** | Dark/colored backgrounds | ![White](/logos/orivon-white.svg) |
+| **Black** | Single-color print, fax | ![Black](/logos/orivon-black.svg) |
+| **Wordmark only** | Tight horizontal spaces | ![Wordmark](/logos/orivon-wordmark.svg) |
+| **Symbol only** | App icons, favicons, small spaces | ![Symbol](/logos/orivon-symbol.svg) |
+| **Stacked** | Vertical layouts, square formats | ![Stacked](/logos/orivon-stacked.svg) |
+
+### Clear space
+Maintain clear space equal to the **height of the "O" in the wordmark** on
+all sides. No other elements (text, images, other logos) may intrude.
+
+```
+    ┌─────────────────────────────┐
+    │  ↑ clear space (O height)   │
+    │  ┌─────────────────────┐    │
+    │  │  ORIVON  ◆          │    │
+    │  └─────────────────────┘    │
+    │  ↓ clear space (O height)   │
+    └─────────────────────────────┘
+```
+
+### Minimum size
+
+| Format | Minimum Width |
+| :--- | :--- |
+| **Digital** | 24px (symbol), 120px (wordmark), 160px (full) |
+| **Print** | 10mm (symbol), 50mm (wordmark), 60mm (full) |
+
+### Do not
+
+<CheckList
+  items={[
+    'Stretch, skew, or rotate the logo.',
+    'Change the logo colors (use provided variants only).',
+    'Add drop shadows, glows, outlines, or effects.',
+    'Place on busy backgrounds without clear space.',
+    'Use the symbol separated from wordmark (except as noted).',
+    'Recreate the logo in a different font.',
+    'Alter the symbol-to-wordmark proportion.',
+    'Place competing logos closer than 2x clear space.',
+  ]}
+/>
+
+## Colors
+
+### Primary palette
+
+| Color | Hex | RGB | HSL | Use |
+| :--- | :--- | :--- | :--- | :--- |
+| **Orivon Blue** | `#0066FF` | 0, 102, 255 | 220, 100%, 50% | Primary actions, links, focus, brand |
+| **Deep Navy** | `#0A0F1A` | 10, 15, 26 | 228, 44%, 7% | Backgrounds, primary text, headers |
+| **Pure White** | `#FFFFFF` | 255, 255, 255 | 0, 0%, 100% | Text on dark, light backgrounds |
+
+### Secondary palette
+
+| Color | Hex | RGB | Use |
+| :--- | :--- | :--- | :--- |
+| **Electric Cyan** | `#00D4FF` | 0, 212, 255 | Accents, highlights, code, links hover |
+| **Signal Green** | `#00E676` | 0, 230, 118 | Success, positive signals, online |
+| **Warning Amber** | `#FFB300` | 255, 179, 0 | Warnings, attention, pending |
+| **Alert Red** | `#FF3D00` | 255, 61, 0 | Errors, critical actions, offline |
+
+### Neutral palette
+
+| Color | Hex | Use |
+| :--- | :--- | :--- |
+| **Gray 900** | `#111827` | Body text (light mode) |
+| **Gray 700** | `#374151` | Secondary text, muted |
+| **Gray 500** | `#6B7280` | Placeholders, disabled |
+| **Gray 300** | `#D1D5DB` | Borders, dividers (light) |
+| **Gray 100** | `#F3F4F6` | Light backgrounds, cards |
+| **Gray 50** | `#F9FAFB` | Page backgrounds (light) |
+
+### Dark mode equivalents
+
+| Light | Dark | Use |
+| :--- | :--- | :--- |
+| Pure White `#FFFFFF` | Deep Navy `#0A0F1A` | Background |
+| Deep Navy `#0A0F1A` | Pure White `#FFFFFF` | Primary text |
+| Gray 100 `#F3F4F6` | Gray 900 `#111827` | Card backgrounds |
+| Gray 300 `#D1D5DB` | Gray 700 `#374151` | Borders |
+| Gray 900 `#111827` | Gray 100 `#F3F4F6` | Secondary text |
+
+### Accessibility
+All primary color combinations meet **WCAG 2.1 AA** contrast ratios:
+- Orivon Blue on White: 4.8:1 ✅
+- White on Orivon Blue: 4.8:1 ✅
+- Electric Cyan on Deep Navy: 7.2:1 ✅
+- Signal Green on Deep Navy: 8.1:1 ✅
+- Warning Amber on Deep Navy: 12.4:1 ✅
+- Alert Red on White: 5.1:1 ✅
+
+**Do not invent new pairings.** Use the defined combinations.
+
+## Typography
+
+### Primary typeface: **Inter**
+Inter is used for all UI, headings, body text, and code (monospace variant).
+
+Available at: [Google Fonts](https://fonts.google.com/specimen/Inter) | [GitHub](https://github.com/rsms/inter)
+
+### Font weights
+| Weight | Value | Use |
+| :--- | :--- | :--- |
+| **Regular** | 400 | Body text, UI labels |
+| **Medium** | 500 | Emphasis, subheadings |
+| **SemiBold** | 600 | Headlines, buttons |
+| **Bold** | 700 | Hero text, major headings |
+
+### Type scale
+
+| Element | Size | Weight | Line Height | Letter Spacing |
+| :--- | :--- | :--- | :--- | :--- |
+| **H1** | 48px / 3rem | 700 | 1.1 | -0.02em |
+| **H2** | 36px / 2.25rem | 600 | 1.2 | -0.01em |
+| **H3** | 28px / 1.75rem | 600 | 1.3 | 0 |
+| **H4** | 22px / 1.375rem | 600 | 1.4 | 0 |
+| **Body Large** | 18px / 1.125rem | 400 | 1.6 | 0 |
+| **Body** | 16px / 1rem | 400 | 1.6 | 0 |
+| **Body Small** | 14px / 0.875rem | 400 | 1.5 | 0 |
+| **Caption** | 12px / 0.75rem | 400 | 1.5 | 0.01em |
+| **Code** | 14px / 0.875rem | 400 | 1.5 | 0 |
+| **Button** | 14px / 0.875rem | 600 | 1 | 0.02em |
+
+### Monospace: **Inter Mono** (or JetBrains Mono as fallback)
+Used for code blocks, inline code, technical labels, CLI output.
+
+## Iconography
+
+### Icon set: **Lucide** (outlined)
+- **Style:** Outlined, 2px stroke weight
+- **Corner radius:** 2px (consistent with Lucide design)
+- **Sizes:** 16px, 20px, 24px, 32px (scale proportionally)
+
+**Do not mix icon sets.** Use Lucide exclusively for product UI and documentation.
+
+### Custom Orivon icons
+| Icon | Use | Source |
+| :--- | :--- | :--- |
+| **Orivon Symbol** | Logo mark, favicon, app icon | [Logos & Assets](/docs/project/logos-assets) |
+| **Module Badge** | Module type indicators | [Logos & Assets](/docs/project/logos-assets) |
+| **Capability Icons** | Permission visualizations | [Logos & Assets](/docs/project/logos-assets) |
+
+## Voice and Tone
+
+### Voice attributes (always)
+
+| Attribute | Description | Example |
+| :--- | :--- | :--- |
+| **Clear** | Simple words, short sentences, define jargon | "The runtime loads modules" not "Modules are loaded by the runtime" |
+| **Confident** | We know what we're building; no hedging | "Orivon provides..." not "Orivon aims to provide..." |
+| **Inclusive** | "You," "we," "the community" — not "the user" | "You can build modules" not "Developers can build modules" |
+| **Honest** | Acknowledge trade-offs, risks, what's not built | "This is experimental" not "This works perfectly" |
+
+### Tone by context
+
+| Context | Tone | Example |
+| :--- | :--- | :--- |
+| **Documentation** | Instructional, precise, encouraging | "Create your first module in 5 minutes" |
+| **Blog/Announcements** | Celebratory, transparent, forward-looking | "We're excited to share v1.2..." |
+| **Social Media** | Conversational, community-focused, visual | "Just shipped: hot reload for modules! 🚀" |
+| **Security/Incidents** | Calm, factual, action-oriented | "We've identified and fixed a sandbox issue..." |
+| **Governance** | Neutral, procedural, respectful | "The TSC has ratified the charter..." |
+| **Error Messages** | Helpful, specific, actionable | "Module 'crypto' requires network:https capability" |
+
+### Writing principles
+
+<CheckList
+  items={[
+    'Use active voice. "The runtime loads modules" not "Modules are loaded by the runtime."',
+    'Define technical terms on first use.',
+    'Prefer "you" over "the user" or "the developer."',
+    'Show, don\'t just tell — use code, diagrams, screenshots.',
+    'Acknowledge uncertainty: "This is experimental" beats "This works."',
+    'One idea per paragraph. One task per section.',
+    'Use Oxford comma. Use contractions (it\'s, you\'re, we\'ll).',
+    'Avoid: "leverage," "utilize," "facilitate," "enable" — use "use," "help," "let."',
+  ]}
+/>
+
+## Co-branding (Partners)
+
+For joint materials with partners:
+
+| Rule | Specification |
+| :--- | :--- |
+| **Placement** | Orivon logo left, partner logo right |
+| **Sizing** | Equal visual weight (same height) |
+| **Spacing** | Minimum 2x clear space between logos |
+| **Alignment** | Horizontal center or baseline |
+| **Background** | Sufficient contrast for both logos |
+| **Approval** | Partner uses their approved logo only |
+
+## Merchandise Guidelines
+
+| Item | Specification |
+| :--- | :--- |
+| **T-shirts** | Logo centered chest (100mm wide) or small left-chest (40mm) + back |
+| **Stickers** | Die-cut symbol (50mm, 75mm, 100mm) or full logo (100mm wide) |
+| **Laptop Stickers** | Symbol 35mm, 50mm; Full logo 80mm wide |
+| **Swag Colors** | Deep Navy base, Orivon Blue accent, White ink |
+| **Quality** | Screen print (textiles), vinyl die-cut (stickers) |
+| **Commercial Sale** | Requires written permission (trademarks@orivon.dev) |
+
+## Digital Templates
+
+Available in [Logos & Assets](/docs/project/logos-assets):
+- **Presentation:** Figma, PowerPoint, Google Slides
+- **Social:** Twitter/X header, LinkedIn banner, GitHub social, Discord banner
+- **Docs:** MDX components, callout styles, code block theme
+- **Email:** Newsletter template (HTML + MJML)
+
+<Callout type="success" title="Guidelines are guardrails, not walls">
+  They exist so we can move fast without breaking identity. If you need an
+  exception, ask brand@orivon.dev — we'd rather say yes with guidance than
+  have you guess.
+</Callout>
+
+**Related:** [Brand Center](/docs/project/brand-center) · [Logos & Assets](/docs/project/logos-assets) · [Media Kit](/docs/project/media-kit) · [Press Resources](/docs/project/press-resources)

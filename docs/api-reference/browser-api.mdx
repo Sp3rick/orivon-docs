@@ -1,0 +1,158 @@
+---
+title: "Browser API"
+description: "Reference for the Browser API: tabs, navigation, popups, bookmarks and history."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["api-reference", "browser-api"]
+keywords: "browser api, tabs, navigate, popup, bookmarks, history, tab events, close tab"
+---
+
+The Browser API controls the browsing surface: tabs, navigation, popups,
+bookmarks and history. It is reached through the `app.browser` facade and is
+available only when the package holds a `browser.*` grant.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: BrowserFacade
+
+### `browser.openTab(url, options?)`
+
+Opens a new tab and returns a handle to it.
+
+```ts
+const tab = await app.browser.openTab('https://docs.orivonstack.com', {
+  active: true,
+  private: false,
+});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | Absolute URL to open. |
+| `options.active` | `boolean \| undefined` | Focus the new tab. Default `true`. |
+| `options.private` | `boolean \| undefined` | Open in a private/incognito context. Default `false`. |
+
+**Returns:** `Promise<Tab>`
+
+**Throws:** `ERR_INVALID_URL` · `ERR_PERMISSION_DENIED`
+
+### `browser.listTabs()`
+
+Lists all tabs in the current window.
+
+**Returns:** `Promise<Tab[]>`
+
+### `browser.getCurrentTab()`
+
+Returns the focused tab.
+
+**Returns:** `Promise<Tab>`
+
+**Throws:** `ERR_NOT_FOUND` if no tab is focused.
+
+### `browser.navigate(tabId, url)`
+
+Navigates an existing tab.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_NOT_FOUND` · `ERR_INVALID_URL`
+
+### `browser.closeTab(tabId)`
+
+Closes a tab. The tab handle becomes invalid.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_NOT_FOUND`
+
+### `browser.createPopup(url, options?)`
+
+Opens a popup window. Popups must be initiated by a user gesture.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | Popup URL. |
+| `options.width` | `number \| undefined` | Width in CSS pixels. Default `420`. |
+| `options.height` | `number \| undefined` | Height in CSS pixels. Default `560`. |
+| `options.position` | `{x, y} \| undefined` | Screen position. |
+
+**Returns:** `Promise<Tab>`
+
+**Throws:** `ERR_BLOCKED_BY_POLICY` if no user gesture is detected.
+
+### `browser.closePopup()`
+
+Closes the popup opened by this package, if any.
+
+**Returns:** `Promise<void>`
+
+## Bookmarks
+
+### `browser.bookmarks.list()`
+
+**Returns:** `Promise<Bookmark[]>`
+
+### `browser.bookmarks.create({title, url, parentId?})`
+
+**Returns:** `Promise<Bookmark>`
+
+### `browser.bookmarks.remove(id)`
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_NOT_FOUND`
+
+## History
+
+### `browser.history.search(query, options?)`
+
+Searches browsing history.
+
+```ts
+const page = await app.browser.history.search('orivon', {limit: 20});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `query` | `string` | Substring matched against titles and URLs. |
+| `options.limit` | `number \| undefined` | Max results. Default `50`. |
+| `options.since` | `number \| undefined` | Epoch milliseconds lower bound. |
+
+**Returns:** `Promise<Page<HistoryEntry>>`
+
+**Throws:** `ERR_PERMISSION_DENIED` (history requires a dedicated grant).
+
+## Types
+
+### `Tab`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Stable tab identifier. |
+| `url` | `string` | Current URL. |
+| `title` | `string` | Current document title. |
+| `active` | `boolean` | Whether the tab is focused. |
+| `private` | `boolean` | Whether the tab is in a private context. |
+| `createdAt` | `number` | Epoch milliseconds of creation. |
+
+### `Bookmark`
+
+`{id, title, url, parentId?, createdAt}`
+
+### `HistoryEntry`
+
+`{id, url, title, visitedAt, visitCount}`
+
+## Browser events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `tab:created` | `Tab` | A tab was created. |
+| `tab:updated` | `Tab` | A tab's URL or title changed. |
+| `tab:closed` | `{id}` | A tab was closed. |
+| `tab:activated` | `{id}` | A tab gained focus. |
+| `history:changed` | `HistoryEntry` | An entry was added. |
+
+**Related:** [Networking API](/docs/api-reference/networking-api) · [Permissions API](/docs/api-reference/permissions-api) · [Error Codes](/docs/api-reference/error-codes)

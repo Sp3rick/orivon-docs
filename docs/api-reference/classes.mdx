@@ -1,0 +1,115 @@
+---
+title: "Classes"
+description: "Reference for the classes instantiable or provided by the Orivon APIs: constructors, properties, methods and events."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["api-reference", "classes"]
+keywords: "classes, class reference, Orivon, constructors, methods, properties, inheritance, instance"
+---
+
+This page indexes the classes a package can construct or is handed by the
+runtime. The defining API page documents each class in full.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Class index
+
+| Class | Provided by | Constructible | Purpose |
+| --- | --- | --- | --- |
+| `Orivon` | runtime | yes* | Root object of every package. |
+| `Module` | [Module API](/docs/api-reference/module-api) | no | Base for module packages. |
+| `Application` | [Application API](/docs/api-reference/application-api) | no | Base for application packages. |
+| `EventEmitter` | runtime | yes | Event subscription primitive. |
+| `Logger` | runtime | no | Leveled logging. |
+| `OrivonError` | runtime | yes | Error type for all failures. |
+| `Collection` | [Storage API](/docs/api-reference/storage-api) | no | Document collection handle. |
+| `HttpClient` | [Networking API](/docs/api-reference/networking-api) | yes | Typed HTTP client. |
+| `Connection` | [Networking API](/docs/api-reference/networking-api) | no | Streaming connection. |
+
+\* `Orivon` is normally provided by the runtime. Direct construction is only
+valid in tests.
+
+## `Orivon`
+
+Root object. See [Runtime API](/docs/api-reference/runtime-api).
+
+| Member | Type | Notes |
+| --- | --- | --- |
+| `constructor(options?)` | — | Bootstrap only, or tests. |
+| `on` / `once` / `off` | methods | Event subscription. |
+| `activate` / `deactivate` | methods | Lifecycle signals. |
+| `postMessage` / `onMessage` / `sendRequest` | methods | Messaging. |
+| `log` | `Logger` | Logging. |
+| `version`, `platform` | properties | Metadata. |
+| `core`, `browser`, `wallet`, … | properties | Facades (grant-gated). |
+
+## `EventEmitter`
+
+The subscription primitive backing `app.on`.
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `on(event, listener)` | `() => void` | Subscribe; returns unsubscribe. |
+| `once(event, listener)` | `() => void` | Subscribe for one delivery. |
+| `off(event, listener)` | `void` | Unsubscribe. |
+| `emit(event, payload)` | `void` | Emit (runtime-internal use). |
+| `listenerCount(event)` | `number` | Current listener count. |
+
+## `Logger`
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `debug(domain, message, context?)` | `void` | Debug level. |
+| `info(domain, message, context?)` | `void` | Info level. |
+| `warn(domain, message, context?)` | `void` | Warning level. |
+| `error(domain, message, context?)` | `void` | Error level. |
+| `setLevel(level)` | `void` | Runtime level override. |
+
+## `OrivonError`
+
+Every rejected operation produces an `OrivonError`.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `code` | `string` | Stable identifier, e.g. `ERR_TIMEOUT`. |
+| `message` | `string` | Human-readable detail. |
+| `details` | `Record<string, unknown> \| undefined` | Optional structured context. |
+| `cause` | `unknown \| undefined` | Underlying error, if any. |
+
+```ts
+function isOrivonError(value: unknown): value is OrivonError {
+  return value instanceof OrivonError && typeof value.code === 'string';
+}
+```
+
+## `HttpClient`
+
+A typed HTTP client bound to a base URL.
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `constructor(baseUrl, options?)` | — | Bind to a base URL. |
+| `get(path, options?)` | `Promise<HttpResponse>` | GET. |
+| `post(path, body?, options?)` | `Promise<HttpResponse>` | POST with JSON or bytes. |
+| `put` / `delete` / `patch` | `Promise<HttpResponse>` | Corresponding methods. |
+| `close()` | `void` | Release pooled resources. |
+
+```ts
+const client = new HttpClient('https://api.example.com');
+const res = await client.get('/v1/status');
+```
+
+## Inheritance
+
+- `Application extends Module` — an application is a module that owns windows
+  and a user-visible lifecycle.
+- All facades expose the same subscription methods as `EventEmitter` but are
+  not required to inherit from it; treat them as event sources.
+
+<Note title="Instantiation">
+  Classes marked "not constructible" are created by the runtime and handed to
+  the package. Constructing them directly throws `ERR_INVALID_ARGUMENT`.
+</Note>
+
+**Related:** [Objects](/docs/api-reference/objects) · [Methods](/docs/api-reference/methods) · [Interfaces](/docs/api-reference/interfaces)

@@ -1,0 +1,218 @@
+---
+title: "Module Loader"
+description: "The internal design of the Orivon module loader: how a content addressed package becomes a running, sandboxed module."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["technical-design", "module-loader"]
+keywords: "module loader, load plan, verify, compile, instantiate, context, activation, lockfile"
+---
+
+The module loader is the component that turns a module package into a running,
+sandboxed module. It sits between the module service, which decides what is
+allowed to load, and the runtime, which executes it. This page documents the
+loading pipeline end to end.
+
+## The loader's place
+
+The loader is deliberately thin on decisions and heavy on verification. It does
+not decide whether a module may load; that is the module service's job. The
+loader guarantees that whatever it loads is exactly what was verified.
+
+<Diagram caption="The loader receives a verified load plan and produces a running context.">
+  <Flow column>
+    <DiagramNode dim>Module service (decides)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Load plan</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Module loader (verifies)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Runtime context (running)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The load plan
+
+The loader never sees an unverified request. It receives a **load plan** built
+by the module service:
+
+```json
+{
+  "module_id": "dev.orivon.storage-bridge",
+  "version": "1.4.2",
+  "address": "QmXv2J7u...",
+  "entry": "dist/entry.wasm",
+  "runtime": "wasm32-wasip1",
+  "manifest_hash": "QmHp3k...",
+  "lockfile": {
+    "dev.orivon.common-utils": "QmR8y..."
+  },
+  "capabilities": ["storage.read", "storage.write"],
+  "scope": "module:dev.orivon.storage-bridge"
+}
+```
+
+The load plan is signed by the module service. The loader verifies the plan
+before honoring it, so a compromised runtime cannot fabricate a load.
+
+## The loading pipeline
+
+Loading is a strict sequence. Each step must succeed before the next begins.
+
+<Steps>
+  <Step title="Verify plan">
+    The loader verifies the signed load plan and checks its own policy context.
+  </Step>
+  <Step title="Fetch">
+    The package bytes are fetched from the storage service by content address.
+  </Step>
+  <Step title="Check hash">
+    The fetched bytes are hashed and compared to the address. Mismatch means
+    stop.
+  </Step>
+  <Step title="Verify signature">
+    The package signature is checked against the author identity.
+  </Step>
+  <Step title="Resolve deps">
+    Transitive dependencies are resolved from the lockfile, each verified by
+    its own content address.
+  </Step>
+  <Step title="Compile">
+    The entry bundle is compiled in a fresh engine instance.
+  </Step>
+  <Step title="Create context">
+    A sandboxed execution context is created with the load plan's
+    capabilities.
+  </Step>
+  <Step title="Instantiate and activate">
+    The module is instantiated and the activate hook is called.
+  </Step>
+</Steps>
+
+<Diagram caption="The loading pipeline. Any failed check terminates the load.">
+  <Flow column>
+    <DiagramNode>Verify plan</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Fetch + hash check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Signature check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Resolve dependencies</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Compile + context</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Activate</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Verification before execution
+
+Two properties hold across the whole pipeline:
+
+1. **Verification precedes execution.** Nothing in the package runs before
+   every check passes. There is no "run first, trust later" path.
+2. **Verification is against the address.** The content address is the
+   contract. If the bytes do not match the address, the package is not the
+   package that was reviewed.
+
+This is what makes the [Security Architecture](/docs/technical-design/security-architecture)
+supply chain guarantees real: a module cannot be swapped, edited or downgraded
+without the address changing.
+
+## Context creation
+
+The execution context is the runtime side of a load. Creating it binds three
+things together:
+
+<CardGrid columns={2}>
+  <Card title="Identity">
+    The context's caller identity is the module id, so every API call is
+    attributed to the module.
+  </Card>
+  <Card title="Capabilities">
+    The context holds the granted capabilities from the load plan.
+  </Card>
+  <Card title="Isolation">
+    The context is its own engine instance, isolated from other contexts.
+  </Card>
+</CardGrid>
+
+A context cannot hold capabilities it was not granted, and it cannot call APIs
+outside its capabilities. See [Sandbox](/docs/technical-design/sandbox) and
+[Permission System](/docs/technical-design/permission-system).
+
+## Compilation and caching
+
+Compilation is expensive, so the loader caches compiled artifacts by content
+address:
+
+- The same content address always produces the same compiled artifact, so the
+  cache is always valid.
+- Cached artifacts are integrity checked before reuse, not trusted blindly.
+- The cache lives in the storage service and is shared across processes.
+
+This is the mechanism behind fast module re-activation described in
+[Module Architecture](/docs/technical-design/module-architecture).
+
+## Activation
+
+Activation hands the module its API handles and starts its lifecycle:
+
+```rust
+let context = loader.create_context(&load_plan).await?;
+let handle = context.activate().await?; // calls on-activate
+```
+
+If activation fails, the context is dropped and the module returns to the
+registered state. Activation is described as part of the
+[Application Lifecycle](/docs/technical-design/application-lifecycle).
+
+## Failure handling
+
+Every step in the pipeline can fail, and the loader distinguishes two classes:
+
+| Failure | Handling |
+| --- | --- |
+| **Verification failure** | The load is aborted; the package is never executed and the event is logged |
+| **Transient failure** | Fetch or compile failure; retried with backoff up to a limit |
+
+Verification failures are never retried. Transient failures are retried with a
+bounded budget, after which they are reported through the
+[Error Handling](/docs/technical-design/error-handling) pipeline.
+
+## Security notes
+
+- The load plan is signed, so a compromised runtime cannot forge a load.
+- Every byte is verified against the content address before execution.
+- Verification failures are permanent: a tampered package is never executed.
+
+## Performance notes
+
+- Compilation is cached by content address, so hot loads skip the compiler.
+- The loader runs off the main thread; loading never blocks UI.
+- Dependency resolution is parallelized where the lockfile allows.
+
+<Callout type="success" title="Best practice">
+  Treat the loader as the only path into a runtime context. Do not add
+  alternate entry points, because every check in this pipeline exists to be the
+  single gate.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include streaming verification for large modules,
+  differential fetch to avoid downloading unchanged chunks, and a shared
+  compilation cache across devices. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Module Architecture](/docs/technical-design/module-architecture): the package model the loader consumes.
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): where loaded modules execute.
+- [Security Architecture](/docs/technical-design/security-architecture): the verification model.
+
+## Further reading
+
+- [Communication Bus](/docs/technical-design/communication-bus): how the loader coordinates.
+- [Storage Engine](/docs/technical-design/storage-engine): where packages live.
+- [Testing Architecture](/docs/technical-design/testing-architecture): how loading is tested.

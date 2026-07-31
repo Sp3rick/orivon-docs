@@ -1,0 +1,118 @@
+---
+title: "Key Features"
+description: "Every major Orivon capability at a glance: Runtime, Core, Browser, Modules, Wallets, DNS, Web3 Score, Security, Sandbox and Standards."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["introduction", "features"]
+keywords: "features, runtime, core, browser, modules, wallets, dns, web3 score, security, sandbox, standards"
+---
+
+The Orivon platform is built from a small set of capabilities. Each one is designed as an
+open standard and described in detail on its own page. Below is a quick tour. Select any
+card to jump to the corresponding documentation.
+
+## Core capabilities
+
+<CardGrid columns={2}>
+  <FeatureCard
+    icon={<Boxes size={18} strokeWidth={1.7} />}
+    title="Runtime"
+    to="/docs/technical-design/orivon-runtime"
+  >
+    Executes applications consistently across devices. This is the layer that makes software
+    run like a website while behaving like native apps.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Cpu size={18} strokeWidth={1.7} />}
+    title="Core"
+    to="/docs/technical-design/orivon-core"
+  >
+    The neutral foundation shared by every implementation: services for identity, value,
+    storage and connectivity.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Globe size={18} strokeWidth={1.7} />}
+    title="Browser"
+    to="/docs/implementation/orivon-browser"
+  >
+    The user-facing interface: a modern web browser with Web3 capabilities built in, not
+    bolted on.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Puzzle size={18} strokeWidth={1.7} />}
+    title="Modules"
+    to="/docs/implementation/modules-system"
+  >
+    A modular system that lets the community add capabilities without forking the browser
+    or rewriting the core.
+  </FeatureCard>
+</CardGrid>
+
+## Web3 capabilities
+
+<CardGrid columns={2}>
+  <FeatureCard
+    icon={<Wallet size={18} strokeWidth={1.7} />}
+    title="Wallets"
+    to="/docs/implementation/wallet-system"
+  >
+    Native, sandboxed wallet support for accounts, keys and transactions, with a consistent,
+    secure consent flow.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Network size={18} strokeWidth={1.7} />}
+    title="Decentralized DNS"
+    to="/docs/implementation/decentralized-dns"
+  >
+    Decentralized names resolve natively, like domains, with no extensions and no manual setup.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Gauge size={18} strokeWidth={1.7} />}
+    title="Web3 Score"
+    to="/docs/implementation/web3-score"
+  >
+    An at-a-glance safety signal that helps users judge dApps and contracts before they
+    commit, built for non-experts.
+  </FeatureCard>
+  <FeatureCard
+    icon={<FileCode2 size={18} strokeWidth={1.7} />}
+    title="Standards"
+    to="/docs/technical-design/orivon-standards"
+  >
+    Public specifications that define how all of the above interoperate. They are the heart
+    of the project.
+  </FeatureCard>
+</CardGrid>
+
+## Trust & safety
+
+<CardGrid columns={2}>
+  <FeatureCard
+    icon={<Shield size={18} strokeWidth={1.7} />}
+    title="Security"
+    to="/docs/implementation/security-sandbox"
+  >
+    Security built into the platform: permissions that make sense, verification the user
+    can trust, and privacy-preserving defaults.
+  </FeatureCard>
+  <FeatureCard
+    icon={<Lock size={18} strokeWidth={1.7} />}
+    title="Sandbox"
+    to="/docs/implementation/security-sandbox"
+  >
+    Applications and modules run in isolation. They get exactly the access they asked for,
+    and nothing more.
+  </FeatureCard>
+</CardGrid>
+
+<Callout type="info" title="Where are these defined?">
+  The pages linked above are part of the upcoming levels (Implementation and Technical
+  Design). While they are being written, each link opens a "Coming soon" page. The design
+  and navigation are already in place.
+</Callout>
+
+<Callout type="success" title="Next">
+  See [Architecture Overview](/docs/introduction/architecture-overview) for how these
+  capabilities relate to one another.
+</Callout>

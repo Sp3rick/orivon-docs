@@ -1,0 +1,142 @@
+---
+title: "Localization"
+description: "Help translate Orivon: what to translate, how to join the localization effort, and the standards for translation quality."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 22
+tags: ["contributors", "community"]
+keywords: "localization, translation, translating documentation, translating interfaces"
+---
+
+Orivon is for the whole web, which means the whole world. Localization makes
+the platform usable in languages beyond English, and it is a contribution
+that does not require coding. This page explains how to help.
+
+<Callout type="success" title="Anyone can localize">
+  If you speak a language besides English, you are qualified. The tools are
+  simple and the community helps with consistency.
+</Callout>
+
+## What can be translated
+
+<CardGrid columns={2}>
+  <Card title="Documentation">
+    The documentation site, guides and examples.
+  </Card>
+  <Card title="Interfaces">
+    The browser, CLI and SDK user facing strings.
+  </Card>
+  <Card title="Release notes">
+    Announcements and changelogs for your language.
+  </Card>
+  <Card title="Community materials">
+    Guides and outreach for local communities.
+  </Card>
+</CardGrid>
+
+## The localization workflow
+
+<Steps>
+  <Step title="Choose a language">
+    Join an existing language team or propose a new one.
+  </Step>
+  <Step title="Translate">
+    Work on the files assigned to your language.
+  </Step>
+  <Step title="Review">
+    Another native speaker reviews your translation.
+  </Step>
+  <Step title="Ship">
+    The translation merges and reaches users.
+  </Step>
+</Steps>
+
+## Translation quality
+
+Good translation is more than word substitution:
+
+<CheckList
+  items={[
+    'Translate meaning, not word order.',
+    'Keep technical terms consistent with the glossary.',
+    'Preserve the tone: clear, plain, respectful.',
+    'Keep code, commands and placeholders untranslated.',
+    'Match UI strings exactly where they appear.',
+  ]}
+/>
+
+<Callout type="warning" title="Do not translate code">
+  Code blocks, commands, package names and configuration values stay as they
+  are. The prose around them is what translates. Translating a command
+  breaks it.
+</Callout>
+
+## Glossaries
+
+Each language maintains a glossary for consistency:
+
+| Term | Why it is consistent |
+| --- | --- |
+| Module | Always the same word |
+| Sandbox | One agreed term |
+| Permission | One agreed term |
+
+If the glossary does not cover a term, propose an addition with your team
+before translating it in many places.
+
+## Starting a new language
+
+To start a new language:
+
+<CheckList
+  items={[
+    'Check that a team does not already exist for it.',
+    'Propose the language in the community discussions.',
+    'Find at least one more native speaker to review.',
+    'Set up the language directory and start with a few pages.',
+    'Grow scope as the team grows.',
+  ]}
+/>
+
+A language with one translator and no reviewer produces translations no one
+checks. Teams need both.
+
+## The culture side
+
+Localization is also about context:
+
+<CardGrid columns={2}>
+  <Card title="Dialects and regions">
+    One language can vary by region; agree on the target audience.
+  </Card>
+  <Card title="Familiarity">
+    Terminology evolves; keep the glossary current.
+  </Card>
+  <Card title="Right to left">
+    Right to left languages need layout support, reported and tested.
+  </Card>
+  <Card title="Accessibility">
+    Translated UI must still meet the accessibility standards.
+  </Card>
+</CardGrid>
+
+## Getting recognition
+
+Localization is real, credited work:
+
+- Translators are acknowledged in the
+  [recognition](/docs/contributors/recognition) program.
+- Significant translation appears in release notes.
+- Language teams grow into maintainer roles.
+
+<Callout type="info" title="Start small">
+  Begin with one page you use yourself. A correct, complete page beats a
+  partial translation of ten. Quality spreads from the pages that are done
+  well.
+</Callout>
+
+## Related pages
+
+- [Documentation Contributions](/docs/contributors/documentation-contributions): the docs contribution process.
+- [Community Guidelines](/docs/contributors/community-guidelines): working with your team.
+- [Recognition](/docs/contributors/recognition): how translators are acknowledged.

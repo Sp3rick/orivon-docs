@@ -1,0 +1,168 @@
+---
+title: "Project Structure"
+description: "The recommended Orivon project layout: every file and directory the scaffold creates, what it is for, and how to keep it organized."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["developers", "project-structure"]
+keywords: "project structure, directory layout, manifest, src, tests, dist"
+---
+
+Every Orivon project has the same skeleton. Understanding the layout means
+never wondering where a file belongs. This page documents the scaffold from
+top to bottom.
+
+## The layout
+
+A freshly scaffolded project looks like this:
+
+```text
+hello-world/
+  orivon.toml
+  src/
+    main.ts
+  tests/
+    main.test.ts
+  config/
+    defaults.toml
+  assets/
+  dist/
+  .gitignore
+  README.md
+```
+
+<Callout type="note" title="Language templates">
+  The scaffold adapts to the language you choose. A Rust module produces
+  `src/lib.rs` and a `Cargo.toml`; the TypeScript template produces the files
+  above. The directory roles are the same either way.
+</Callout>
+
+## The manifest
+
+**`orivon.toml`** is the root of every project. It declares identity, version,
+permissions, hooks and dependencies, and it is the file the CLI and the
+runtime trust first.
+
+```toml
+[package]
+name = "hello-world"
+version = "0.1.0"
+authors = ["you.orivon"]
+
+[permissions]
+allow = []
+
+[dependencies]
+```
+
+The manifest is documented in full on the
+[Module Manifest](/docs/developers/module-manifest) page.
+
+## Source
+
+**`src/`** holds your code. The entry file is defined by the manifest or by
+convention:
+
+| File | Role |
+| --- | --- |
+| `src/main.ts` | Application entry point |
+| `src/lib.rs` | Module entry point (Rust templates) |
+| `src/` (other files) | Additional modules, imported by the entry point |
+
+Keep source flat when possible. Nest folders only when the project genuinely
+grows past a handful of files.
+
+## Tests
+
+**`tests/`** holds your test suite. The scaffold creates one test file per
+artifact:
+
+```text
+tests/
+  main.test.ts
+```
+
+Tests are ordinary code that imports your project and asserts behavior. The
+conventions are documented in [Testing](/docs/developers/testing). A passing
+test suite is what `orivon test` checks.
+
+## Configuration
+
+**`config/`** holds default configuration shipped with the project:
+
+```text
+config/
+  defaults.toml
+```
+
+Defaults define what the project does when the user changes nothing. Runtime
+overrides sit above them. See [Configuration](/docs/developers/configuration)
+for the full precedence model.
+
+## Assets
+
+**`assets/`** holds non code files that ship with the package: icons,
+localization, static data. Everything here is included in the built package
+and is read only at runtime.
+
+## Build output
+
+**`dist/`** is where builds land. It is generated, not edited:
+
+```text
+dist/
+  hello-world.omp
+```
+
+The `.omp` file is the Orivon module package. It is what `orivon publish`
+uploads and what the runtime loads. `dist/` is always gitignored.
+
+## Supporting files
+
+| File | Purpose |
+| --- | --- |
+| `.gitignore` | Excludes `dist/`, caches and editor files |
+| `README.md` | Describes the project for humans |
+| `LICENSE` | The project license (optional but recommended) |
+
+The `.gitignore` also excludes the dependency cache so it never reaches source
+control.
+
+## Where dependencies go
+
+Dependencies are resolved into a cache, not into the project tree:
+
+<Diagram caption="Dependencies live in the shared cache, pinned by the manifest.">
+  <Flow column>
+    <DiagramNode accent>orivon.toml [dependencies]</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Resolver reads pins</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Shared content cache</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Verified packages at build time</DiagramNode>
+  </Flow>
+</Diagram>
+
+The cache is shared across projects on your machine. The manifest is the single
+source of truth for what a project depends on.
+
+## Keeping it organized
+
+Practical rules for larger projects:
+
+<CheckList
+  items={[
+    'Keep the manifest small: delegate detail to config and assets.',
+    'One responsibility per source file, named after what it does.',
+    'Test files mirror source files one to one under tests/.',
+    'Never edit dist/; it is replaced on every build.',
+    'Commit the manifest and source, never the cache or the build output.',
+  ]}
+/>
+
+## Related pages
+
+- [Module Manifest](/docs/developers/module-manifest): the file that defines everything.
+- [Creating Your First Project](/docs/developers/creating-your-first-project): the scaffold in detail.
+- [Configuration](/docs/developers/configuration): the config directory.

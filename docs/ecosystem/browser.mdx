@@ -1,0 +1,143 @@
+---
+title: "Browser"
+description: "The user-facing layer of the ecosystem: a browser with wallets, decentralized DNS, sandboxing and the Web3 Score built in."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["ecosystem", "browser", "product"]
+keywords: "browser, web3, wallet, sandbox, DNS, privacy, tabs, user experience"
+---
+
+The Orivon Browser is the product most people will meet first. It is a full
+browser built on the classic web platform, with Web3 capabilities native to the
+experience rather than added as extensions. This page explains what the browser
+is, what it does differently, and why that matters.
+
+## The browser's place in the stack
+
+The browser sits at the top of the stack. It is where security, privacy and
+usability meet, and it is the single point of contact between the user and
+everything else.
+
+<Diagram caption="The browser mediates between the user, applications and networks.">
+  <Flow column>
+    <DiagramNode>User</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Orivon Browser</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Applications</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Networks & services</DiagramNode>
+  </Flow>
+</Diagram>
+
+## What the browser does differently
+
+A classic browser is a window into websites. The Orivon Browser keeps that
+familiar experience and adds four capabilities that are usually delivered by
+plugins, extensions or separate apps:
+
+<CardGrid columns={2}>
+  <Card title="Native wallet">
+    Keys and accounts are part of the browser, not a separate extension. Signing
+    a transaction is as natural as filling in a form. See the
+    [Wallet System](/docs/ecosystem/wallet-system).
+  </Card>
+  <Card title="Decentralized naming">
+    The address bar resolves human readable names through the
+    [Naming System](/docs/ecosystem/naming-system) without a central DNS.
+  </Card>
+  <Card title="Web3 Score">
+    Every site carries a visible trust signal so users can judge what they are
+    about to interact with. See the [Web3 Score](/docs/ecosystem/web3-score).
+  </Card>
+  <Card title="Sandboxing by default">
+    Applications run isolated from each other and from your system, which makes
+    the whole session safer. See the [Security Model](/docs/ecosystem/security-model).
+  </Card>
+</CardGrid>
+
+## A familiar interface
+
+The interface intentionally stays close to what users already know. Tabs,
+bookmarks, a settings page and an address bar behave the way they always have.
+The difference is underneath:
+
+- **The address bar** also resolves decentralized names.
+- **The wallet** lives behind a key shortcut, not a browser store.
+- **The Web3 Score** appears next to the padlock and connection info for every
+  site.
+- **Modules** add capability through the same surface where you manage settings,
+  so power users can customize without ordinary users losing safety.
+
+This matters because onboarding is everything. The web only becomes user owned
+if users can arrive, feel at home, and leave never having to think about
+keys, hashes or nodes.
+
+## Privacy and tracking
+
+The browser treats privacy as a default rather than a feature to enable.
+
+<CheckList
+  items={[
+    'Third party tracking cookies are blocked by default.',
+    'Fingerprinting is reduced at the platform level, not patched site by site.',
+    'Search and DNS lookups avoid central surveillance points.',
+    'Permissions are narrow, and the user is always asked.',
+  ]}
+/>
+
+Because identity is yours, not the browser's, the browser has no reason to
+profile you. That is a structural difference: a platform that makes money from
+attention wants to watch you; a neutral browser has nothing to gain.
+
+## Extending the browser
+
+Users and developers extend the browser through **modules**, not by forking it.
+Modules plug into the [Core](/docs/ecosystem/core) through public interfaces, so
+they are sandboxed, verifiable and removable. A custom download manager, a
+privacy dashboard or a payment helper are all modules. See
+[Modules](/docs/ecosystem/modules) for how that works.
+
+<Callout type="info" title="Did you know?">
+  Because the browser is built on the classic web platform, existing websites
+  and web apps work. The Web3 capabilities are additive. There is no "Web2 vs
+  Web3" wall inside the browser.
+</Callout>
+
+## Who the browser is for
+
+<CardGrid columns={2}>
+  <Card title="Everyday users">
+    A familiar browser that happens to give them ownership of their identity,
+    data and payments.
+  </Card>
+  <Card title="Developers">
+    A predictable runtime and a built in wallet mean web3 applications no longer
+    require a plugin dance to test.
+  </Card>
+  <Card title="Security-conscious people">
+    Sandboxing, visible scores and least privilege permissions reduce the
+    surface an attacker can reach.
+  </Card>
+  <Card title="Privacy advocates">
+    The defaults are private and the incentives are aligned: the browser does
+    not profit from surveillance.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Next">
+  Under the browser sits the [Runtime](/docs/ecosystem/runtime), the engine that
+  makes applications behave like software.
+</Callout>
+
+## Related pages
+
+- [Runtime](/docs/ecosystem/runtime): how the browser's applications actually execute.
+- [Wallet System](/docs/ecosystem/wallet-system): the native wallet experience.
+- [Web3 Score](/docs/ecosystem/web3-score): the trust signal shown for every site.
+
+## Further reading
+
+- [Security Model](/docs/ecosystem/security-model): sandboxing and protection boundaries.
+- [Future Products](/docs/ecosystem/future-products): desktop and cloud runtimes in planning.

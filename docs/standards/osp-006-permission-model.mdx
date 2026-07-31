@@ -1,0 +1,119 @@
+---
+title: "OSP-006: Permission Model"
+description: "Draft specification for the permission model: capabilities, grant flows, scopes, revocation and runtime enforcement."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["standards", "osp-006", "permissions"]
+keywords: "OSP-006, permission model, capabilities, grants, consent, revocation, policy"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Permissions are how untrusted code gets limited, reviewable access to the
+system. This draft defines the capability model, the grant flows, and how
+permissions are enforced.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-006 |
+| Title | Permission Model |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Permissions |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+Access is capability based with a default deny policy. Grants are requested,
+evaluated by the policy broker, and either auto granted, consented or denied.
+Every privileged call is checked against the grants at runtime. The reference
+design is the [Permission System](/docs/technical-design/permission-system)
+page.
+
+## Purpose
+
+The permission model exists so that a module or application can do exactly
+what it declared and nothing else. It turns "trust the module" into "trust the
+granted capabilities", which is reviewable and revocable.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The capability and grant model.',
+    'Grant flows: auto grant, consent required, auto deny.',
+    'Scopes: origin, application, module, profile.',
+    'Temporary and persistent grants.',
+    'Revocation and runtime enforcement.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'The sandbox that makes enforcement mechanical (covered by OSP-013).',
+    'The manifest permissions section (covered by OSP-005).',
+    'The consent UI (covered by the User Experience category).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): the guarantees enforcement relies on.
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): identity scoped grants.
+- [OSP-004 Module System](/docs/standards/osp-004-module-system): modules as grant holders.
+
+## Related specifications
+
+- [OSP-007 Wallet API](/docs/standards/osp-007-wallet-api): the most sensitive granted capability.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): where policy is enforced.
+
+## Example
+
+The policy API as defined by this draft:
+
+```rust
+let decision = policy.check("wallet.sign", scope).await;
+match decision {
+    Grant::Allowed => sign(),
+    Grant::NeedsConsent => present_consent().await,
+    Grant::Denied => return Err(PermissionError::Denied),
+}
+```
+
+The exact API surface and grant types are normative content under review.
+
+## Implementation status
+
+The reference implementation includes the policy broker, scoped grants and
+runtime enforcement in the core layer. The draft tracks the design at 0.1.0.
+No conformance suite has been published yet.
+
+## Future work
+
+- Adaptive consent that learns from user behavior.
+- Policy review tooling for users.
+- Cross device permission sync.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Permission System](/docs/technical-design/permission-system): the reference design.

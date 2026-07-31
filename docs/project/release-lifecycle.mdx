@@ -1,0 +1,192 @@
+---
+title: "Release Lifecycle"
+description: "Orivon release lifecycle: development, preview, beta, release candidate, stable, long-term support, and end-of-life phases."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["project", "releases", "lifecycle", "versions"]
+keywords: "orivon release lifecycle, development releases, preview releases, beta, release candidates, stable, LTS, end of life"
+---
+
+Orivon follows a structured release lifecycle with multiple channels, each
+serving a different audience and stability requirement. This page documents
+the phases, cadence, and policies for each channel.
+
+## Release channels
+
+| Channel | Cadence | Audience | Stability | Use Case |
+| --- | --- | --- | --- | --- |
+| **Nightly** | Every commit (daily) | Early adopters, CI, platform engineers | Experimental | Testing latest changes, catching regressions early |
+| **Preview** | Weekly | Contributors, extension authors | Unstable | Feature validation, API feedback |
+| **Beta** | Every 4–6 weeks | Developers, early enterprise evaluators | Feature-complete, testing | Pre-release testing, compatibility checks |
+| **Release Candidate** | As needed (pre-stable) | Release managers, QA | Near-production | Final validation before stable |
+| **Stable** | Every 8–12 weeks | General users, production deployments | Production-ready | Production use, enterprise deployment |
+| **LTS** | Annual (selected stable) | Enterprise, long-term deployments | Extended support | Environments requiring multi-year stability |
+
+<Flow>
+  <DiagramNode title="Nightly" description="Every commit" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Preview" description="Weekly snapshots" />
+  <FlowArrowDown />
+  <DiagramNode title="Beta" description="Every 4-6 weeks" />
+  <FlowArrowDown />
+  <DiagramNode title="Release Candidate" description="Pre-stable validation" />
+  <FlowArrowDown />
+  <DiagramNode title="Stable" description="Every 8-12 weeks" accent />
+  <FlowArrowDown />
+  <DiagramNode title="LTS" description="Annual selection" />
+</Flow>
+
+## Phase details
+
+### 1. Development (Nightly)
+- **Trigger:** Every successful merge to `main` branch.
+- **Artifacts:** Unsigned binaries, container images, npm packages with `-nightly` suffix.
+- **Testing:** Automated test suite only; no manual QA.
+- **Retention:** Last 30 nightlies kept; older artifacts pruned.
+- **Support:** None. Use at own risk.
+
+### 2. Preview
+- **Trigger:** Weekly (typically Monday) from current `main`.
+- **Artifacts:** Signed binaries, packages with `-preview.N` suffix.
+- **Testing:** Automated test suite + smoke tests.
+- **Purpose:** Early feedback on new APIs and features before Beta.
+- **Support:** Community best-effort in Discord/forum.
+
+### 3. Beta
+- **Cadence:** Every 4–6 weeks (aligned with sprint boundaries).
+- **Branch:** Cut from `main` to `release/vX.Y` branch.
+- **Freeze:** Feature freeze on branch cut; only bug fixes and doc updates.
+- **Artifacts:** Signed binaries, packages with `-beta.N` suffix.
+- **Testing:** Full test suite + integration tests + community testing.
+- **Duration:** 2–3 weeks before RC or stable.
+- **Support:** Active — issues triaged, regressions fixed.
+
+### 4. Release Candidate (RC)
+- **Trigger:** When Beta is deemed stable enough for final validation.
+- **Artifacts:** Signed binaries, packages with `-rc.N` suffix.
+- **Testing:** Full test suite + release-specific test plan + security scan.
+- **Duration:** 1–2 weeks.
+- **Criteria for promotion to Stable:**
+  - Zero critical/high-severity open issues.
+  - All release-blocking tests passing.
+  - Security scan clean.
+  - Documentation updated.
+  - TSC sign-off.
+
+### 5. Stable
+- **Cadence:** Every 8–12 weeks (typically after 1–2 Betas).
+- **Branch:** Tagged from `release/vX.Y` branch; branch becomes maintenance.
+- **Artifacts:** Signed binaries, packages with exact version (e.g., `v1.2.0`).
+- **Testing:** Complete release validation completed in RC phase.
+- **Announcement:** Blog post, newsletter, social channels, GitHub release.
+- **Support:** Full — security fixes, critical bug fixes, documentation updates.
+
+### 6. Long-Term Support (LTS)
+- **Selection:** One Stable release per year designated as LTS (typically Q1 release).
+- **Criteria:** Proven stability, wide adoption, no major architectural changes pending.
+- **Duration:** 24 months of security and critical bug fixes.
+- **Branches:** `lts/vX.Y` maintenance branch.
+- **Updates:** Point releases (e.g., `v1.0.1`, `v1.0.2`) as needed.
+- **Announcement:** Designated at Stable release; communicated in release notes.
+
+| LTS Release | Base Version | Start Date | End Date (Projected) | Status |
+| --- | --- | --- | --- | --- |
+| LTS v1.0 | v1.0.x | 2026-01-10 | 2028-01-10 | Active |
+| LTS v2.0 | v2.0.x | 2027-Q1 (planned) | 2029-Q1 (planned) | Planned |
+
+### 7. End-of-Life (EOL)
+- **Standard releases:** EOL when next Stable release is published (8–12 weeks).
+- **LTS releases:** EOL after 24 months or when next LTS is established.
+- **Notification:** 3 months advance notice in release notes and newsletter.
+- **Post-EOL:** No fixes, no security patches. Users must upgrade.
+- **Archive:** Artifacts remain available in [Release Archive](/docs/project/release-archive).
+
+## Version numbering
+
+Orivon uses **Semantic Versioning (SemVer 2.0)** with the following conventions:
+
+| Component | Meaning |
+| --- | --- |
+| **MAJOR** | Breaking changes to public APIs, module format, or capability model. |
+| **MINOR** | New features, new APIs, new standards (backward-compatible). |
+| **PATCH** | Bug fixes, security fixes, documentation, tooling (no API changes). |
+
+### Pre-release suffixes
+- `-nightly.YYYYMMDD` — Nightly builds.
+- `-preview.N` — Weekly previews.
+- `-beta.N` — Beta releases.
+- `-rc.N` — Release candidates.
+
+### Examples
+| Version | Channel | Meaning |
+| --- | --- | --- |
+| `1.2.0` | Stable | Minor feature release |
+| `1.2.1` | Stable | Patch bugfix release |
+| `1.3.0-beta.1` | Beta | First beta for next minor |
+| `1.3.0-rc.1` | RC | First release candidate |
+| `1.3.0` | Stable | Promoted from RC |
+| `2.0.0` | Stable | Major breaking release |
+| `1.0.5` | LTS | LTS point release |
+
+## Release process
+
+<Steps>
+  <Step title="Branch cut">
+    TSC approves branch cut from `main` to `release/vX.Y`. Feature freeze begins.
+  </Step>
+  <Step title="Beta period">
+    2–3 weeks of Beta releases. Community testing, bug fixing, doc updates.
+  </Step>
+  <Step title="RC decision">
+    Release managers propose RC. TSC confirms criteria met.
+  </Step>
+  <Step title="RC period">
+    1–2 weeks of RC releases. Final validation, security scan, performance check.
+  </Step>
+  <Step title="Stable promotion">
+    TSC votes to promote RC to Stable. Tag created, artifacts signed and published.
+  </Step>
+  <Step title="Announcement">
+    Release notes published, blog post, newsletter, social media.
+  </Step>
+  <Step title="Maintenance">
+    `release/vX.Y` branch receives patches for critical issues until next Stable.
+  </Step>
+</Steps>
+
+## Release artifacts
+
+| Artifact | Platforms | Signing | Verification |
+| --- | --- | --- | --- |
+| **Browser binaries** | Windows, macOS, Linux (x64, ARM64) | Cosign/Sigstore | `cosign verify` + checksums |
+| **Runtime library** | Linux, macOS, Windows | Cosign/Sigstore | `cosign verify` + checksums |
+| **SDK packages** | npm (TypeScript), crates.io (Rust) | npm attestations, cargo sign | Registry verification |
+| **CLI** | Windows, macOS, Linux | Cosign/Sigstore | `cosign verify` + checksums |
+| **Container images** | Docker Hub / GHCR (amd64, arm64) | Cosign/Sigstore | `cosign verify` |
+| **Documentation** | This site (versioned) | Git tags | Git verification |
+
+## Release calendar (2026–2027)
+
+| Quarter | Planned Stable | Planned LTS | Notes |
+| --- | --- | --- | --- |
+| 2026-Q3 | v1.3 | — | Enterprise features, compliance prep |
+| 2026-Q4 | v1.4 | — | Professional services framework |
+| 2027-Q1 | v2.0 | **LTS v2.0** | Major release, first new LTS |
+| 2027-Q2 | v2.1 | — | Post-LTS feature work |
+| 2027-Q3 | v2.2 | — | Ecosystem scale |
+| 2027-Q4 | v2.3 | — | Standards track submissions |
+
+<Callout type="info" title="Dates are targets, not commitments">
+  Release dates are best estimates. Quality and security take precedence over
+  calendar dates. The TSC may adjust the schedule based on release readiness.
+</Callout>
+
+## Related policies
+
+- [Version Support Policy](/docs/project/version-support) — Which versions receive fixes.
+- [Security Policy](/docs/project/security-policy) — Security fix process and disclosure.
+- [Roadmap](/docs/project/roadmap) — Feature planning per release.
+- [Changelog Archive](/docs/project/changelog-archive) — Detailed change history.
+
+**Related:** [Version Support Policy](/docs/project/version-support) · [Roadmap](/docs/project/roadmap) · [Release Archive](/docs/project/release-archive) · [Security Policy](/docs/project/security-policy)

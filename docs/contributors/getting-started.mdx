@@ -1,0 +1,174 @@
+---
+title: "Getting Started"
+description: "Set up your contribution environment: prerequisites, cloning the repository, installing dependencies, running the project and submitting your first contribution."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["contributors", "overview"]
+keywords: "getting started, prerequisites, clone repository, install dependencies, run project, first contribution"
+---
+
+Getting started as a contributor is a short, well-trodden path. This page
+walks you from prerequisites to your first contribution, and points to the
+guides that cover each step in depth.
+
+<Callout type="info" title="Prerequisites">
+  Before you start you need a code editor, a GitHub account, and
+  [Git](https://git-scm.com) installed. The developer environment page lists
+  the recommended tools for Orivon development.
+</Callout>
+
+## Step 1: Set up your environment
+
+<CheckList
+  items={[
+    'Install Git and configure your name and email.',
+    'Install the editor of your choice; the project recommends VS Code.',
+    'Install the Rust toolchain, because the runtime is Rust.',
+    'Install Node.js, because the SDK and docs are TypeScript.',
+    'Install the Orivon CLI for local development.',
+  ]}
+/>
+
+The [Development Environment](/docs/developers/development-environment) page
+has the exact versions and setup steps for each platform.
+
+## Step 2: Clone the repository
+
+Fork the repository on GitHub, then clone your fork:
+
+```sh
+git clone https://github.com/your-username/orivon-docs.git
+cd orivon-docs
+git remote add upstream https://github.com/OrivonBrowser/orivon-docs.git
+```
+
+The `upstream` remote lets you pull the latest changes from the project. See
+[Repository Structure](/docs/contributors/repository-structure) for what is
+inside.
+
+## Step 3: Install dependencies
+
+```sh
+npm install
+```
+
+This installs the documentation site and toolchain dependencies. For the
+runtime repositories, the Rust toolchain fetches its own dependencies on
+first build.
+
+## Step 4: Run the project
+
+```sh
+npm run dev
+```
+
+The documentation site starts locally, and the search index rebuilds as you
+edit. You can also run:
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server with live reload |
+| `npm run build` | Type check and build the production bundle |
+| `npm run preview` | Serve the production build locally |
+
+## Step 5: Read the contribution guides
+
+Before making changes, read the guides that govern the work:
+
+- [Development Workflow](/docs/contributors/development-workflow): forking, branching, PRs.
+- [Coding Standards](/docs/contributors/coding-standards): how code should look.
+- [Documentation Standards](/docs/contributors/documentation-standards): how docs should look.
+- [Issue Guidelines](/docs/contributors/issue-guidelines): how to report and propose.
+
+## Step 6: Find your first task
+
+The best first tasks are labeled and scoped:
+
+<CardGrid columns={2}>
+  <Card title="Good first issues" href="/docs/contributors/good-first-issues">
+    Beginner friendly tasks with explicit scope and mentoring.
+  </Card>
+  <Card title="Documentation fixes">
+    Broken links, unclear prose, missing examples. High value, low risk.
+  </Card>
+  <Card title="Bug reports" href="/docs/contributors/bug-reports">
+    Reproduce an issue and open a clear report, or fix it.
+  </Card>
+  <Card title="Localization" href="/docs/contributors/localization">
+    Translate documentation and interfaces into your language.
+  </Card>
+</CardGrid>
+
+## Step 7: Make your change
+
+Follow the [development workflow](/docs/contributors/development-workflow):
+
+<Steps>
+  <Step title="Branch">
+    Create a descriptive branch from the current development branch.
+  </Step>
+  <Step title="Change">
+    Make your change, small and focused.
+  </Step>
+  <Step title="Test">
+    Run the relevant tests and checks locally.
+  </Step>
+  <Step title="Commit">
+    Commit with a clear message following the repository conventions.
+  </Step>
+</Steps>
+
+## Step 8: Open a pull request
+
+Push your branch and open a pull request with the
+[pull request template](/docs/contributors/templates/pull-request):
+
+```sh
+git push origin your-branch
+```
+
+The template walks you through the required checklist. Then a maintainer
+reviews, asks for changes if needed, and merges when ready. See
+[Pull Requests](/docs/contributors/pull-requests) for the full process.
+
+## The contribution workflow
+
+<Diagram caption="From fork to merged contribution.">
+  <Flow column>
+    <DiagramNode accent>Fork and clone</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Branch and change</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Test locally</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Open a pull request</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Review, merge, ship</DiagramNode>
+  </Flow>
+</Diagram>
+
+<Callout type="success" title="Your first contribution does not have to be code">
+  Documentation edits, design feedback and bug reports are all first-class
+  contributions. Pick the track that plays to your strengths.
+</Callout>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Working on main">
+    Never commit directly to main. Always work on a branch.
+  </Card>
+  <Card title="Big unrequested changes">
+    Discuss significant changes first through an issue, then implement.
+  </Card>
+  <Card title="Skipping local tests">
+    The CI checks run locally too. Run them before opening a PR.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Development Workflow](/docs/contributors/development-workflow): the full process.
+- [Good First Issues](/docs/contributors/good-first-issues): where to start.
+- [Mentorship](/docs/contributors/mentorship): how to get help.

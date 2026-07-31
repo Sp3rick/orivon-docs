@@ -1,0 +1,136 @@
+---
+title: "Contributor Troubleshooting"
+description: "Solutions for common contribution and development problems: setup, Git, builds, tests, reviews and CI."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 30
+tags: ["contributors", "overview"]
+keywords: "contributor troubleshooting, common problems, setup issues, git issues, build failures"
+---
+
+Every contributor hits problems, and most are the same ones. This page lists
+the common contribution problems, their symptoms and their fixes, grouped by
+where they occur.
+
+<Callout type="success" title="Gather evidence first">
+  Include the exact command and full error in any question you ask. The
+  fastest answers come to reports that are reproducible.
+</Callout>
+
+## Setup problems
+
+<Accordion title="The project does not install dependencies">
+  Check the Node and package manager versions against the repository README.
+  Delete the lockfile cache and retry, then check network access to the
+  registry.
+</Accordion>
+
+<Accordion title="The dev server will not start">
+  Check for a port conflict, then read the server output for the real error.
+  See [Getting Started](/docs/contributors/getting-started).
+</Accordion>
+
+<Accordion title="The build fails on my machine but passes in CI">
+  Compare versions: your toolchain may differ from CI's. Update to the
+  repository's expected versions and rebuild.
+</Accordion>
+
+## Git problems
+
+<Accordion title="My fork is behind the project">
+  Sync your fork and rebase your branch on the current development branch.
+  See [Development Workflow](/docs/contributors/development-workflow).
+</Accordion>
+
+<Accordion title="I accidentally committed to main">
+  Move the commit to a branch, then reset main to the upstream state. Do this
+  before pushing if possible.
+</Accordion>
+
+<Accordion title="My pull request has merge conflicts">
+  Rebase on the current development branch and resolve the conflicts
+  carefully, one at a time. Ask for help if a conflict is confusing.
+</Accordion>
+
+<Accordion title="I pushed to the wrong branch">
+  If it has not been merged, reset the branch and push the corrected state.
+  Coordinate before force-pushing a shared branch.
+</Accordion>
+
+## Build and test problems
+
+<Accordion title="Tests pass locally but fail in CI">
+  Look for ordering, environment or version differences. Flaky tests are a
+  real problem; report them rather than rerunning blindly.
+</Accordion>
+
+<Accordion title="A test I did not touch is failing">
+  It may be flaky, or your branch may be missing an expected change. Check
+  the failure and ask in the PR if it does not relate to your work.
+</Accordion>
+
+<Accordion title="The formatter rewrote my whole file">
+  The file was probably not formatted with the repository's formatter.
+  Format the whole file once, then make your change.
+</Accordion>
+
+## Review problems
+
+<Accordion title="My PR has not been reviewed">
+  Maintainers review in order and on their schedule. Commenting to ask for
+  status rarely helps. If a PR is stale for a long time, politely ask in a
+  community channel.
+</Accordion>
+
+<Accordion title="I disagree with a review comment">
+  Respond with your reasoning and evidence. Reviews are discussions. Keep
+  the tone collaborative and the goal the best change.
+</Accordion>
+
+<Accordion title="A reviewer requested changes I do not understand">
+  Ask for clarification on the comment thread. Unclear feedback should be
+  clarified, not guessed at.
+</Accordion>
+
+## CI problems
+
+<Accordion title="CI is failing for a reason unrelated to my change">
+  Note it in the PR and check whether it is a known infrastructure issue.
+  Do not silently rerun; a real infrastructure bug is worth reporting.
+</Accordion>
+
+<Accordion title="CI takes a long time">
+  Large PRs and long-lived branches are slower. Keep PRs small and merged
+  often, which is faster for everyone.
+</Accordion>
+
+## The troubleshooting workflow
+
+When the list does not cover your problem:
+
+<Steps>
+  <Step title="Reproduce">
+    Get the smallest repeatable case.
+  </Step>
+  <Step title="Isolate">
+    Change one variable at a time until the cause is clear.
+  </Step>
+  <Step title="Search">
+    Search the issues and discussions for the error or symptom.
+  </Step>
+  <Step title="Ask">
+    Ask with the exact command, output and what you tried.
+  </Step>
+</Steps>
+
+<Callout type="info" title="Asking well">
+  "Command X failed with this error, here is what I tried" gets answers.
+  "It does not work" cannot be answered. The effort you put into the question
+  is returned in the quality of the answers.
+</Callout>
+
+## Related pages
+
+- [Getting Started](/docs/contributors/getting-started): the setup.
+- [Development Workflow](/docs/contributors/development-workflow): the process.
+- [Contributor FAQ](/docs/contributors/faq): common questions.

@@ -1,0 +1,172 @@
+---
+title: "Security Whitepaper"
+description: "The security paper: threat model, sandbox design, permission system, and supply-chain defenses of the Orivon platform."
+readingTime: 35
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["research", "whitepaper", "security"]
+keywords: "security whitepaper, threat model, sandbox, permissions, supply chain, attack surface, trust"
+---
+
+*Orivon Research Group · Security Research · Version 1.0 · Published 2026-07-29 · Status: Published*
+
+## Abstract
+
+This paper presents the Orivon security model. It states the platform's threat
+assumptions, describes the layered defense that protects users from malicious
+modules and hostile sites, and details the sandbox, the permission system, and
+the supply-chain defenses that make distribution safe. The central claim is
+that Orivon's security rests on *structural guarantees* — mechanisms enforced
+by the platform rather than by user vigilance.
+
+## Background
+
+Security failures in web platforms are overwhelmingly failures of privilege:
+code that runs with more authority than it should. Extension ecosystems are
+the canonical example. The design literature on capability security and
+isolation (from Saltzer and Schroeder to Miller) consistently concludes that
+security holds when *authority is granted explicitly and bounded
+mechanically*.
+
+Orivon applies these conclusions to a full platform. Every untrusted component
+— site renderer, module, extension — is treated as hostile and given the
+minimum authority the task requires.
+
+## Problem Statement
+
+The threat model must cover:
+
+1. **Malicious modules** that attempt to exfiltrate data, spend funds, or
+   damage the platform.
+2. **Compromised modules** — legitimate modules whose code has been
+   subverted after publishing.
+3. **Malicious or compromised sites** that attempt to reach module
+   capabilities or steal identity.
+4. **Supply-chain attacks** in which the module the user installs differs from
+   the module the developer published.
+5. **Insider risk in the toolchain** — a compromised SDK, storefront, or
+   signing key.
+
+## Motivation
+
+User agency is worthless if the platform cannot keep users safe. Orivon's
+promise — run any software, own your identity — is only meaningful if running
+unknown software is *safe by default*. This paper makes the security argument
+explicit so that it can be reviewed, attacked, and improved by the community.
+
+## Architecture
+
+### Trust assumptions
+
+| Assumption | Statement |
+| --- | --- |
+| Host OS and hardware are trusted | The platform protects against software threats, not physical attackers. |
+| The core is trusted | See [Core Whitepaper](/docs/research/core-whitepaper); its surface is minimized. |
+| Modules are untrusted | By default, every module is potentially hostile. |
+| Sites are untrusted | Every site is sandboxed regardless of reputation. |
+| Storefronts are untrusted for code | Signatures, not storefronts, establish artifact integrity. |
+
+### Layered defense
+
+```
+Layer 1  Renderer sandbox         (sites)
+Layer 2  Module sandbox          (WASM instances)
+Layer 3  Capability enforcement  (host interface)
+Layer 4  Permission system       (user consent, grants)
+Layer 5  Supply-chain defenses   (signatures, verification)
+Layer 6  Audit & telemetry       (logs, metrics, monitoring)
+```
+
+### The sandbox
+
+The sandbox is described in full in the [Runtime Whitepaper](/docs/research/runtime-whitepaper).
+Its security-relevant properties:
+
+| Property | Mechanism |
+| --- | --- |
+| Memory isolation | WASM linear memory, bounds-checked. |
+| No ambient authority | All host calls go through capability checks. |
+| System call mediation | Files, network, and processes behind host interfaces. |
+| Instance separation | No cross-module memory access. |
+
+### The permission system
+
+See [Permission System](/docs/research/permission-system) for the full design.
+Key properties:
+
+- Grants are scoped, explicit, revocable, and observable.
+- The grant registry lives in the trusted core.
+- Runtime enforcement is mechanical — modules cannot "ask forgiveness."
+
+### Supply-chain defenses
+
+| Defense | Purpose |
+| --- | --- |
+| Artifact signing | Integrity and origin of published modules. |
+| Manifest verification | Permissions match what was reviewed. |
+| Reproducible builds | Independent verification of the artifact. |
+| Key management | Hardware-backed signing keys, rotation policy. |
+| Dependency pinning | Verified, versioned dependency graphs. |
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Default-deny permissions | The safe default; grants are additive. |
+| Sandbox over privilege separation | One well-audited sandbox covers all untrusted code. |
+| Signatures over storefront trust | Integrity survives a compromised storefront. |
+| Structural enforcement over policy | Machines, not user vigilance, enforce security. |
+| Layered defense | Any single layer may fail; the combination survives. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Default-deny vs. friction | Default-deny | Users must approve capabilities; education required. |
+| Sandboxing vs. performance | Sandboxing | Overhead on hostile-adjacent workloads. |
+| Signing ceremony vs. developer velocity | Signing | Key management burden on developers. |
+| Defense in depth vs. complexity | Defense in depth | More moving parts to maintain and reason about. |
+
+## Implementation Strategy
+
+1. Land the sandbox and capability enforcement before any module runs.
+2. Add the permission system and grant registry.
+3. Add the signing and verification pipeline.
+4. Publish a security policy and a [Responsible Disclosure](/docs/contributors/responsible-disclosure) program.
+5. Fund independent audits of the core and the sandbox.
+
+## Future Work
+
+- Formal verification of capability confinement.
+- Hardware-backed isolation (memory tagging) as an additional layer.
+- Post-quantum signing of artifacts.
+- Real-time threat intelligence for storefront verification.
+
+## References
+
+- J. H. Saltzer and M. D. Schroeder, "The protection of information in
+  computer systems," *Proc. IEEE*, 1975.
+- M. Miller, *Robust Composition*, 2006.
+- The Chromium Projects, *Security Architecture* documentation.
+- Orivon, *Runtime Whitepaper*, 2026.
+- Orivon, *Module System Whitepaper*, 2026.
+
+## Appendix A — Security invariants
+
+1. **No module may access host memory or another module's memory.**
+2. **No module may perform an operation without a matching grant.**
+3. **No site renderer may reach a module capability without user consent.**
+4. **The grant registry is the single source of truth for permissions.**
+5. **The core's code surface is capped and CI-gated.**
+
+## Appendix B — Incident response
+
+| Stage | Action |
+| --- | --- |
+| Triage | Confirm scope and severity. |
+| Contain | Revoke affected grants, unpublish affected artifacts. |
+| Fix | Patch, rebuild, re-sign. |
+| Notify | Disclose per the [Responsible Disclosure](/docs/contributors/responsible-disclosure) policy. |
+| Review | Record the incident and update the threat model. |
+
+**Related:** [Security Model](/docs/research/security-model) · [Security Research](/docs/research/security-research) · [Sandbox Design](/docs/research/security-research)

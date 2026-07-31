@@ -1,0 +1,180 @@
+---
+title: "Changelog Archive"
+description: "Searchable archive of all Orivon project changelogs with detailed change history for every version."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 44
+tags: ["project", "changelog", "archive", "history", "changes"]
+keywords: "changelog archive, change history, version history, orivon changelog"
+---
+
+Searchable archive of detailed changelogs for every Orivon release.
+
+## Changelog by Version
+
+### v1.2.0 (2026-07-15) — Community
+
+#### Added
+- **Documentation:** Community, Governance & Ecosystem section (39 pages)
+  - Overview, Mission & Values, Community, Governance, Maintainers
+  - 9 Working Group charters (Runtime, Browser, Core, SDK, Security, Documentation, Community, Developer Experience, Research)
+  - Technical Steering Committee, Decision Making
+  - Project Roadmap, Community Roadmap, Open Source Philosophy, Contribution Recognition
+  - Community Showcase, Community Events, Meetups, Hackathons, Grants Program
+  - Sponsors, Partners, Ecosystem Projects, Project Directory, Case Studies, Success Stories
+  - Media Kit, Press Resources, Brand Guidelines, Logos & Assets, Social Channels, Newsletter, FAQ
+- **Documentation:** Project, Organization & Enterprise section (44 pages)
+  - Overview, About Orivon, Mission & Vision, Project History
+  - Organization, Leadership, Core Team, Maintainers, Advisors, Project Structure
+  - Release Lifecycle, Version Support Policy, Roadmap
+  - Trust Center, Security Policy, Privacy Policy, Licensing, Open Source Licenses, Third-Party Licenses, Legal, Compliance
+  - Enterprise, Enterprise Features, Enterprise Deployment, Professional Services
+  - Support, Support Policy, Service Level Objectives
+  - Partners, Technology Partners, Integration Partners, Case Studies, Success Stories
+  - Funding & Sustainability, Transparency Reports
+  - Brand Center, Brand Guidelines, Logos & Assets, Media Kit, Press Resources
+  - Downloads, Documentation Archive, Release Archive, Changelog Archive, Contact, FAQ
+- **Governance:** TSC election process documented and implemented
+- **Governance:** Working Group charter template and ratification process
+- **Grants:** Program framework with 6 categories, quarterly cycles
+- **Community:** Contribution Recognition program with 5 levels
+
+#### Changed
+- **Runtime:** Module load performance improved ~15%
+- **Browser:** Permission UI redesigned for privacy-preserving flows
+- **SDK:** Type-safe capability declarations (TypeScript)
+- **CLI:** Improved scaffolding templates with `orivon create`
+- **Standards:** Naming System dispute resolution v2 drafted
+- **Web3 Score:** Algorithm v2 in progress
+
+#### Fixed
+- **Runtime:** Memory leak in module cache eviction (issue #1247)
+- **Browser:** Crash on malformed capability delegation (issue #1302)
+- **SDK:** Type inference regression for generic modules (issue #1189)
+- **Registry:** Race condition in concurrent module publish (issue #1265)
+
+#### Security
+- **Runtime:** Hardened capability validation (CVE-2026-XXXX)
+- **Browser:** Fixed origin check bypass in module communication (CVE-2026-XXXX)
+- **Dependencies:** Updated `ring` to 0.17.5, `aws-lc-rs` to 0.1.2
+
+#### Deprecated
+- `orivon module install --legacy` flag (use `--format v1` instead)
+- `OrivonRuntime.loadModuleSync()` (use async `loadModule()`)
+
+### v1.1.0 (2026-04-20) — Developer
+
+#### Added
+- **Documentation:** Developer Documentation level complete (10 levels)
+- **SDK:** TypeScript SDK v1.1 with React integration
+- **SDK:** Rust SDK v1.1 with async runtime support
+- **CLI:** `orivon create` scaffolding with templates
+- **CLI:** `orivon dev` hot reload for module development
+- **Runtime:** Module hot reload (preview, behind flag)
+- **Browser:** Extension API compatibility layer (preview)
+- **Standards:** Module Format v1.1 (resource limits, metadata v2)
+
+#### Changed
+- **Runtime:** Startup time improved ~25% (cold), ~40% (warm)
+- **Browser:** DevTools integration with module inspector
+- **Registry:** Search API v2 with faceted filters
+- **CLI:** Output format standardized (JSON, table, human)
+
+#### Fixed
+- **Runtime:** WASM memory growth under sustained load
+- **Browser:** Tab crash on module unload during navigation
+- **SDK:** Memory leak in capability watcher
+
+#### Security
+- **Dependencies:** Updated `wasmtime` to 19.0.1, `tokio` to 1.38
+
+#### Deprecated
+- `orivon-sdk` v0.x namespace (use `@orivon/sdk`)
+
+### v1.0.0 (2026-01-10) — Ecosystem (LTS)
+
+#### Added
+- **Platform:** First stable release
+- **Runtime:** Module system v1, capability sandbox v1
+- **Browser:** MVP with rendering pipeline, basic UI
+- **Core:** Networking, Storage, Identity, Permissions libraries
+- **SDK:** TypeScript v1.0, Rust v1.0
+- **Standards:** 12 specifications v1.0 accepted
+- **Documentation:** Levels 1–6 complete (Introduction through Research)
+- **Grants:** Program v1 launched
+- **Registry:** Project Directory, Module Marketplace v1
+
+#### Security
+- **Runtime:** Formal verification of capability model (subset)
+- **Browser:** Sandbox escape mitigations
+- **Dependencies:** All transitive deps scanned, zero critical
+
+### v0.9.0 (2025-10-05) — Standards (Beta)
+
+#### Added
+- **Standards:** 12 specifications accepted v1.0
+- **API Reference:** 34 entries complete
+- **Research:** 39 publications (10 whitepapers, 10 architecture, 13 research areas, 3 roadmap/refs)
+- **Security Model:** Documented with threat model, disclosure process
+
+### v0.8.0 (2025-07-15) — Architecture (Beta)
+
+#### Added
+- **Technical Design:** Level complete (26 entries)
+- **Research:** Whitepapers for Browser, Runtime, Core, Module System, Security, Networking, Storage, Identity, Web3 Score
+- **Architecture Papers:** Browser, Runtime, Core, Module System, Permission System, Security Model, Communication Layer, Rendering Pipeline, Storage Layer, Networking Layer
+
+### v0.5.0 (2025-01-20) — Browser MVP (Preview)
+
+#### Added
+- **Browser:** First functional build, rendering pipeline
+- **SDK:** TypeScript v0.1
+- **Runtime:** Module hot reload prototype
+
+### v0.1.0 (2024-09-10) — Foundation (Alpha)
+
+#### Added
+- **Runtime:** Core operational, module loading, capability sandbox
+- **Repository:** Open source (Apache 2.0)
+- **Governance:** Initial model drafted
+
+## Search Changelogs
+
+Use the site search or filter by:
+
+| Filter | Example |
+| :--- | :--- |
+| **Version** | `v1.2.0` |
+| **Category** | `Added`, `Changed`, `Fixed`, `Security`, `Deprecated` |
+| **Component** | `Runtime`, `Browser`, `SDK`, `CLI`, `Registry` |
+| **Date** | `2026-07` |
+
+## Changelog Format
+
+We follow [Keep a Changelog](https://keepachangelog.com/) format:
+
+| Section | Purpose |
+| :--- | :--- |
+| **Added** | New features |
+| **Changed** | Changes to existing functionality |
+| **Deprecated** | Soon-to-be-removed features |
+| **Removed** | Removed features |
+| **Fixed** | Bug fixes |
+| **Security** | Vulnerability fixes |
+
+## Automation
+
+Changelogs are generated from:
+- Conventional Commits (`feat:`, `fix:`, `BREAKING CHANGE:`)
+- GitHub Release notes
+- Security Advisory links
+- Dependency update PRs
+
+See `orivon-release` repo for generation scripts.
+
+<Callout type="info" title="Changelogs are the source of truth">
+  If it's not in the changelog, it didn't happen in that release.
+  Release notes summarize; changelogs detail.
+</Callout>
+
+**Related:** [Release Archive](/docs/project/release-archive) · [Documentation Archive](/docs/project/doc-archive) · [Version Support Policy](/docs/project/version-support) · [Release Lifecycle](/docs/project/release-lifecycle)

@@ -1,0 +1,175 @@
+---
+title: "Wallet APIs"
+description: "The wallet APIs your application uses for key access and signing: signing, transaction flows, providers, consent and recovery."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["developers", "wallet-apis"]
+keywords: "wallet APIs, signing, transactions, key access, consent, recovery, wallet"
+---
+
+The wallet is the only component that holds keys, and the wallet APIs are the
+only way your code can use them. This page explains how to request signatures,
+build transactions and respect the consent that guards every operation.
+
+## What the wallet APIs are
+
+The wallet APIs give applications access to key operations without ever
+seeing keys:
+
+<CheckList
+  items={[
+    'Requesting signatures over payloads.',
+    'Building and submitting transactions.',
+    'Deriving public addresses.',
+    'Managing consent around every operation.',
+    'Recovery flows when they are needed.',
+  ]}
+/>
+
+The wallet service owns the key hierarchy. Your code never touches a private
+key. The design is documented in
+[Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+## Why they exist
+
+Keys are the root of identity and value. If application code could hold keys,
+a compromise of any application would compromise everything. The wallet APIs
+centralize key operations behind consent, so every signature is deliberate and
+auditable.
+
+## Requesting a signature
+
+The core operation is signing:
+
+```ts
+const result = await app.wallet.sign({
+  payload: bytes,
+  purpose: 'authentication',
+});
+```
+
+The call may trigger a consent prompt, depending on the grant. The flow is:
+
+<Diagram caption="The signing consent flow.">
+  <Flow column>
+    <DiagramNode accent>Request signature</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Consent (auto granted, prompted, or denied)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Sign</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Return signature</DiagramNode>
+  </Flow>
+</Diagram>
+
+The policy check happens before any key is touched. See
+[Permissions](/docs/developers/permissions) for the grant model.
+
+## Transactions
+
+For blockchain operations, use the transaction flow:
+
+```ts
+const tx = await app.wallet.transaction.build({
+  to: address,
+  value: amount,
+});
+
+const presented = await app.wallet.transaction.present(tx);
+const signed = await app.wallet.transaction.sign(presented);
+
+await app.wallet.transaction.submit(signed);
+const confirmed = await app.wallet.transaction.confirm(signed.id);
+```
+
+The stages are explicit so the user always sees what they are signing:
+
+1. **Build**: construct the unsigned transaction.
+2. **Present**: show the user exactly what will be signed.
+3. **Sign**: produce the signature under consent.
+4. **Submit**: broadcast the signed transaction.
+5. **Confirm**: wait for confirmation.
+
+## Providers
+
+The wallet can be backed by different providers, and applications do not care
+which:
+
+| Provider | Description |
+| --- | --- |
+| **Software vault** | Keys in encrypted local storage |
+| **OS keychain** | Keys managed by the operating system |
+| **Hardware wallet** | Keys on a hardware device |
+| **Remote signer** | Keys on a remote service |
+
+Your code calls the same API regardless. The provider is chosen by the user,
+and the [Wallet Architecture](/docs/technical-design/wallet-architecture)
+documents the model.
+
+## Recovery
+
+Recovery lets users restore access to their keys. Applications rarely trigger
+recovery, but they should understand it:
+
+```ts
+const recovery = await app.wallet.recovery.begin();
+// the user backs up their recovery shares
+await app.wallet.recovery.complete(recovery.id);
+```
+
+Recovery uses shares and social options so no single lost device means lost
+keys. See [Identity Layer](/docs/technical-design/identity-layer).
+
+## When to use the wallet APIs
+
+| You need to | Use |
+| --- | --- |
+| Prove the user controls a key | `app.wallet.sign(...)` |
+| Move value | The transaction flow |
+| Show the user's address | `app.wallet.address()` |
+| Integrate a provider | Provider adapter APIs |
+
+If your application does not handle identity or value, you may not need the
+wallet APIs at all. Do not request wallet permissions speculatively.
+
+<Callout type="warning" title="The most sensitive API">
+  The wallet APIs are the highest value target in the ecosystem. Every call is
+  consent gated, and your code must never attempt to cache, store or extract
+  private key material. There is no API to do so; that is by design.
+</Callout>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Requesting wallet.sign speculatively">
+    A wallet permission with no feature that uses it is a red flag at consent
+    time.
+  </Card>
+  <Card title="Signing without presentation">
+    Always present what will be signed. Users must see the payload.
+  </Card>
+  <Card title="Storing signatures">
+    Signatures are not credentials. Store them only if the domain requires it.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Keep every signature purposeful. Include a clear `purpose` so the user
+  understands why the key is being used, and never batch unrelated payloads
+  into one signature.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The wallet APIs are specified in the
+  [Wallet API draft](/docs/standards/osp-007-wallet-api) and defined by
+  [Wallet Architecture](/docs/technical-design/wallet-architecture).
+</Callout>
+
+## Related pages
+
+- [Identity APIs](/docs/developers/identity-apis): what keys authenticate.
+- [Permissions](/docs/developers/permissions): the consent model.
+- [Wallet Integration example](/docs/developers/examples/wallet-integration): a complete example.

@@ -1,0 +1,144 @@
+---
+title: "Browser APIs"
+description: "The APIs applications use to present a user experience in the Orivon browser: UI rendering, tabs, navigation and install surfaces."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["developers", "browser-apis"]
+keywords: "browser APIs, UI rendering, tabs, navigation, application UI, browser"
+---
+
+Applications run inside the Orivon browser, and the browser APIs are how they
+present themselves to the user. This page explains the browser surface: what
+you can render, how navigation works, and how your application fits into the
+browser's process model.
+
+## What the browser APIs are
+
+The browser APIs let an application become part of the browser experience:
+
+<CheckList
+  items={[
+    'Rendering application UI through the browser compositor.',
+    'Managing application windows and tabs.',
+    'Navigating the current tab.',
+    'Interacting with the address bar and browser chrome.',
+    'Participating in the install and permission surfaces.',
+  ]}
+/>
+
+Applications are not web pages; they are first class surfaces in the browser,
+rendered alongside web content. See
+[Rendering Pipeline](/docs/technical-design/rendering-pipeline).
+
+## Why they exist
+
+The browser is the trust boundary between the user and untrusted code. The
+browser APIs exist so an application can offer a full experience without ever
+escaping the browser's process isolation. The process model is documented in
+[Browser Architecture](/docs/technical-design/browser-architecture).
+
+## Rendering UI
+
+Render your application's interface:
+
+```ts
+app.ui.render(
+  <view>
+    <text>Hello from an Orivon application</text>
+    <button onPress={() => app.ui.navigate('/settings')}>
+      Settings
+    </button>
+  </view>,
+);
+```
+
+The UI runs through the browser compositor, so it animates and scrolls as
+smoothly as web content. You declare your interface with the UI model; the
+browser handles the pixels.
+
+## Windows and tabs
+
+Applications can manage their presentation:
+
+```ts
+const win = await app.window.create({title: 'My App'});
+await win.show();
+await app.window.focus(win.id);
+```
+
+A window hosts your application surface. Tabs navigate between surfaces:
+
+```ts
+await app.tab.navigate('https://example.com');
+await app.tab.open('orivon-app://my-app');
+```
+
+<Callout type="warning" title="Navigation is sensitive">
+  Navigating a user's active tab is a visible, potentially disruptive action.
+  It is guarded by permissions and should only be done in response to a user
+  gesture. Do not navigate tabs in the background.
+</Callout>
+
+## The install surface
+
+When a user installs your application, the browser presents the permission
+screen. Your manifest drives it:
+
+```toml
+[permissions]
+allow = ["identity.read"]
+```
+
+Every entry is shown to the user. The consent surface is described in
+[Permissions](/docs/developers/permissions) and the
+[Application Lifecycle](/docs/technical-design/application-lifecycle).
+
+## When to use the browser APIs
+
+| You need to | Use |
+| --- | --- |
+| Draw your interface | `app.ui.render(...)` |
+| Open a window | `app.window.create(...)` |
+| Move the user somewhere | `app.tab.navigate(...)` |
+| Integrate with browser chrome | The browser extension APIs |
+| Show a permission explanation | `app.ui.permissionNotice(...)` |
+
+If your application is headless (no UI), you do not need the browser APIs at
+all. Modules typically never use them; they use the
+[runtime](/docs/developers/runtime-apis) and
+[core](/docs/developers/core-apis) APIs.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Navigating without a gesture">
+    Background navigation is jarring and may be blocked. Only navigate on user
+    intent.
+  </Card>
+  <Card title="Rendering on the main thread">
+    Heavy work belongs in workers; the UI thread must stay responsive.
+  </Card>
+  <Card title="Forgetting the UI budget">
+    The compositor is shared. Keep animations compositor driven; see
+    [Performance](/docs/developers/performance).
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Design your application so the UI and the logic are separate. A logic layer
+  that talks to the runtime and core APIs, and a thin UI layer that renders,
+  is easy to test and easy to restyle without touching behavior.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The browser APIs are defined by [Browser Architecture](/docs/technical-design/browser-architecture)
+  and the [Rendering Pipeline](/docs/technical-design/rendering-pipeline),
+  and specified in the [Browser Architecture draft](/docs/standards/osp-003-browser-architecture).
+</Callout>
+
+## Related pages
+
+- [Building Your First Application](/docs/developers/building-your-first-application): the UI in practice.
+- [Permissions](/docs/developers/permissions): what the install surface shows.
+- [Runtime APIs](/docs/developers/runtime-apis): the non UI side of your app.

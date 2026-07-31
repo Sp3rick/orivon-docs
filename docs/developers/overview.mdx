@@ -1,0 +1,205 @@
+---
+title: "Developer Documentation Overview"
+description: "The home of the Orivon developer documentation: who it is for, how to get started, the learning path, examples, tutorials and the latest SDK versions."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["developers", "overview"]
+keywords: "developer documentation, getting started, SDK, learning path, tutorials, examples"
+---
+
+This is the home of the Orivon developer documentation. It is written for the
+people who build on Orivon: module authors, application developers, integration
+engineers, tool builders and everyone who wants to extend the ecosystem. The
+goal is to take you from first project to production quality, with practical
+examples at every step.
+
+## Who this documentation is for
+
+<CardGrid columns={2}>
+  <Card title="Module authors" to="/docs/developers/building-your-first-module">
+    Build modules that extend the runtime with new capabilities.
+  </Card>
+  <Card title="Application developers" to="/docs/developers/building-your-first-application">
+    Build applications that run inside the Orivon browser.
+  </Card>
+  <Card title="Integration engineers" to="/docs/developers/permissions">
+    Connect Orivon to wallets, identities, storage and networks.
+  </Card>
+  <Card title="Tool builders" to="/docs/developers/cli">
+    Build developer tools, providers and services on the ecosystem.
+  </Card>
+</CardGrid>
+
+No prior Orivon experience is required. Some pages assume basic familiarity
+with web development, but every concept is introduced where it is first used.
+
+## How to get started
+
+The fastest path is the Quick Start, which gets a project running in minutes:
+
+<Steps>
+  <Step title="Install">
+    Install the Orivon CLI and SDK. See
+    [Installation](/docs/developers/installation).
+  </Step>
+  <Step title="Create">
+    Scaffold a project. See
+    [Quick Start](/docs/developers/quick-start).
+  </Step>
+  <Step title="Build">
+    Write your first module or application.
+    See [Your First Module](/docs/developers/building-your-first-module).
+  </Step>
+  <Step title="Run">
+    Run, test and debug what you built. See
+    [Testing](/docs/developers/testing) and
+    [Debugging](/docs/developers/debugging).
+  </Step>
+</Steps>
+
+If you prefer to learn by doing, start with the
+[examples](/docs/developers/examples) or one of the
+[tutorials](/docs/developers/tutorials).
+
+## Recommended learning path
+
+The documentation is organized so that each page builds on the ones before it:
+
+<Timeline
+  phases={[
+    {
+      period: 'Setup',
+      title: 'Environment and CLI',
+      status: 'done',
+      children:
+        'System requirements, installation, and the command line tool you will use every day.',
+    },
+    {
+      period: 'Fundamentals',
+      title: 'Projects, modules, applications',
+      status: 'done',
+      children:
+        'The project structure, the module manifest, and how a project goes from scaffold to running.',
+    },
+    {
+      period: 'Interfaces',
+      title: 'APIs and permissions',
+      status: 'current',
+      children:
+        'The runtime, core, browser, wallet, identity, storage, networking and DNS APIs, plus how permissions and events work.',
+    },
+    {
+      period: 'Practice',
+      title: 'Quality and delivery',
+      status: 'future',
+      children:
+        'Debugging, logging, testing, performance and best practices, then the examples and tutorials that tie it together.',
+    },
+  ]}
+/>
+
+## Quick links
+
+The pages developers reach for most:
+
+<CardGrid columns={3}>
+  <Card title="Quick Start" to="/docs/developers/quick-start">
+    Create and run your first project in minutes.
+  </Card>
+  <Card title="CLI reference" to="/docs/developers/cli">
+    Every command, its options and its output.
+  </Card>
+  <Card title="Module Manifest" to="/docs/developers/module-manifest">
+    The orivon.toml file that defines every project.
+  </Card>
+  <Card title="Permissions" to="/docs/developers/permissions">
+    Requesting and scoping access safely.
+  </Card>
+  <Card title="Cookbook" to="/docs/developers/cookbook">
+    Short recipes for common tasks.
+  </Card>
+  <Card title="Troubleshooting" to="/docs/developers/troubleshooting">
+    Fix common problems by symptom.
+  </Card>
+</CardGrid>
+
+## Popular tutorials
+
+Hands on guides that teach real skills:
+
+<CardGrid columns={3}>
+  <Card title="Build a wallet" to="/docs/developers/tutorials/building-a-wallet">
+    From signer to signed transaction, end to end.
+  </Card>
+  <Card title="Create a DNS provider" to="/docs/developers/tutorials/creating-a-dns-provider">
+    Plug a new namespace into the resolver.
+  </Card>
+  <Card title="Create a storage provider" to="/docs/developers/tutorials/creating-a-storage-provider">
+    Add a new storage backend behind the engine.
+  </Card>
+  <Card title="Build a network provider" to="/docs/developers/tutorials/building-a-network-provider">
+    Implement a custom transport.
+  </Card>
+  <Card title="Use permissions" to="/docs/developers/tutorials/using-permissions">
+    Request, scope and handle consent.
+  </Card>
+  <Card title="Work with events" to="/docs/developers/tutorials/working-with-events">
+    Subscribe, publish and react to lifecycle.
+  </Card>
+</CardGrid>
+
+## Latest SDK versions
+
+| Package | Version | Status |
+| --- | --- | --- |
+| `@orivon/sdk` | 0.1.0 | Prerelease |
+| `@orivon/cli` | 0.1.0 | Prerelease |
+| `orivon-runtime` (Rust) | 0.1.0 | Prerelease |
+
+All packages are at version 0.1.0 and follow the specification drafts described
+in the [Standards](/docs/standards) section. The [Migration Guides](/docs/developers/migration-guides)
+explain how future releases will be handled.
+
+<Callout type="warning" title="Prerelease software">
+  The SDK and CLI are prerelease. Interfaces may change between versions, and
+  breaking changes will follow the [versioning](/docs/standards/versioning)
+  rules of the specification drafts.
+</Callout>
+
+## Latest documentation updates
+
+<CheckList
+  items={[
+    'Developer Documentation section published with the environment, API and quality guides.',
+    'Quick Start and first module tutorials added.',
+    'Examples gallery expanded with wallet, storage, networking and identity examples.',
+    'Cookbook with recipes for common developer tasks.',
+  ]}
+/>
+
+## Featured examples
+
+The [examples gallery](/docs/developers/examples) collects complete, working
+samples:
+
+<CardGrid columns={2}>
+  <Card title="Hello World" to="/docs/developers/examples/hello-world">
+    The smallest possible module.
+  </Card>
+  <Card title="Wallet Integration" to="/docs/developers/examples/wallet-integration">
+    Sign a message through the wallet API.
+  </Card>
+  <Card title="Storage Example" to="/docs/developers/examples/storage-example">
+    Store and retrieve content addressed data.
+  </Card>
+  <Card title="Identity Example" to="/docs/developers/examples/identity-example">
+    Resolve and verify an identity.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Getting Started](/docs/developers/getting-started): the full walkthrough.
+- [Standards](/docs/standards/overview): the specifications behind the APIs.
+- [Technical Design](/docs/technical-design/architecture-overview): how the system is built.

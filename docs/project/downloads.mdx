@@ -1,0 +1,162 @@
+---
+title: "Downloads"
+description: "Orivon download center: documentation, brand assets, release files, and future SDK downloads."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 41
+tags: ["project", "downloads", "releases", "documentation", "assets"]
+keywords: "downloads, release files, documentation, brand assets, sdk downloads, orivon downloads"
+---
+
+Centralized download center for Orivon artifacts: releases, documentation,
+brand assets, and future SDK packages.
+
+## Release Downloads
+
+### Current Stable: v1.2.0 (July 2026)
+
+| Platform | Browser | Runtime | CLI | Checksums |
+| :--- | :--- | :--- | :--- | :--- |
+| **Windows x64** | [Installer](To Be Announced) | [Zip](To Be Announced) | [Zip](To Be Announced) | [SHA256](To Be Announced) |
+| **Windows ARM64** | [Installer](To Be Announced) | [Zip](To Be Announced) | [Zip](To Be Announced) | [SHA256](To Be Announced) |
+| **macOS x64** | [DMG](To Be Announced) | [Tar.gz](To Be Announced) | [Tar.gz](To Be Announced) | [SHA256](To Be Announced) |
+| **macOS ARM64** | [DMG](To Be Announced) | [Tar.gz](To Be Announced) | [Tar.gz](To Be Announced) | [SHA256](To Be Announced) |
+| **Linux x64** | [AppImage](To Be Announced) | [Tar.gz](To Be Announced) | [Tar.gz](To Be Announced) | [SHA256](To Be Announced) |
+| **Linux ARM64** | [AppImage](To Be Announced) | [Tar.gz](To Be Announced) | [Tar.gz](To Be Announced) | [SHA256](To Be Announced) |
+
+### LTS Release: v1.0.x (Supported until Jan 2028)
+
+| Platform | Browser | Runtime | CLI | Checksums |
+| :--- | :--- | :--- | :--- | :--- |
+| **All Platforms** | [Archive](To Be Announced) | [Archive](To Be Announced) | [Archive](To Be Announced) | [SHA256](To Be Announced) |
+
+### All Releases
+See [Release Archive](/docs/project/release-archive) for complete history with
+download links, release notes, and verification instructions.
+
+## Verification
+
+Every release artifact is signed and includes verification metadata:
+
+```bash
+# 1. Download artifact + .sig + .crt
+wget https://github.com/OrivonBrowser/orivon-browser/releases/download/v1.2.0/orivon-browser-linux-x64.AppImage
+wget https://github.com/OrivonBrowser/orivon-browser/releases/download/v1.2.0/orivon-browser-linux-x64.AppImage.sig
+wget https://github.com/OrivonBrowser/orivon-browser/releases/download/v1.2.0/orivon-browser-linux-x64.AppImage.crt
+
+# 2. Verify with cosign
+cosign verify-blob \
+  --signature orivon-browser-linux-x64.AppImage.sig \
+  --cert orivon-browser-linux-x64.AppImage.crt \
+  orivon-browser-linux-x64.AppImage
+
+# 3. Verify checksum
+sha256sum -c orivon-browser-linux-x64.AppImage.sha256
+```
+
+### Verification Methods
+| Method | Tools | Artifacts |
+| :--- | :--- | :--- |
+| **Cosign/Sigstore** | `cosign` | All binaries, containers |
+| **Checksums (SHA256)** | `sha256sum` | All files |
+| **SBOM** | `cosign verify-attestation` | All releases |
+| **Provenance** | SLSA verification | All releases |
+| **GitHub Attestations** | `gh attestation` | npm/crates.io packages |
+
+## Package Managers
+
+| Manager | Command | Registry |
+| :--- | :--- | :--- |
+| **npm (TypeScript SDK)** | `npm install @orivon/sdk` | npmjs.com |
+| **Cargo (Rust SDK)** | `cargo add orivon-sdk` | crates.io |
+| **Homebrew** | `brew install orivon/tap/orivon` | GitHub Packages |
+| **Chocolatey** | `choco install orivon` | Chocolatey |
+| **Scoop** | `scoop install orivon` | Scoop |
+| **Docker** | `docker pull orivon/browser:latest` | GHCR / Docker Hub |
+| **Flatpak** | `flatpak install flathub dev.orivon.Browser` | Flathub |
+| **Snap** | `snap install orivon` | Snapcraft |
+
+## Documentation Downloads
+
+| Format | Version | Download |
+| :--- | :--- | :--- |
+| **HTML (Offline)** | v1.2 | [ZIP](To Be Announced) |
+| **PDF (Complete)** | v1.2 | [PDF](To Be Announced) |
+| **EPUB** | v1.2 | [EPUB](To Be Announced) |
+| **Markdown Source** | Current | [GitHub](https://github.com/OrivonBrowser/orivon-docs) |
+
+See [Documentation Archive](/docs/project/doc-archive) for previous versions.
+
+## Brand Assets
+
+| Package | Download |
+| :--- | :--- |
+| **Essential Kit** | [Logos & Assets → Essential Kit](/docs/project/logos-assets) |
+| **Complete Kit** | [Logos & Assets → Complete Kit](/docs/project/logos-assets) |
+| **Press Kit** | [Logos & Assets → Press Kit](/docs/project/logos-assets) |
+| **Community Kit** | [Logos & Assets → Community Kit](/docs/project/logos-assets) |
+
+## SDK Downloads (Future)
+
+| SDK | Status | Target |
+| :--- | :--- | :--- |
+| **TypeScript SDK** | ✅ On npm | Current |
+| **Rust SDK** | ✅ On crates.io | Current |
+| **Python SDK** | Planned | 2027 |
+| **Go SDK** | Planned | 2027 |
+| **Swift SDK** | Planned | 2028 |
+| **Kotlin SDK** | Planned | 2028 |
+| **WASM Component SDK** | Research | 2028+ |
+
+## Container Images
+
+| Image | Registry | Tags |
+| :--- | :--- | :--- |
+| **orivon/browser** | GHCR / Docker Hub | `latest`, `v1.2.0`, `v1.2`, `v1`, `stable`, `lts` |
+| **orivon/runtime** | GHCR / Docker Hub | `latest`, `v1.2.0`, `v1.2`, `v1` |
+| **orivon/registry** | GHCR / Docker Hub | `latest`, `v1.2.0` |
+| **orivon/ci** | GHCR | `latest`, `v1.2.0` |
+
+```bash
+# Pull latest stable browser
+docker pull ghcr.io/orivonbrowser/browser:stable
+
+# Pull specific version
+docker pull ghcr.io/orivonbrowser/runtime:v1.2.0
+
+# Verify signature
+cosign verify ghcr.io/orivonbrowser/browser:stable
+```
+
+## Archive Integrity
+
+| Artifact | Verification |
+| :--- | :--- |
+| **All Downloads** | SHA256 checksums published with every release |
+| **Signatures** | Cosign/Sigstore (keyless, transparency log) |
+| **SBOM** | CycloneDX + SPDX per artifact |
+| **Provenance** | SLSA Level 3 build attestation |
+| **Transparency Log** | Rekor / GitHub Attestation API |
+
+## Download Mirrors
+
+| Mirror | Regions | Status |
+| :--- | :--- | :--- |
+| **GitHub Releases** | Global (CDN) | Primary |
+| **GHCR / Docker Hub** | Global | Containers |
+| **npm / crates.io** | Global | SDKs |
+| **Custom CDN** | Planned | 2027 |
+
+## Support
+
+- **Broken link / missing file:** GitHub Issue on `orivon-docs` repo
+- **Verification failure:** security@orivon.dev
+- **Mirror request:** infrastructure@orivon.dev
+- **Checksum mismatch:** **Do not run** — report to security@orivon.dev immediately
+
+<Callout type="success" title="Always verify">
+  Cryptographic verification takes seconds and protects against supply chain
+  attacks. Make it part of your deployment pipeline.
+</Callout>
+
+**Related:** [Release Archive](/docs/project/release-archive) · [Documentation Archive](/docs/project/doc-archive) · [Changelog Archive](/docs/project/changelog-archive) · [Logos & Assets](/docs/project/logos-assets) · [Security Policy](/docs/project/security-policy)

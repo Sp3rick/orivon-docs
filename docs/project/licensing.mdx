@@ -1,0 +1,160 @@
+---
+title: "Licensing"
+description: "Orivon licensing: project license, documentation license, code license, asset license, and contribution license agreement."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["project", "licensing", "license", "apache", "contribution"]
+keywords: "orivon licensing, apache license 2.0, documentation license, code license, asset license, CLA"
+---
+
+Orivon uses permissive, industry-standard licenses that enable broad adoption
+while protecting contributors and users. This page summarizes the licenses
+governing the project.
+
+## Project license: Apache License 2.0
+
+**The Orivon platform (runtime, browser, core, SDKs, CLI) is licensed under the Apache License 2.0.**
+
+<Callout type="info" title="Full license text">
+  The complete Apache License 2.0 text is in the repository root: [LICENSE](/LICENSE).
+  It is also reproduced below for reference.
+</Callout>
+
+### Why Apache 2.0?
+
+| Factor | Why it fits Orivon |
+| --- | --- |
+| **Permissive** | Anyone can use, modify, distribute, and sell — including in proprietary products. |
+| **Patent grant** | Contributors grant patent rights to users, protecting against patent litigation. |
+| **Attribution** | Credit is required, preserving project identity. |
+| **No viral effect** | Unlike copyleft, does not force derivative works to be open source. |
+| **Enterprise-friendly** | Widely accepted by corporate legal teams (used by Kubernetes, TensorFlow, Rust, etc.). |
+| **Foundation-compatible** | Standard for Apache Software Foundation, Linux Foundation, CNCF projects. |
+
+### Key terms (summary)
+- **Grant:** Copyright + patent license to use, reproduce, modify, distribute.
+- **Conditions:** Preserve license notices; include copy of license; state changes.
+- **Trademarks:** License does not grant trademark rights (see [Trademark Usage](/docs/project/legal#trademark-usage)).
+- **Warranty:** Provided "AS IS" without warranties.
+- **Liability:** No liability for damages (standard open-source disclaimer).
+
+## Documentation license: Creative Commons Attribution 4.0 (CC BY 4.0)
+
+**All documentation on this site (Markdown/MDX source, generated HTML) is licensed under CC BY 4.0.**
+
+- **You may:** Share, adapt, remix, build upon — even commercially.
+- **You must:** Give appropriate credit (link to orivon.dev), indicate changes.
+- **Rationale:** Maximizes reuse of docs in translations, courses, books, internal wikis.
+
+## Code license: Apache License 2.0
+
+All source code in Orivon repositories is Apache 2.0 unless a file header
+explicitly states otherwise (e.g., vendored dependencies with their own
+licenses).
+
+## Asset license: Creative Commons Attribution 4.0 (CC BY 4.0)
+
+**Brand assets (logos, icons, illustrations, templates) are licensed under CC BY 4.0.**
+
+- **You may:** Use in presentations, articles, forked projects, merchandise.
+- **You must:** Attribute Orivon (link to orivon.dev).
+- **Exception:** Trademark usage follows [Trademark Usage](/docs/project/legal#trademark-usage), not CC BY.
+
+## Contribution license: Developer Certificate of Origin (DCO)
+
+Orivon uses the **Developer Certificate of Origin (DCO)** instead of a
+Contributor License Agreement (CLA).
+
+### What is the DCO?
+A simple sign-off on each commit certifying that you have the right to
+contribute the code:
+
+```
+Signed-off-by: Your Name <your.email@example.com>
+```
+
+### DCO vs. CLA
+| Aspect | DCO | Traditional CLA |
+| --- | --- | --- |
+| **Legal instrument** | Per-commit certification | Signed agreement |
+| **Copyright assignment** | No (contributor retains copyright) | Often yes |
+| **Patent grant** | Implicit via Apache 2.0 contribution | Explicit in CLA |
+| **Friction** | Low (git commit -s) | High (legal review, signing) |
+| **Used by** | Linux, Kubernetes, Git, systemd | Some Apache projects, corporate projects |
+
+### How to comply
+```bash
+# Add sign-off to your commit
+git commit -s -m "Your commit message"
+
+# Or configure globally
+git config --global format.signoff true
+```
+
+### What the DCO certifies
+By adding `Signed-off-by`, you certify that:
+1. The contribution was created by you and you have the right to submit it.
+2. The contribution is based on previous work covered under an appropriate open-source license.
+3. The contribution was provided directly to you by someone who certified (a) or (b) and you have not modified it.
+4. You understand the contribution is public and recorded.
+
+<Callout type="success" title="No CLA required">
+  You do not need to sign a CLA, create an account on a CLA platform, or
+  assign copyright. The DCO + Apache 2.0 is the complete contribution agreement.
+</Callout>
+
+## Third-party licenses
+
+All third-party dependencies retain their original licenses. We only accept
+dependencies with permissive licenses compatible with Apache 2.0.
+
+See [Third-Party Licenses](/docs/project/third-party-licenses) for the full
+registry.
+
+## License compliance
+
+| Check | Tool | Frequency |
+| --- | --- | --- |
+| **License scanning** | `cargo-license`, `license-checker` | Every PR |
+| **Copyleft detection** | Automated (blocks GPL, AGPL, LGPL) | Every PR |
+| **SPDX headers** | Required on all source files | CI (blocking) |
+| **SBOM generation** | Syft (CycloneDX + SPDX) | Every release |
+
+## License exceptions
+
+The TSC may approve exceptions for:
+- **Test fixtures** with restrictive licenses (not shipped).
+- **Documentation quotes** under fair use / quotation rights.
+- **Transitional dependencies** during migration (with sunset plan).
+
+All exceptions are documented in the governance repository.
+
+## Frequently asked questions
+
+<Accordion
+  items={[
+    {
+      q: "Can I use Orivon in a commercial product?",
+      a: "Yes. Apache 2.0 explicitly permits commercial use, modification, and distribution. You can embed Orivon in proprietary products without open-sourcing your product."
+    },
+    {
+      q: "Do I need to open-source my modifications?",
+      a: "No. Apache 2.0 is not copyleft. You only need to preserve license notices and include a copy of the license with redistributed code."
+    },
+    {
+      q: "What about patents?",
+      a: "Apache 2.0 includes a patent grant from contributors to users. If you contribute, you grant patent rights. If you use Orivon, you receive patent rights from contributors."
+    },
+    {
+      q: "Can I use the Orivon logo in my product?",
+      a: "Logo usage follows the [Brand Guidelines](/docs/project/brand-guidelines) and [Trademark Usage](/docs/project/legal#trademark-usage), not the code license. Attribution required; no endorsement implied."
+    },
+    {
+      q: "What if I want to contribute but my employer owns my code?",
+      a: "The DCO certifies *you* have the right to submit. If your employer owns the code, you need their permission. Many employers have open-source contribution policies — check with your legal team."
+    },
+  ]}
+/>
+
+**Related:** [Open Source Licenses](/docs/project/open-source-licenses) · [Third-Party Licenses](/docs/project/third-party-licenses) · [Legal](/docs/project/legal) · [Trust Center](/docs/project/trust-center)

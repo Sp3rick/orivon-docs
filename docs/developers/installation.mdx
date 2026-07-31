@@ -1,0 +1,198 @@
+---
+title: "Installation"
+description: "Install the Orivon CLI and SDK on Windows, macOS and Linux, build from source, verify the installation, update and uninstall."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["developers", "installation"]
+keywords: "installation, windows, macos, linux, build from source, verify, update, uninstall"
+---
+
+Installing Orivon takes a few minutes and one command per platform. This page
+covers every platform, verifying the install, updating and removing it.
+
+## Windows
+
+Open a PowerShell terminal and run:
+
+```sh
+powershell -Command "irm https://orivon.dev/install.ps1 | iex"
+```
+
+The script installs the CLI to your user directory, adds it to `PATH`, and
+prints the next steps. After it finishes, open a new terminal.
+
+## macOS
+
+Using Homebrew:
+
+```sh
+brew tap orivon/tap
+brew install orivon
+```
+
+Or with the official installer script:
+
+```sh
+curl -fsSL https://orivon.dev/install.sh | sh
+```
+
+The script installs to `~/.orivon/bin` and adds it to `PATH`.
+
+## Linux
+
+Using the official installer script:
+
+```sh
+curl -fsSL https://orivon.dev/install.sh | sh
+```
+
+Or download the release archive for your architecture, extract it, and add
+the binary to `PATH`:
+
+```sh
+tar -xzf orivon-linux-x86_64.tar.gz -C ~/.orivon/bin
+```
+
+The CLI is a static binary with no runtime dependencies on Linux.
+
+## Building from source
+
+Building from source is for contributors and for platforms without releases.
+You need the requirements from [System Requirements](/docs/developers/system-requirements).
+
+<Steps>
+  <Step title="Clone">
+    Clone the repository:
+    ```sh
+    git clone https://github.com/OrivonBrowser/orivon-cli
+    cd orivon-cli
+    ```
+  </Step>
+  <Step title="Build">
+    Build the release binary:
+    ```sh
+    cargo build --release
+    ```
+  </Step>
+  <Step title="Install">
+    Install the binary to your PATH:
+    ```sh
+    cargo install --path .
+    ```
+  </Step>
+</Steps>
+
+Building the CLI for the first time compiles many dependencies and takes a few
+minutes. Subsequent builds are faster.
+
+## Installing the SDK
+
+The SDK is installed per project, not globally. Inside a project directory:
+
+```sh
+npm install @orivon/sdk
+```
+
+The SDK is also available as a Rust crate for Rust modules:
+
+```sh
+cargo add orivon-sdk
+```
+
+See [Project Structure](/docs/developers/project-structure) for where the SDK
+fits in a project.
+
+## Verifying the installation
+
+Run the doctor command, which checks the whole toolchain:
+
+```sh
+orivon doctor
+```
+
+<Diagram caption="What doctor verifies.">
+  <Flow column>
+    <DiagramNode accent>orivon doctor</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>CLI binary version</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>SDK presence</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Toolchain (Node, Rust)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Config directory</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Network reachability</DiagramNode>
+  </Flow>
+</Diagram>
+
+The output reports each check as passed, warning or failed. A quick manual
+check is:
+
+```sh
+orivon --version
+```
+
+Which prints something like:
+
+```text
+orivon 0.1.0
+```
+
+## Updating
+
+To update the CLI to the latest version:
+
+```sh
+orivon upgrade
+```
+
+On macOS with Homebrew, `brew upgrade orivon` works instead. The `upgrade`
+command reads the current version, fetches the latest release and replaces the
+binary in place.
+
+The SDK is updated per project:
+
+```sh
+npm update @orivon/sdk
+```
+
+<Callout type="warning" title="Check release notes">
+  Before upgrading the CLI or SDK, read the release notes. Breaking changes
+  follow the [migration](/docs/developers/migration-guides) process, and the
+  notes explain what to expect.
+</Callout>
+
+## Uninstalling
+
+To remove the CLI:
+
+```sh
+orivon uninstall
+```
+
+The command removes the binary and asks whether to keep your configuration and
+cached packages. If you installed via Homebrew, use `brew uninstall orivon`
+instead.
+
+To remove the SDK from a project, remove the dependency:
+
+```sh
+npm uninstall @orivon/sdk
+```
+
+Uninstalling the CLI never touches your keys or identities; those live in the
+wallet and storage, which are separate from the toolchain.
+
+<Callout type="success" title="Best practice">
+  Run `orivon doctor` after any install, update or uninstall that changes the
+  environment. It is the fastest way to confirm the environment is healthy
+  before you start a project.
+</Callout>
+
+## Related pages
+
+- [System Requirements](/docs/developers/system-requirements): what the install needs.
+- [Quick Start](/docs/developers/quick-start): what to do after installing.
+- [Troubleshooting](/docs/developers/troubleshooting): installation problems.

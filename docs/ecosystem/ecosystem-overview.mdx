@@ -1,0 +1,197 @@
+---
+title: "Ecosystem Overview"
+description: "A map of the Orivon ecosystem: the products, open standards and participants that come together to form a user-owned web."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["ecosystem", "overview", "products", "standards"]
+keywords: "ecosystem, overview, browser, runtime, core, modules, standards, participants, open web"
+---
+
+The Orivon ecosystem is more than a browser. It is the full set of products,
+open standards and participants that work together so that users, not
+platforms, own the web. This page is the map: what exists today, what is being
+built, and how every piece connects.
+
+## What the ecosystem is
+
+An ecosystem is everything that must exist for the vision to hold together. In
+Orivon's case that means four things working at once:
+
+1. **Products** that people actually use, starting with the browser.
+2. **Standards** that define how identities, value, data and modules behave,
+   so that any implementation interoperates with any other.
+3. **Infrastructure** such as decentralized naming, storage and networking that
+   replaces the servers and gatekeepers of today's web.
+4. **Participants** including developers, creators, validators and users who
+   keep the ecosystem running and growing.
+
+<StatGrid>
+  <Stat value="4" label="Product layers: browser, runtime, core, modules" />
+  <Stat value="15" label="Pages in this section" />
+  <Stat value="Open" label="Any implementation can interoperate" />
+</StatGrid>
+
+## The stack, from user to standard
+
+The ecosystem is easiest to understand as a stack. Users touch the top; open
+standards anchor the bottom.
+
+<Diagram caption="The Orivon stack. Standards make everything above them interchangeable.">
+  <Flow column>
+    <DiagramNode accent>Users</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Browser</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Open Standards</DiagramNode>
+  </Flow>
+</Diagram>
+
+Each layer answers a single question:
+
+- The **browser** answers "how do I get to the web?"
+- The **runtime** answers "how do applications actually run?"
+- The **core** answers "what shared services does everything need?"
+- The **standards** answer "how do we all agree on what the web means?"
+
+## The product map
+
+Each product or capability has its own page in this section.
+
+<CardGrid columns={3}>
+  <Card title="Browser" to="/docs/ecosystem/browser">
+    The user-facing layer. A browser with wallets, decentralized DNS, sandboxing
+    and the Web3 Score built in.
+  </Card>
+  <Card title="Runtime" to="/docs/ecosystem/runtime">
+    Executes applications: the classic web stack plus the new capabilities
+    defined by the standards.
+  </Card>
+  <Card title="Core" to="/docs/ecosystem/core">
+    The small, neutral layer that provides identity, value, storage and
+    connectivity to everything above it.
+  </Card>
+  <Card title="Modules" to="/docs/ecosystem/modules">
+    The extension mechanism. Anyone can build and distribute modules without
+    forking the browser.
+  </Card>
+  <Card title="SDK" to="/docs/ecosystem/sdk">
+    The developer toolkit for building applications, modules and services on
+    the ecosystem.
+  </Card>
+  <Card title="Wallet System" to="/docs/ecosystem/wallet-system">
+    Keys, accounts and payments handled natively, not bolted on through a
+    plugin.
+  </Card>
+  <Card title="Identity" to="/docs/ecosystem/identity">
+    Decentralized identities that are portable across every application and
+    network.
+  </Card>
+  <Card title="Naming System" to="/docs/ecosystem/naming-system">
+    Human readable names that resolve to identities and content without a
+    central registry.
+  </Card>
+  <Card title="Web3 Score" to="/docs/ecosystem/web3-score">
+    A transparent signal for how trustworthy, decentralized and well behaved a
+    website is.
+  </Card>
+</CardGrid>
+
+The remaining pages describe the infrastructure and governance that keep the
+ecosystem secure and open: the [Security Model](/docs/ecosystem/security-model),
+[Networking](/docs/ecosystem/networking), [Storage](/docs/ecosystem/storage),
+[Governance](/docs/ecosystem/governance) and the
+[Future Products](/docs/ecosystem/future-products) that are still planned.
+
+## Who participates
+
+A healthy ecosystem needs more than code. It needs people playing different
+roles:
+
+<CardGrid columns={2}>
+  <Card title="Users">
+    Browse, own their identity and data, and choose which applications and
+    modules to trust.
+  </Card>
+  <Card title="Developers">
+    Build applications, modules and services against open standards, with no
+    permission required.
+  </Card>
+  <Card title="Creators">
+    Publish content and applications directly, without paying a platform for
+    the right to reach an audience.
+  </Card>
+  <Card title="Network participants">
+    Run infrastructure: storage, naming, and network relays that keep the
+    ecosystem available and censorship resistant.
+  </Card>
+  <Card title="Validators and curators">
+    Help compute signals like the Web3 Score and participate in governance.
+  </Card>
+  <Card title="Governance participants">
+    Shape the standards through an open process, so the rules evolve with the
+    community.
+  </Card>
+</CardGrid>
+
+## How the pieces connect
+
+Everything hangs together through interfaces defined by the standards. Wallets,
+naming, storage and modules do not talk to a specific browser. They talk to the
+core, through public interfaces, which means any of them can be replaced.
+
+<Diagram caption="Participants attach through public interfaces, never to a single product.">
+  <Flow>
+    <DiagramNode dim>Wallets</DiagramNode>
+    <DiagramNode dim>Modules</DiagramNode>
+    <DiagramNode dim>Storage</DiagramNode>
+    <DiagramNode dim>Naming</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Core interfaces</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Open Standards</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The rules that hold it together
+
+The ecosystem follows a small set of rules. They are worth remembering because
+every design decision on the following pages is a consequence of them:
+
+1. **Open standards first.** Interoperability comes from agreement, not from a
+   single company owning the stack.
+2. **Neutral core.** The shared services stay small and neutral so no single
+   participant can capture them.
+3. **Replaceable parts.** Any product can be swapped for a better one without
+   breaking the rest.
+4. **Backward compatibility.** The existing web keeps working; the ecosystem
+   extends it instead of breaking it.
+
+<Callout type="success" title="Next">
+  Start with the layer users touch first: the [Browser](/docs/ecosystem/browser).
+  Or, if you prefer the long view, read about how the ecosystem is governed in
+  [Governance](/docs/ecosystem/governance).
+</Callout>
+
+## Related pages
+
+- [Key Features](/docs/introduction/key-features): the feature tour of the whole project.
+- [Architecture Overview](/docs/introduction/architecture-overview): the stack in diagram form.
+- [Vision](/docs/introduction/vision): where the ecosystem is heading.
+
+## Further reading
+
+- [Future Products](/docs/ecosystem/future-products): what is still on the drawing board.
+- [SDK](/docs/ecosystem/sdk): how to start building on the ecosystem today.

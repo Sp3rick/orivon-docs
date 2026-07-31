@@ -1,0 +1,184 @@
+---
+title: "FAQ"
+description: "Frequently asked questions about Orivon: what it is, how it works, security, governance and the road ahead. Searchable."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["introduction", "faq"]
+keywords: "faq, questions, orivon, web3 browser, security, governance, roadmap, wallet"
+---
+
+Common questions about Orivon, answered. Use the search box to filter, or browse the
+sections below.
+
+## General
+
+<Faq
+  label="questions"
+  items={[
+    {
+      q: 'What is Orivon?',
+      a: (
+        <>
+          Orivon is an open, community-driven browser for Web3: a trustless, user-friendly
+          way to use decentralized networks. See{' '}
+          <a href="/docs/introduction/what-is-orivon">What is Orivon?</a>.
+        </>
+      ),
+    },
+    {
+      q: 'Is Orivon a fork of an existing browser?',
+      a: 'Orivon builds on the classic web platform and plans to start from an existing open browser codebase as an upstream, layering Web3 capabilities on top. It is not a from-scratch replacement of the web.',
+    },
+    {
+      q: 'Is Orivon open source?',
+      a: 'Yes. The documentation, specifications and future implementation are open and community-driven. All source lives in public repositories.',
+    },
+    {
+      q: 'Who owns Orivon?',
+      a: 'Nobody owns it. Orivon is designed as a community-governed project, with an open foundation driving the vision for the benefit of the whole ecosystem.',
+    },
+    {
+      q: 'Is Orivon a cryptocurrency?',
+      a: 'No. Orivon is a browser and a set of open standards. Some ecosystem plans involve tokens and a DAO, but Orivon itself is infrastructure, not an investment.',
+    },
+    {
+      q: 'When will Orivon be available?',
+      a: 'Orivon is in its foundations phase. The specifications and reference implementation are being developed; see the <a href="/docs/introduction/roadmap">Roadmap</a> for the plan.',
+    },
+    {
+      q: 'How is this different from other Web3 browsers?',
+      a: 'Orivon focuses on open standards and a modular architecture rather than a proprietary product. The goal is for other browsers and tools to adopt the same standards.',
+    },
+  ]}
+/>
+
+## Technology
+
+<Faq
+  label="technical questions"
+  items={[
+    {
+      q: 'What is the Orivon Runtime?',
+      a: (
+        <>
+          The runtime executes applications, including the web stack, plus new Web3
+          capabilities, making software behave like native apps while staying portable. See{' '}
+          <a href="/docs/implementation/orivon-browser">the Implementation section</a>.
+        </>
+      ),
+    },
+    {
+      q: 'What is the Orivon Core?',
+      a: 'The core provides the neutral, shared services every implementation needs, such as identity, value, storage and connectivity, so different browsers and runtimes interoperate.',
+    },
+    {
+      q: 'What are modules?',
+      a: 'Modules are community-built capabilities that plug into the core through defined interfaces. They let the ecosystem extend the platform without forking the browser.',
+    },
+    {
+      q: 'How does the wallet system work?',
+      a: 'Wallets are a built-in, sandboxed browser capability. Keys and accounts are managed securely at the platform level, with a consistent consent flow for transactions.',
+    },
+    {
+      q: 'What is decentralized DNS?',
+      a: 'Decentralized DNS lets names resolve natively, like domains, without extensions or manual configuration. Users type a name and arrive at the right decentralized service.',
+    },
+    {
+      q: 'What is the Web3 Score?',
+      a: 'The Web3 Score is a safety signal that summarizes how risky a dApp or contract looks, so non-experts can make informed decisions before committing.',
+    },
+    {
+      q: 'Will standard websites still work?',
+      a: 'Yes. Backward compatibility is a core principle. Orivon preserves the existing web platform and extends it, so existing sites keep working as they do today.',
+    },
+    {
+      q: 'What does "trustless" mean here?',
+      a: 'It means the browser verifies what it shows you and doesn\'t rely on hidden intermediaries. You trust the math, not a middleman.',
+    },
+  ]}
+/>
+
+## Security & privacy
+
+<Faq
+  label="security questions"
+  items={[
+    {
+      q: 'How does Orivon keep my keys safe?',
+      a: 'Keys live in a sandboxed, platform-managed wallet. Applications request access explicitly, and the browser shows a clear consent flow for every transaction.',
+    },
+    {
+      q: 'What is sandboxing?',
+      a: 'Applications and modules run in isolation with exactly the permissions they asked for, and nothing more. This limits the damage any single app can cause.',
+    },
+    {
+      q: 'Can Orivon be phished?',
+      a: 'Phishing is a constant battle on every platform. Orivon mitigates it with native identity, Web3 Score signals and browser-level verification instead of relying on plugins.',
+    },
+    {
+      q: 'Does Orivon track me?',
+      a: 'No. Privacy-preserving defaults are a design principle. The browser is not funded by harvesting user data.',
+    },
+    {
+      q: 'Who can see my transactions?',
+      a: 'Public networks are inherently transparent. Orivon does not add new surveillance. It makes the consent and identity model clearer so you know what is exposed.',
+    },
+  ]}
+/>
+
+## Community & governance
+
+<Faq
+  label="community questions"
+  items={[
+    {
+      q: 'How can I contribute?',
+      a: (
+        <>
+          Start with the documentation, then join the community channels and GitHub.
+          Contributions of all kinds are welcome: docs, specs, design and code. See the
+          <a href="/docs/introduction/home"> Home page</a> for links.
+        </>
+      ),
+    },
+    {
+      q: 'Is there a DAO or token?',
+      a: 'Ecosystem governance is planned, including a DAO plan and reward structures for contributors. These are later phases; the roadmap covers the timeline.',
+    },
+    {
+      q: 'Who writes the standards?',
+      a: 'The community does. Standards are written openly and reviewed publicly, so anyone can participate in defining the next generation of the web.',
+    },
+    {
+      q: 'Where do I ask questions?',
+      a: 'The fastest route is the Discord and Telegram communities, or the OrivonStack forum. Bug and spec feedback belong on GitHub issues.',
+    },
+  ]}
+/>
+
+## The road ahead
+
+<Faq
+  label="roadmap questions"
+  items={[
+    {
+      q: 'What is the current phase?',
+      a: (
+        <>
+          We are in the foundations and specifications phase: the documentation is live and
+          the open standards are being drafted. See the{' '}
+          <a href="/docs/introduction/roadmap">Roadmap</a>.
+        </>
+      ),
+    },
+    {
+      q: 'When will Level 2 documentation be available?',
+      a: 'Implementation and Technical Design levels are being written. They appear in the sidebar as "Coming soon" until published.',
+    },
+    {
+      q: 'Can I use Orivon today?',
+      a: 'Not yet. There is no production browser build. Today you can read the documentation, join the community and contribute to the specifications.',
+    },
+  ]}
+/>

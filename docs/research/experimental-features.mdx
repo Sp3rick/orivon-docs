@@ -1,0 +1,83 @@
+---
+title: "Experimental Features"
+description: "Early ideas not yet finalized, explicitly labeled as experimental, concept, research, or proposal — never as production-ready features."
+readingTime: 22
+lastUpdated: "July 31, 2026"
+order: 37
+tags: ["research", "experimental-features"]
+keywords: "experimental features, concepts, proposals, research, not production, early ideas"
+---
+
+*Orivon Research Group · Status: Experimental / Concept / Proposal*
+
+This page collects ideas that are not yet finalized. They are published for
+discussion and research, and are **explicitly not production-ready**. Do not
+build on them.
+
+## Status labels
+
+| Label | Meaning |
+| --- | --- |
+| `Experimental` | Prototype-level; may change or be abandoned. |
+| `Concept` | An idea with no implementation commitment. |
+| `Research` | Under active investigation. |
+| `Proposal` | A proposed direction not yet accepted. |
+
+A label is never stronger than the evidence. Items that survive evaluation
+move to the [Design Documents](/docs/research/design-documents) as accepted
+decisions; the rest are archived.
+
+## Experimental
+
+| Feature | Status | Description |
+| --- | --- | --- |
+| WASM component-model modules | Experimental | Composible, type-checked module interfaces. |
+| Named session portability | Experimental | Export/import sessions as encrypted bundles. |
+| AOT module compilation | Experimental | Cold-start reduction via ahead-of-time artifacts. |
+| BLS signature aggregation | Experimental | Aggregated verification for governance. |
+
+## Concepts
+
+| Feature | Status | Description |
+| --- | --- | --- |
+| Browsers as network peers | Concept | Devices contributing relay/storage capacity. |
+| Agent-assisted browsing | Concept | On-device AI assistance (see [AI](/docs/research/artificial-intelligence)). |
+| Erasure-coded DSN tiers | Concept | Durable distributed storage tiers. |
+| Zero-knowledge score proofs | Concept | Prove a score threshold without revealing it. |
+
+## Research
+
+| Feature | Status | Description |
+| --- | --- | --- |
+| Formal sandbox verification | Research | Mechanized proof of capability confinement. |
+| Searchable encryption | Research | Query encrypted collections. |
+| Differential-privacy reputation | Research | Aggregate metrics without individual disclosure. |
+| Threshold key custody | Research | Distributed key control. |
+
+## Proposals
+
+| Feature | Status | Description |
+| --- | --- | --- |
+| Decentralized storefronts | Proposal | Storefront-independent distribution. |
+| Cross-ecosystem DID interop | Proposal | Interoperability testing with other DID methods. |
+| Transparent supply-chain logs | Proposal | Append-only artifact transparency. |
+| WebTransport-native P2P | Proposal | Browsers as peers over HTTP/3. |
+
+## Review process
+
+| Stage | Gate |
+| --- | --- |
+| Idea | Recorded with a status label. |
+| Prototype | Demonstrates the core mechanism. |
+| Evaluation | Measured against requirements and trade-offs. |
+| Accepted | Recorded in [Design Documents](/docs/research/design-documents). |
+| Archived | Rejected or superseded, with rationale. |
+
+<Danger title="Not production">
+  Items on this page are not part of the supported platform. The
+  [Standards](/docs/standards/overview), [API Reference](/docs/api-reference/overview),
+  and [Developer Documentation](/docs/developers/overview) describe what you
+  can rely on.
+</Danger>
+
+**Related:** [Design Documents](/docs/research/design-documents) · [Research Roadmap](/docs/research/research-roadmap) · [Decentralized Computing](/docs/research/decentralized-computing)

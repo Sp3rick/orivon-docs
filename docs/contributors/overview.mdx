@@ -1,0 +1,157 @@
+---
+title: "Contributor Guide Overview"
+description: "A complete guide to contributing to Orivon: who can contribute, how to start, the contribution workflow, community values and resources."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["contributors", "overview"]
+keywords: "contributor guide, contribute to orivon, open source, getting involved"
+---
+
+Orivon is built by the people who use it. The Contributor Guide is your entry
+point: it explains who can contribute, how the process works, and where to
+find help at every step.
+
+<Callout type="success" title="The short version">
+  Pick something you care about, read the relevant guide, and open your first
+  contribution. You do not need permission and you do not need to be an
+  expert. The community is here to help you through it.
+</Callout>
+
+## Why contribute
+
+Contributing to Orivon is more than writing code. It is:
+
+- **Building the open web**: every contribution moves the platform toward a
+  web users own and control.
+- **Learning deeply**: contributing is the best way to understand the
+  architecture, from the sandbox to the standards.
+- **Growing a portfolio**: your work is public, attributed and reviewed by
+  people who care about quality.
+- **Earning recognition**: contributors are acknowledged publicly and through
+  the rewards program.
+
+See [Why Contribute](/docs/contributors/why-contribute) for the full case.
+
+## Who can contribute
+
+Anyone. The guide covers contributions from:
+
+| Who you are | How you fit in |
+| --- | --- |
+| **Developer** | Code, reviews, tests, performance |
+| **Designer** | UI, UX, icons, illustrations, diagrams |
+| **Writer** | Documentation, guides, editing |
+| **Tester** | Bug hunting, QA, conformance testing |
+| **Security researcher** | Responsible disclosure, audits |
+| **Community member** | Support, translation, outreach, governance |
+
+The ecosystem is bigger than the code, and every role is a real contribution.
+
+## Types of contributions
+
+<CardGrid columns={2}>
+  <Card title="Code" href="/docs/contributors/development-workflow">
+    Features, fixes, tests, performance work and the CI pipeline.
+  </Card>
+  <Card title="Documentation" href="/docs/contributors/documentation-contributions">
+    Guides, examples, diagrams and this very documentation.
+  </Card>
+  <Card title="Design" href="/docs/contributors/design-contributions">
+    UI, UX, icons, illustrations and architecture diagrams.
+  </Card>
+  <Card title="Security" href="/docs/contributors/security-policy">
+    Finding and responsibly reporting vulnerabilities.
+  </Card>
+  <Card title="Localization" href="/docs/contributors/localization">
+    Translating documentation and interfaces.
+  </Card>
+  <Card title="Community" href="/docs/contributors/community-guidelines">
+    Helping others, reviews, discussion and governance.
+  </Card>
+</CardGrid>
+
+## Community values
+
+The work happens in an open, respectful community. The
+[Code of Conduct](/docs/contributors/code-of-conduct) is the contract every
+contributor lives by:
+
+<CheckList
+  items={[
+    'Be respectful and constructive in every interaction.',
+    'Assume good faith: most disagreements are about tradeoffs, not people.',
+    'Give actionable feedback and receive it openly.',
+    'Credit others for their work, always.',
+    'Follow the security and privacy expectations without exception.',
+  ]}
+/>
+
+## Quick start
+
+The fastest path to a first contribution:
+
+<Steps>
+  <Step title="Set up">
+    Install the development tools and clone the repository. See
+    [Getting Started](/docs/contributors/getting-started).
+  </Step>
+  <Step title="Find an issue">
+    Start with a [good first issue](/docs/contributors/good-first-issues).
+  </Step>
+  <Step title="Read the guides">
+    Follow the [development workflow](/docs/contributors/development-workflow)
+    and the [coding standards](/docs/contributors/coding-standards).
+  </Step>
+  <Step title="Open a PR">
+    Submit your change with the [pull request checklist](/docs/contributors/pull-requests).
+  </Step>
+  <Step title="Iterate">
+    Engage with the review and land your contribution.
+  </Step>
+</Steps>
+
+## The contribution workflow
+
+Every contribution follows the same loop, whether it is a code change, a
+documentation edit or a design:
+
+<Diagram caption="The contribution loop.">
+  <Flow column>
+    <DiagramNode accent>Fork and branch</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Make the change</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Test and review</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Merge and ship</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Celebrate and repeat</DiagramNode>
+  </Flow>
+</Diagram>
+
+The full detail is in
+[Development Workflow](/docs/contributors/development-workflow).
+
+## Helpful resources
+
+| Resource | Where |
+| --- | --- |
+| Repository structure | [Repository Structure](/docs/contributors/repository-structure) |
+| Branching strategy | [Branching Strategy](/docs/contributors/branching-strategy) |
+| Issue guidelines | [Issue Guidelines](/docs/contributors/issue-guidelines) |
+| Templates | [Bug Report](/docs/contributors/templates/bug-report), [Feature Request](/docs/contributors/templates/feature-request), [Pull Request](/docs/contributors/templates/pull-request), [Security Report](/docs/contributors/templates/security-report) |
+| Mentorship | [Mentorship](/docs/contributors/mentorship) |
+| FAQ | [Contributor FAQ](/docs/contributors/faq) |
+
+<Callout type="info" title="Where to ask questions">
+  When in doubt, ask. The [community guidelines](/docs/contributors/community-guidelines)
+  list the channels for help, and maintainers are happy to point new
+  contributors in the right direction.
+</Callout>
+
+## Related pages
+
+- [Why Contribute](/docs/contributors/why-contribute): the reasons to get involved.
+- [Getting Started](/docs/contributors/getting-started): the setup.
+- [Good First Issues](/docs/contributors/good-first-issues): where to begin.
