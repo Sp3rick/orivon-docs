@@ -1,0 +1,224 @@
+---
+title: "Versioning"
+description: "How Orivon specifications are versioned: semantic versioning, compatibility promises, breaking changes, migration strategy and long-term support."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["standards", "versioning"]
+keywords: "versioning, semantic versioning, backward compatibility, forward compatibility, breaking changes, migration, long-term support"
+---
+
+Versioning is the promise that makes standards usable. A consumer must be able
+to read a specification version, build against it, and know what will still be
+true tomorrow. This page defines how Orivon versions its specifications and
+what each version number means.
+
+## The version model
+
+Every specification uses semantic versioning, `MAJOR.MINOR.PATCH`, with rules
+that map directly to compatibility:
+
+| Part | Incremented when | Compatibility |
+| --- | --- | --- |
+| **MAJOR** | Backward incompatible change | Breaking |
+| **MINOR** | Additive, backward compatible change | Backward compatible |
+| **PATCH** | Clarification or correction, no behavior change | Fully compatible |
+
+A version number is a promise. When it is published with an **Accepted** status,
+that promise is binding.
+
+<Diagram caption="Semantic versioning encodes the compatibility promise.">
+  <Flow column>
+    <DiagramNode>PATCH: clarification, no change</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>MINOR: additive, compatible</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>MAJOR: breaking, announced</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Specification versions
+
+Each specification is versioned independently. The identifier stays the same
+across versions; only the version number changes:
+
+- **OSP-006 Permission Model v0.1.0** and **OSP-006 Permission Model v0.2.0**
+  are two versions of the same specification.
+- The registry records the current version of every document. See
+  [Specification Registry](/docs/standards/specification-registry).
+- Every version is immutable once published as Accepted. Corrections become a
+  new PATCH or MINOR, never a rewrite of the published text.
+
+## Backward compatibility
+
+Backward compatibility means a consumer built against version N keeps working
+against version N+1. Orivon maintains this with specific rules:
+
+<CheckList
+  items={[
+    'New fields are optional and ignored by older consumers.',
+    'Existing fields keep their meaning and their default values.',
+    'New enum values are added, never renamed or removed.',
+    'Endpoints, messages and formats that exist stay valid.',
+    'Behavior changes are PATCH or MINOR only when they fix bugs, never when they alter contracts.',
+  ]}
+/>
+
+The rule of thumb: **a MINOR version adds, it does not change.** This is what
+lets the ecosystem upgrade at different speeds.
+
+## Forward compatibility
+
+Forward compatibility is the harder direction: a consumer built against version
+N should be able to understand data produced by version N+1. This is achieved
+through the same discipline, seen from the other side:
+
+- Producers add fields, they do not remove them.
+- Consumers ignore fields they do not understand. Unknown fields are never an
+  error.
+- Version markers are explicit in every serialized message or file, so a
+  consumer can always detect a newer format.
+
+Forward compatibility matters for long-lived data, because data outlives the
+code that wrote it. The [Storage](/docs/standards/osp-010-storage) draft depends
+on this property.
+
+## Breaking changes
+
+Breaking changes are possible, expensive, and strictly controlled. A MAJOR
+version is required for any of these:
+
+| Change | Example |
+| --- | --- |
+| **Removal** | A field, message or endpoint is deleted |
+| **Renaming** | A field or enum value is renamed |
+| **Semantic change** | A value's meaning changes (for example, units change) |
+| **Reordering** | A positional format changes order |
+| **Default change** | A default value changes behavior |
+
+A MAJOR version is never released silently. It follows the full lifecycle:
+the change is drafted, discussed and reviewed before it is accepted. See
+[Specification Lifecycle](/docs/standards/specification-lifecycle).
+
+## Migration strategy
+
+Breaking changes come with a migration path, defined at the same time as the
+change:
+
+<Steps>
+  <Step title="Deprecate">
+    The old behavior is marked deprecated with a timeline, in the current major
+    version.
+  </Step>
+  <Step title="Announce">
+    The deprecation and the replacement are announced publicly, with examples.
+  </Step>
+  <Step title="Overlap">
+    The new major version and the old major version coexist during migration.
+  </Step>
+  <Step title="Remove">
+    Only after the overlap window, the old behavior is retired in a later
+    version.
+  </Step>
+</Steps>
+
+<Diagram caption="Migration as an overlap window, not a cutover.">
+  <Flow column>
+    <DiagramNode accent>Version N (deprecated)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Migration window</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Version N+1 (current)</DiagramNode>
+  </Flow>
+</Diagram>
+
+The goal is that no consumer is forced to migrate on the same day the new
+version ships.
+
+## Long-term support
+
+Not every specification version is supported forever. The support policy:
+
+<CardGrid columns={3}>
+  <Card title="Current major">
+    Fully supported. Bugs are fixed with PATCH versions.
+  </Card>
+  <Card title="Previous major">
+    Supported for a defined period after the new major ships.
+  </Card>
+  <Card title="Older majors">
+    Deprecated, then archived. Consumers are expected to have migrated.
+  </Card>
+</CardGrid>
+
+The support period for each specification is recorded in the registry entry,
+and deprecation always points at the supported replacement. Retired
+specifications are tracked on the
+[Deprecated Specifications](/docs/standards/deprecated-specifications) page.
+
+## Version markers
+
+Serialized data carries its specification version explicitly. A realistic
+example from the package manifest draft:
+
+```json
+{
+  "format": "orivon-package",
+  "version": "0.1.0",
+  "name": "example-app",
+  "manifest": "orivon.toml"
+}
+```
+
+The explicit version marker is what makes forward compatibility enforceable:
+a consumer reads the version before it reads the content, and can decide how to
+interpret what follows. See the [Package Manifest draft](/docs/standards/osp-005-package-manifest)
+for the full definition.
+
+## Versioning in practice
+
+A worked example of how versions interact with the registry:
+
+<Timeline
+  phases={[
+    {
+      period: 'v0.1.0',
+      title: 'First draft',
+      status: 'done',
+      children: 'The specification is published as a draft. The 0.x series means the contract is still changing.',
+    },
+    {
+      period: 'v0.2.0',
+      title: 'Additive revision',
+      status: 'current',
+      children: 'New optional fields are added after discussion. Still 0.x, so breaking changes are possible.',
+    },
+    {
+      period: 'v1.0.0',
+      title: 'First stable version',
+      status: 'future',
+      children: 'The specification is accepted. From here, compatibility rules are binding.',
+    },
+  ]}
+/>
+
+The 0.x series is the key nuance: before 1.0.0, a MINOR bump can still break,
+which is why nothing below 1.0.0 is treated as a promise.
+
+<Callout type="warning" title="0.x is a draft promise">
+  A 0.x version is a direction, not a contract. Only a 1.0.0 (or higher)
+  **Accepted** specification binds its compatibility rules. All fifteen current
+  drafts are 0.x for exactly this reason.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  When a consumer pins a specification version, pin the MAJOR and check the
+  migration notes before bumping. MINOR and PATCH upgrades are safe by
+  contract; MAJOR upgrades are a project, not a step.
+</Callout>
+
+## Related pages
+
+- [Specification Registry](/docs/standards/specification-registry): current versions of every document.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): how versions change through stages.
+- [Deprecated Specifications](/docs/standards/deprecated-specifications): retired versions and replacements.

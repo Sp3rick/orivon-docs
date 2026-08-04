@@ -1,0 +1,214 @@
+---
+title: "Building Your First Application"
+description: "A tutorial that builds an Orivon application from creation to execution, using modules, permissions and the runtime APIs."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["developers", "first-application"]
+keywords: "first application, application tutorial, modules, permissions, runtime, lifecycle"
+---
+
+An application is a complete product: it combines modules, APIs and a user
+experience into something that runs inside the Orivon browser. This tutorial
+builds one from creation to execution, and explains the application lifecycle
+along the way.
+
+## What an application is
+
+An application is a package that:
+
+<CheckList
+  items={[
+    'Declares the modules and permissions it depends on.',
+    'Presents an interface to the user through the browser.',
+    'Runs in a runtime host with its declared capabilities.',
+    'Communicates with the rest of the system through the APIs.',
+  ]}
+/>
+
+The distinction from a module: a module provides capability, an application
+provides a product. Applications consume modules. See
+[Module Architecture](/docs/technical-design/module-architecture).
+
+## Step 1: Scaffold the application
+
+```sh
+orivon new daily-greeting
+cd daily-greeting
+```
+
+The default template is an application. It scaffolds an entry point, a test
+and an empty manifest.
+
+## Step 2: Declare dependencies and permissions
+
+Edit `orivon.toml`. The application depends on the greeting module from the
+module tutorial and requests the permissions it needs:
+
+```toml
+[package]
+name = "daily-greeting"
+version = "0.1.0"
+authors = ["you.orivon"]
+
+[permissions]
+allow = ["identity.read"]
+
+[dependencies]
+"greeting-module" = "0.1.0"
+```
+
+<Callout type="warning" title="Permissions are the contract">
+  Every permission the application requests is shown to the user at install
+  time. Request only what the app actually uses. A request for `wallet.sign`
+  with no signing feature is a red flag for users and reviewers.
+</Callout>
+
+Install the dependency:
+
+```sh
+orivon add greeting-module
+```
+
+## Step 3: Write the application
+
+Open `src/main.ts`:
+
+```ts
+import {Orivon} from '@orivon/sdk';
+
+const app = new Orivon();
+const greeting = app.use('greeting-module');
+
+app.on('ready', async () => {
+  const who = await app.identity.read();
+  const result = await greeting.call('greet', {name: who?.name ?? 'world'});
+
+  app.ui.render(
+    <view>
+      <text>{result.message}</text>
+    </view>,
+  );
+});
+```
+
+The application composes three things:
+
+- `app.use(...)` loads the module and prepares it for calls.
+- `app.identity.read()` uses the granted `identity.read` permission to learn
+  who the user is.
+- `app.ui.render(...)` draws the interface through the browser rendering
+  pipeline.
+
+## Step 4: Build
+
+```sh
+orivon build
+```
+
+Expected output:
+
+```text
+Building daily-greeting 0.1.0
+Compiled in 1.4s
+Package ready: dist/daily-greeting.omp
+```
+
+The build resolves and verifies the module dependency, so a clean build also
+means the dependency tree is intact.
+
+## Step 5: Test
+
+Replace the scaffold test:
+
+```ts
+import {launchApp} from '@orivon/sdk/testing';
+
+test('renders a greeting', async () => {
+  const app = await launchApp('./dist/daily-greeting.omp', {
+    permissions: ['identity.read'],
+    mocks: {identity: {name: 'Alice'}},
+  });
+  expect(app.renderLog()).toContain('Hello, Alice!');
+});
+```
+
+Run:
+
+```sh
+orivon test
+```
+
+The test mocks the identity service, so it runs without a real identity. See
+[Testing](/docs/developers/testing) for the mocking model.
+
+## Step 6: Run the application
+
+Run in the local runtime:
+
+```sh
+orivon run
+```
+
+The runtime starts, loads the application with its granted permissions,
+resolves the module dependency, and runs the app. The local runtime is a
+development environment; in production the application runs inside the browser
+process topology described in
+[Browser Architecture](/docs/technical-design/browser-architecture).
+
+## The application lifecycle
+
+An application moves through a defined lifecycle, which the runtime enforces:
+
+<Diagram caption="The application lifecycle.">
+  <Flow column>
+    <DiagramNode accent>Installed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Registered (consent for permissions)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Initialized</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Running (active and suspended)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Shutting down</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Uninstalled</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Stage | What happens |
+| --- | --- |
+| **Installed** | The package is present but inactive |
+| **Registered** | The user consents to the requested permissions |
+| **Initialized** | Dependencies are resolved and hooks run |
+| **Running** | The app is active, or suspended in the background |
+| **Shutting down** | State is flushed and resources are released |
+| **Uninstalled** | The package and its grants are removed |
+
+The full lifecycle is documented in
+[Application Lifecycle](/docs/technical-design/application-lifecycle). Your
+code participates through the lifecycle hooks in the manifest.
+
+## What you built
+
+The application now:
+
+1. Declares a dependency on a module and a permission on identity.
+2. Loads the module and calls it.
+3. Reads identity with the granted permission.
+4. Renders a result.
+
+That is the complete shape of an Orivon application, from creation to
+execution.
+
+<Callout type="success" title="Next steps">
+  Explore the [Runtime APIs](/docs/developers/runtime-apis) to grow the app,
+  then read [Permissions](/docs/developers/permissions) and
+  [Best Practices](/docs/developers/best-practices) before shipping.
+</Callout>
+
+## Related pages
+
+- [Building Your First Module](/docs/developers/building-your-first-module): the module the app consumed.
+- [Runtime APIs](/docs/developers/runtime-apis): what the app can do.
+- [Permissions](/docs/developers/permissions): how grants work.

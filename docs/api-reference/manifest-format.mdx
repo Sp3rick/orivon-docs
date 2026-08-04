@@ -1,0 +1,126 @@
+---
+title: "Manifest Format"
+description: "Reference for the Orivon package manifest: fields, permissions, icons and distribution metadata."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 27
+tags: ["api-reference", "manifest-format"]
+keywords: "manifest, manifest format, orivon.json, package metadata, permissions, icons, manifest schema, entry, distribution"
+---
+
+Every package ships a manifest that describes how the runtime should load,
+authenticate and sandbox it. The manifest is validated against
+`manifest.schema.json` (see [Schemas](/docs/api-reference/schemas)) at install
+time and on every load.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Manifest file
+
+The manifest is authored as `orivon.json` in the package root.
+
+```json
+{
+  "manifest_version": 1,
+  "name": "example.wallet",
+  "version": "1.2.0",
+  "type": "application",
+  "description": "Example wallet",
+  "entry": "dist/index.js",
+  "apiVersion": "1.0.0",
+  "runtime": ">=1.20",
+  "permissions": [
+    {"name": "wallet.read"},
+    {"name": "wallet.sign", "scope": "transactions"}
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "defaultLocale": "en",
+  "locales": {"en": "locales/en.json"},
+  "distribution": {"markets": ["orivon-store"]}
+}
+```
+
+## Field reference
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `manifest_version` | `number` | yes | Schema version. Currently `1`. |
+| `name` | `string` | yes | Reverse-DNS identifier. |
+| `version` | `Version` | yes | Package version. |
+| `type` | `"module" \| "application"` | yes | Package type. |
+| `description` | `string` | no | Short description. |
+| `entry` | `string` | yes | Entry point relative to root. |
+| `apiVersion` | `Version` | yes | API version targeted. |
+| `runtime` | `string` | no | Semver range for the runtime. |
+| `permissions` | `PermissionDescriptor[]` | no | Maximum capabilities. |
+| `icons` | `Record<string, string>` | no | Size-keyed icon paths. |
+| `defaultLocale` | `string` | no | Default locale code. |
+| `locales` | `Record<string, string>` | no | Locale file paths. |
+| `distribution` | `DistributionConfig` | no | Store publication metadata. |
+
+## Permission registry
+
+The following permission names are recognized. Unknown names are ignored at
+load time (never granted).
+
+| Permission | Gates |
+| --- | --- |
+| `browser.tabs` | [Browser API](/docs/api-reference/browser-api) tab operations. |
+| `browser.bookmarks` | Bookmark operations. |
+| `browser.history` | History reads. |
+| `wallet.read` | Account and balance reads. |
+| `wallet.sign` | Signing operations. |
+| `wallet.transactions` | Transaction send and history. |
+| `identity.did` | DID creation and resolution. |
+| `identity.credentials` | Credential issue and verify. |
+| `identity.session` | Session management. |
+| `storage.read` | KV and file reads. |
+| `storage.write` | KV and file writes. |
+| `storage.clear` | Quota clearing. |
+| `networking.fetch` | HTTP fetch. |
+| `networking.connect` | Streaming connections. |
+| `dns.resolve` | Name resolution. |
+| `dns.manage` | Registration and updates. |
+| `security.keys` | Key management and signing. |
+| `security.secrets` | Keychain access. |
+
+## Scopes
+
+A descriptor may carry a `scope` to narrow the grant:
+
+| Scope | Applies to | Restriction |
+| --- | --- | --- |
+| `transactions` | `wallet.sign` | Signing for transactions only. |
+| `cache` | `storage.*` | Only the `cache` storage scope. |
+| `specific-did` | `identity.*` | Only the listed DID. |
+
+```json
+{"name": "storage.write", "scope": "cache"}
+```
+
+## Distribution
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `markets` | `string[]` | Allowed storefronts. |
+| `updateUrl` | `string \| undefined` | Custom update source. |
+| `autoupdate` | `boolean \| undefined` | Allow silent updates. |
+
+## Load-time rules
+
+- Duplicate `name` fields are an error.
+- `entry` must stay within the package root (no `../` escapes).
+- Icon files must be PNG or WebP under 1 MB each.
+- `permissions` beyond the platform's registry are ignored, never an error.
+
+<Warning title="Permission scope">
+  `permissions` is the maximum the package may request — not a guarantee. The
+  user can deny individual grants at install time. Gate feature code on the
+  actual state via [Permissions API](/docs/api-reference/permissions-api).
+</Warning>
+
+**Related:** [Configuration](/docs/api-reference/configuration) · [Schemas](/docs/api-reference/schemas) · [Permissions API](/docs/api-reference/permissions-api)

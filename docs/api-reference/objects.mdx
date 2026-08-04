@@ -1,0 +1,83 @@
+---
+title: "Objects"
+description: "Reference for the global objects and singleton facades exposed to Orivon packages."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 22
+tags: ["api-reference", "objects"]
+keywords: "objects, global objects, facades, singletons, root object, runtime globals"
+---
+
+Packages access platform capability through a set of global objects. Each
+object is a singleton facade created by the runtime and injected before
+`activate()`. This page indexes them.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Global object index
+
+| Object | Type | Purpose |
+| --- | --- | --- |
+| `app` | `Orivon` | Root object; event hub, messaging, life cycle. |
+| `app.core` | `CoreFacade` | Platform and resource metadata. |
+| `app.browser` | `BrowserFacade` | Tabs, popups, bookmarks, history. |
+| `app.module` | `ModuleFacade` | Module loading and control. |
+| `app.application` | `ApplicationFacade` | Application lifecycle and windows. |
+| `app.wallet` | `WalletFacade` | Accounts, signing, transactions. |
+| `app.identity` | `IdentityFacade` | DIDs, credentials, sessions. |
+| `app.storage` | `StorageFacade` | KV store, files, collections. |
+| `app.networking` | `NetworkingFacade` | HTTP and streaming connections. |
+| `app.dns` | `DnsFacade` | Domain name resolution and ownership. |
+| `app.permissions` | `PermissionsFacade` | Capability inspection and grants. |
+| `app.security` | `SecurityFacade` | Crypto primitives and secrets. |
+| `app.log` | `Logger` | Leveled logging. |
+| `app.version` | `string` | Package API version. |
+| `app.platform` | `PlatformInfo` | Host metadata. |
+| `app.env` | `Record<string, string>` | Environment variables. |
+| `app.moduleId` | `string` | This package's identifier. |
+
+## Accessibility
+
+| Object | Always available | Requires grant |
+| --- | --- | --- |
+| `app` | yes | — |
+| `app.log` | yes | — |
+| `app.version`, `app.platform`, `app.env` | yes | — |
+| `app.core` | yes | — |
+| `app.module` | yes | — |
+| `app.application` | yes | — |
+| `app.browser` | no | `browser.tabs` |
+| `app.wallet` | no | `wallet.*` |
+| `app.identity` | no | `identity.*` |
+| `app.storage` | no | `storage.*` |
+| `app.networking` | no | `networking.*` |
+| `app.dns` | no | `dns.*` |
+| `app.permissions` | yes | — |
+| `app.security` | no | `security.*` |
+
+Grant-gated facades are present on `app` but every method call rejects with
+`ERR_PERMISSION_DENIED` until the corresponding grant is held.
+
+## Object identity
+
+- Facades are singletons: `app.wallet === app.wallet` for the lifetime of the
+  package.
+- No facade can be constructed directly. See [Classes](/docs/api-reference/classes).
+
+## Enumerating facades
+
+```ts
+for (const [name, facade] of Object.entries(app)) {
+  if (typeof facade?.listGrants === 'function') {
+    // facade-shaped object
+  }
+}
+```
+
+<Warning title="Do not cache facades">
+  Facades may be replaced between activations on future major versions.
+  Resolve `app.<facade>` at use time rather than caching it during
+  `activate()`.
+</Warning>
+
+**Related:** [Classes](/docs/api-reference/classes) · [Enums](/docs/api-reference/enums) · [Interfaces](/docs/api-reference/interfaces)

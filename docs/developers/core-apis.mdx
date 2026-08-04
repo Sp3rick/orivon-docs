@@ -1,0 +1,163 @@
+---
+title: "Core APIs"
+description: "The core services your code uses through the runtime: sessions, modules, naming, configuration and the request pipeline they share."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["developers", "core-apis"]
+keywords: "core APIs, core services, session, module service, naming, config, request pipeline"
+---
+
+The core services are the privileged middle layer of Orivon. Your code reaches
+them through the runtime facades, and every call travels the same pipeline.
+This page explains what the core APIs are and when to use them.
+
+## What the core APIs are
+
+The core layer is a set of services behind one API:
+
+<CardGrid columns={3}>
+  <Card title="Session">
+    Your session and its identity context.
+  </Card>
+  <Card title="Module service">
+    Loading, installing and inspecting modules.
+  </Card>
+  <Card title="Naming service">
+    Resolving names to identities and targets.
+  </Card>
+  <Card title="Config service">
+    Reading scoped configuration.
+  </Card>
+  <Card title="Wallet service">
+    Key operations, through the wallet APIs.
+  </Card>
+  <Card title="Policy service">
+    Permission evaluation, through the permission APIs.
+  </Card>
+</CardGrid>
+
+You usually interact with the facades (`app.identity`, `app.storage`) rather
+than the services directly. The core APIs are what those facades call.
+
+## Why they exist
+
+The core layer centralizes privileged operations so they are always
+authenticated, authorized, validated and audited. Every call to a core service
+passes through the same pipeline:
+
+<Diagram caption="The core request pipeline.">
+  <Flow column>
+    <DiagramNode accent>authenticate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>authorize</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>validate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>execute</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>emit</DiagramNode>
+  </Flow>
+</Diagram>
+
+Because every call is checked the same way, a module cannot reach a core
+service it was not granted. The architecture is documented in
+[Core Architecture](/docs/technical-design/core-architecture).
+
+## Using the core APIs
+
+### Sessions
+
+The session is your identity context for the current run:
+
+```ts
+const session = await app.session.current();
+const identity = session.identity;
+```
+
+Sessions are short lived and derived from your identity. They are what
+authenticates your calls to core services.
+
+### Module service
+
+Load and inspect modules at runtime:
+
+```ts
+const info = await app.modules.info('greeting-module');
+const module = await app.modules.load('greeting-module');
+```
+
+Use the module service when your package dynamically loads other packages.
+Prefer declaring static dependencies in the
+[manifest](/docs/developers/module-manifest) when possible; dynamic loading is
+more powerful and more dangerous.
+
+### Naming service
+
+Resolve names through the naming stack:
+
+```ts
+const target = await app.naming.resolve('alice.orivon');
+```
+
+See [DNS APIs](/docs/developers/dns-apis) for the naming APIs in detail.
+
+### Config service
+
+Read configuration through the scoped config API:
+
+```ts
+const value = await app.config.get('max_results');
+```
+
+See [Configuration](/docs/developers/configuration).
+
+## When to use the core APIs
+
+| You need to | Use |
+| --- | --- |
+| Know who is running you | `app.session.current()` |
+| Load a package dynamically | `app.modules.load(...)` |
+| Resolve a name | `app.naming.resolve(...)` |
+| Read scoped config | `app.config.get(...)` |
+| Sign or manage keys | [Wallet APIs](/docs/developers/wallet-apis) |
+| Check a grant | [Permissions](/docs/developers/permissions) |
+
+Most code will touch the facades, not the core services directly. Reach for
+the core APIs when you need the service itself: dynamic modules, naming and
+sessions.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Dynamic loading everything">
+    Static dependencies are verifiable; dynamic loads are not. Prefer the
+    manifest for real dependencies.
+  </Card>
+  <Card title="Storing sessions">
+    Sessions are short lived by design. Re-read the current session instead of
+    storing stale ones.
+  </Card>
+  <Card title="Assuming core access">
+    The core APIs are privileged. A missing permission surfaces as a denial;
+    request it in the manifest.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Treat the core APIs as the sensitive layer. Write a wrapper in your own
+  module for the two or three core operations you actually use, so the calls
+  are easy to audit and easy to test with mocks.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The core APIs are defined by [Core Architecture](/docs/technical-design/core-architecture)
+  and specified in the
+  [Core Architecture draft](/docs/standards/osp-002-core-architecture).
+</Callout>
+
+## Related pages
+
+- [Runtime APIs](/docs/developers/runtime-apis): the facades that call the core.
+- [Identity APIs](/docs/developers/identity-apis): sessions and identity.
+- [Permissions](/docs/developers/permissions): how the authorize stage works.

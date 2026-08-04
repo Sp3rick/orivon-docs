@@ -1,0 +1,116 @@
+---
+title: "Application API"
+description: "Reference for the Application API: launching, lifecycle, windows and startup arguments for applications."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["api-reference", "application-api"]
+keywords: "application api, launch application, quit, window, startup args, app lifecycle, app state"
+---
+
+The Application API manages the lifecycle of applications — the runnable,
+windowed packages of the platform. Modules extend the platform; applications
+are what users interact with directly.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: ApplicationFacade
+
+### `application.launch(id, args?)`
+
+Launches an application package, optionally passing arguments.
+
+```ts
+const handle = await app.application.launch('com.example.reader', {
+  url: 'https://docs.orivonstack.com',
+});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier of the application. |
+| `args` | `Record<string, unknown> \| undefined` | Startup arguments exposed to the app. |
+
+**Returns:** `Promise<ApplicationHandle>` — includes `id`, `window` and `state`.
+
+**Throws:** `ERR_MODULE_NOT_FOUND` · `ERR_PERMISSION_DENIED`
+
+### `application.getCurrent()`
+
+Returns the record for the currently executing application.
+
+**Returns:** `Promise<ApplicationRecord>`
+
+### `application.getStartupArgs()`
+
+Returns the arguments the current application was launched with.
+
+**Returns:** `Promise<Record<string, unknown>>`
+
+### `application.state`
+
+Read-only accessor for the current application state:
+
+| Value | Meaning |
+| --- | --- |
+| `starting` | Bootstrap in progress. |
+| `running` | Active and rendering. |
+| `hidden` | Running but no visible window. |
+| `suspended` | Backgrounded by the runtime. |
+| `quitting` | Shutdown in progress. |
+
+### `application.window()`
+
+Returns the primary window handle.
+
+**Returns:** `Promise<Window>`
+
+**Throws:** `ERR_INVALID_STATE` if no window exists.
+
+### `application.show()` / `application.hide()`
+
+Shows or hides the primary window.
+
+**Returns:** `Promise<void>`
+
+### `application.quit(options?)`
+
+Requests a graceful shutdown. Runs the `deactivate` hook, closes windows and
+releases grants.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_INVALID_STATE` if already quitting.
+
+## Types
+
+### `Window`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Window identifier. |
+| `title` | `string` | Window title. |
+| `bounds` | `{x, y, width, height}` | Window rectangle in CSS pixels. |
+| `visible` | `boolean` | Visibility state. |
+| `focused` | `boolean` | Focus state. |
+
+### `ApplicationRecord`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Package identifier. |
+| `version` | `string` | Package version. |
+| `state` | `string` | Lifecycle state (table above). |
+| `windowCount` | `number` | Number of open windows. |
+
+## Application events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `app:launched` | `ApplicationRecord` | An application started. |
+| `app:state-changed` | `{id, state}` | Application state changed. |
+| `app:window-created` | `Window` | A window was created. |
+| `app:window-closed` | `{id}` | A window was closed. |
+| `app:quit` | `{id, code}` | An application exited. |
+
+**Related:** [Browser API](/docs/api-reference/browser-api) · [Runtime API](/docs/api-reference/runtime-api) · [Manifest Format](/docs/api-reference/manifest-format) · [Error Codes](/docs/api-reference/error-codes)

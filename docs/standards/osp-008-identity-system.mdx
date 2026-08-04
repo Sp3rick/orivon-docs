@@ -1,0 +1,122 @@
+---
+title: "OSP-008: Identity System"
+description: "Draft specification for the identity system: the identity model, DDoc format, authentication, sessions and recovery."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["standards", "osp-008", "identity"]
+keywords: "OSP-008, identity, DDoc, did:orivon, authentication, sessions, recovery"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Identity is the root of trust in the ecosystem. This draft defines the identity
+model, the DDoc document format, authentication and recovery.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-008 |
+| Title | Identity System |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Identity |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+An identity is a DDoc based identifier (`did:orivon`), a set of public keys and
+services, and a lifecycle from creation to revocation. Authentication is
+challenge signature based and sessions are short lived. The reference design is
+the [Identity Layer](/docs/technical-design/identity-layer) page.
+
+## Purpose
+
+Everything in the ecosystem anchors to identity: signing, permissions, storage
+encryption and value. The identity system exists so that this anchor is
+standard, portable and verifiable by anyone.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The identity and DDoc format.',
+    'Authentication via challenge signatures.',
+    'Session issuance and validation.',
+    'The identity lifecycle: create, active, recover, deactivate, revoke.',
+    'Provider integration.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Key storage (covered by OSP-007).',
+    'Cryptographic primitives (covered by the Cryptography category).',
+    'DNS and naming lookup (covered by the DNS category).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-007 Wallet API](/docs/standards/osp-007-wallet-api): where identity keys live.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): the trust anchors.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): the identity service.
+
+## Related specifications
+
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): identity scoped grants.
+- [OSP-010 Storage](/docs/standards/osp-010-storage): identity scoped encryption.
+
+## Example
+
+A DDoc as defined by this draft:
+
+```json
+{
+  "id": "did:orivon:z6Mkq...",
+  "controllers": ["did:orivon:z6Mkq..."],
+  "keys": [
+    {"id": "#key-1", "type": "ed25519", "publicKey": "z6Mkq..."}
+  ],
+  "services": [
+    {"id": "#storage", "type": "storage", "endpoint": "..."}
+  ]
+}
+```
+
+The exact DDoc schema, key types and service entries are normative content
+under review.
+
+## Implementation status
+
+The reference implementation includes DDoc based identity, challenge
+authentication and session management. The draft tracks the design at 0.1.0.
+No conformance suite has been published yet.
+
+## Future work
+
+- A `did:orivon` registry and resolution standard.
+- Delegation and multi controller identities.
+- Cross ecosystem interop via public DDoc work.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Identity Layer](/docs/technical-design/identity-layer): the reference design.

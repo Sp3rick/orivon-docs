@@ -1,0 +1,76 @@
+---
+title: "Environment Variables"
+description: "Reference for every environment variable the Orivon runtime and CLI read, with defaults and precedence."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 31
+tags: ["api-reference", "environment-variables"]
+keywords: "environment variables, env vars, ORIVON_ prefix, runtime env, cli env, defaults, precedence"
+---
+
+The runtime and CLI read environment variables for platform-level behavior.
+Package-facing variables are prefixed and exposed through `app.env`; see
+[Configuration](/docs/api-reference/configuration) for precedence.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Runtime variables
+
+| Variable | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ORIVON_RUNTIME_ID` | `string` | — | Runtime instance identifier. |
+| `ORIVON_PROFILE` | `string` | `"default"` | Active runtime profile. |
+| `ORIVON_LOG_LEVEL` | `LogLevel` | `"info"` | Runtime log level. |
+| `ORIVON_LOG_DIR` | `string` | system temp | Log directory. |
+| `ORIVON_CACHE_DIR` | `string` | per-user | Cache root. |
+| `ORIVON_DATA_DIR` | `string` | per-user | Data root. |
+| `ORIVON_NETWORK` | `string` | `"mainnet"` | Active network. |
+| `ORIVON_RPC_URL` | `string \| undefined` | — | Override RPC endpoint. |
+| `ORIVON_DNS_HTTP_URL` | `string \| undefined` | — | DNS over HTTP endpoint. |
+| `ORIVON_KEYCHAIN` | `"system" \| "memory"` | `"system"` | Keychain backend. |
+| `ORIVON_DISABLE_UPDATES` | `"1" \| "0"` | `"0"` | Disable autoupdate. |
+
+## CLI variables
+
+| Variable | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ORIVON_TOKEN` | `string \| undefined` | — | Auth token for publish. |
+| `ORIVON_STORE` | `string` | `"orivon-store"` | Default storefront. |
+| `ORIVON_REGISTRY` | `string` | registry URL | Package registry. |
+| `ORIVON_NO_COLOR` | `"1" \| "0"` | `"0"` | Disable color. |
+| `ORIVON_CACHE` | `"1" \| "0"` | `"1"` | Enable CLI cache. |
+| `ORIVON_UPDATE_URL` | `string \| undefined` | — | Override update source. |
+
+## Package-facing precedence
+
+For package configuration, resolution order (lowest to highest):
+
+1. Built-in defaults.
+2. `environment` block in configuration.
+3. `ORIVON_<KEY>` environment variables.
+4. CLI `--env` overrides.
+
+```sh
+ORIVON_RPC_URL=https://rpc.example.com orivon run example.wallet
+```
+
+## Reading in a package
+
+```ts
+const rpc = app.env.ORIVON_RPC_URL ?? 'https://default.rpc.orivon.dev';
+```
+
+## Security notes
+
+- Environment variables are readable by the host user; never store secrets
+  there. Use the [Security API](/docs/api-reference/security-api) keychain.
+- `ORIVON_TOKEN` is consumed only by the CLI and is never exposed to packages.
+- Package-facing variables are a fixed allowlist; unknown `ORIVON_*` variables
+  are not injected into `app.env`.
+
+<Warning title="Mutation">
+  `app.env` is read-only in a package. Writing to it is a no-op and rejected
+  in strict mode with `ERR_INVALID_STATE`.
+</Warning>
+
+**Related:** [Configuration](/docs/api-reference/configuration) · [CLI Reference](/docs/api-reference/cli-reference) · [Security API](/docs/api-reference/security-api)

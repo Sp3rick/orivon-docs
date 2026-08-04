@@ -1,0 +1,228 @@
+---
+title: "Building Your First Module"
+description: "A complete tutorial: create, configure, build, test and run your first Orivon module, with every step explained."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["developers", "first-module"]
+keywords: "first module, module tutorial, orivon new --module, manifest, hooks, publish"
+---
+
+Modules are the building blocks of the Orivon ecosystem: reusable units of
+code that run in the sandboxed runtime and are granted capabilities by the
+user. This tutorial builds a complete module from scratch, step by step.
+
+## What a module is
+
+A module is a package that:
+
+<CheckList
+  items={[
+    'Declares its identity and capabilities in a manifest.',
+    'Runs in a sandboxed runtime host, not as a host process.',
+    'Interacts with the world only through the granted APIs.',
+    'Ships as a single package that the runtime can load and activate.',
+  ]}
+/>
+
+Modules are how you share functionality across the ecosystem. The architecture
+is documented in [Module Architecture](/docs/technical-design/module-architecture).
+
+## Step 1: Scaffold the module
+
+```sh
+orivon new greeting-module --module
+cd greeting-module
+```
+
+The `--module` flag selects the module template. It produces a project with a
+module entry point instead of an application entry point.
+
+## Step 2: Inspect the manifest
+
+```sh
+cat orivon.toml
+```
+
+```toml
+[package]
+name = "greeting-module"
+version = "0.1.0"
+authors = ["you.orivon"]
+
+[permissions]
+allow = []
+
+[hooks]
+on_activate = "activate"
+```
+
+Two things matter here:
+
+- `allow = []`: the module starts with no capabilities. This is correct.
+- The `hooks` section declares lifecycle hooks, which the module can implement
+  to run code when the runtime activates it. See
+  [Module Manifest](/docs/developers/module-manifest) for every hook.
+
+## Step 3: Write the module
+
+Open `src/main.ts` and replace the content:
+
+```ts
+import {Orivon} from '@orivon/sdk';
+
+const module = new Orivon();
+
+export function activate() {
+  module.on('request', (req) => {
+    if (req.method === 'greet') {
+      module.respond(req, {message: `Hello, ${req.params.name}!`});
+    } else {
+      module.respond(req, {error: 'unknown method'});
+    }
+  });
+}
+```
+
+The module listens for requests and responds to a `greet` method. This is the
+core shape of a module: receive a request, do the work, respond.
+
+## Step 4: Declare what the module exposes
+
+A well defined module publishes its interface in the manifest so consumers and
+tools can understand it:
+
+```toml
+[package]
+name = "greeting-module"
+version = "0.1.0"
+authors = ["you.orivon"]
+
+[interface]
+methods = ["greet"]
+```
+
+The `[interface]` section is documentation and tooling data. It lists the
+methods the module handles. Consumers use it to discover the module's
+capabilities.
+
+## Step 5: Build
+
+```sh
+orivon build
+```
+
+Expected output:
+
+```text
+Building greeting-module 0.1.0
+Compiled in 1.1s
+Package ready: dist/greeting-module.omp
+```
+
+The build produces the module package. A clean build means the code is valid
+and the manifest is well formed.
+
+## Step 6: Test the module
+
+Replace the scaffold test with a test that exercises the `greet` method:
+
+```ts
+import {loadModule} from '@orivon/sdk/testing';
+
+const module = await loadModule('./dist/greeting-module.omp');
+
+test('greets by name', async () => {
+  const response = await module.call('greet', {name: 'world'});
+  expect(response.message).toBe('Hello, world!');
+});
+```
+
+Run the tests:
+
+```sh
+orivon test
+```
+
+Expected output:
+
+```text
+Running 1 test
+test greets by name ... ok
+```
+
+The SDK's testing helpers load the built package in a sandboxed test runtime,
+so the test exercises the real artifact. See
+[Testing](/docs/developers/testing) for the full testing model.
+
+## Step 7: Run the module
+
+Modules are consumed by applications or other modules. For development, use a
+test harness:
+
+```sh
+orivon run --test-harness
+```
+
+The test harness loads your module and lets you send it requests from the
+command line. Send a greeting:
+
+```text
+> greet { "name": "Orivon" }
+{ "message": "Hello, Orivon!" }
+```
+
+The module works end to end.
+
+## Step 8: Publish
+
+When the module is ready, publish it to the registry:
+
+```sh
+orivon build
+orivon login
+orivon publish
+```
+
+<Callout type="warning" title="Publishing is public">
+  `orivon publish` makes your module available to the ecosystem. Verify the
+  manifest, the permissions and the license before publishing. Permissions are
+  reviewed by users at install time, so a correct, minimal permission set is
+  part of a good published module.
+</Callout>
+
+## The module lifecycle
+
+Putting the steps together, a module moves through its lifecycle:
+
+<Diagram caption="Module lifecycle from scaffold to publish.">
+  <Flow column>
+    <DiagramNode accent>Scaffold</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Configure (manifest)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implement</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Build</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Test</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Publish</DiagramNode>
+  </Flow>
+</Diagram>
+
+This is the same lifecycle the runtime enforces at load time, described in
+[Module Architecture](/docs/technical-design/module-architecture).
+
+<Callout type="success" title="Next steps">
+  Your module now does one thing. From here: handle errors
+  ([Error Handling](/docs/developers/debugging)), request permissions
+  ([Permissions](/docs/developers/permissions)), and follow the
+  [Best Practices](/docs/developers/best-practices) before publishing.
+</Callout>
+
+## Related pages
+
+- [Module Manifest](/docs/developers/module-manifest): every field a module declares.
+- [Building Your First Application](/docs/developers/building-your-first-application): consume modules from an app.
+- [Runtime APIs](/docs/developers/runtime-apis): the APIs modules call.

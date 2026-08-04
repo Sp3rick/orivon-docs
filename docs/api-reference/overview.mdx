@@ -1,0 +1,126 @@
+---
+title: "API Reference Overview"
+description: "The authoritative reference for every public API, interface, class, function, event, schema, configuration option and developer contract in the Orivon ecosystem."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["api-reference", "overview"]
+keywords: "api reference, orivon api, public api, version compatibility, naming conventions, deprecation policy"
+---
+
+The API Reference is the authoritative, machine-readable specification of every
+public contract in the Orivon ecosystem: APIs, interfaces, classes, functions,
+events, schemas, configuration options and developer tools. It is a reference,
+not a guide. Concepts, motivation and architecture live in the other
+documentation levels; this section documents **what exists** and **how to call
+it**.
+
+## Scope
+
+This reference covers the public contracts exposed to developers by the Orivon
+platform:
+
+| Area | Contents |
+| --- | --- |
+| Core APIs | Runtime, Core, Browser, Module and Application APIs |
+| Feature APIs | Wallet, Identity, Storage, Networking, DNS, Permissions and Security APIs |
+| Language reference | Events, Interfaces, Classes, Functions, Methods, Objects, Enums and Types |
+| Formats | Configuration, JSON Schemas and the module Manifest format |
+| Status | Error codes and HTTP status codes |
+| Tooling | CLI reference and environment variables |
+
+Contracts prefixed with `_` or annotated `internal` are not part of this
+reference and may change at any time.
+
+## Supported API versions
+
+The stable API surface is versioned and follows
+[Semantic Versioning](/docs/api-reference/versioning). The currently supported
+versions are:
+
+| Version | Status | Released | Supported until |
+| --- | --- | --- | --- |
+| 1.0 | Current | July 2026 | next major |
+| 0.9 | Maintenance | May 2026 | 1.1 |
+| 0.8 | End of life | Feb 2026 | removed |
+
+<Note title="Versioned, not duplicated">
+  Versioning applies to the API surface and manifest format, not to this
+  documentation. Deprecated or removed members are annotated in place and in
+  the [Deprecations](/docs/api-reference/deprecations) index.
+</Note>
+
+## Version compatibility
+
+All packages that target an API version continue to load on newer minor and
+patch releases of the same major version. A package is rejected by the runtime
+when its declared API version is not compatible, with error
+[`ERR_API_VERSION`](/docs/api-reference/error-codes#err-api-version).
+
+```yaml
+# manifest declaration of the target API version
+apiVersion: "1.0"
+```
+
+## Naming conventions
+
+Public names follow one consistent scheme across every API:
+
+- **Types, classes and interfaces** use `UpperCamelCase` (for example
+  `OrivonWallet`, `RequestOptions`).
+- **Functions, methods, properties and events** use `lowerCamelCase` (for
+  example `wallet.sign`, `storage.put`, event `tab:updated`).
+- **Enums and enum members** use `UpperCamelCase` members on `UpperCamelCase`
+  enums (for example `PermissionState.Granted`).
+- **Type aliases** use `UpperCamelCase` (for example `Bytes`, `KeyPair`).
+- **Event names** are namespaced strings in the form `domain:action` (for
+  example `module:activated`, `wallet:account-added`).
+- **Error identifiers** are `SCREAMING_SNAKE_CASE` strings prefixed with
+  `ERR_` (for example `ERR_PERMISSION_DENIED`).
+
+## Type conventions
+
+The reference uses TypeScript-style types as the canonical notation. Rust
+bindings use the nearest equivalent mapping:
+
+| Orivon API type | TypeScript | Rust |
+| --- | --- | --- |
+| Signed integer | `number` (int32) | `i32` |
+| Unsigned integer | `number` (uint32) | `u32` |
+| Large integer | `bigint` | `u64` |
+| Byte string | `Uint8Array` | `&[u8]` / `Vec<u8>` |
+| Text | `string` | `String` / `&str` |
+| Boolean | `boolean` | `bool` |
+| Unit | `void` | `()` |
+| Optional | `T \| undefined` | `Option<T>` |
+| Result | `Promise<T>` | `async fn` + `Result<T>` |
+
+## Deprecation policy
+
+An API member is marked **deprecated** before it is removed. Deprecated members
+still function for at least two minor releases, and removal only happens in a
+new major version. Every deprecated member documents its replacement and the
+removal target in the [Deprecations](/docs/api-reference/deprecations) index.
+
+<Warning title="Experimental members">
+  Members marked **experimental** are not covered by the stability guarantee.
+  They are excluded from breaking-change constraints until the marker is
+  removed. Treat them as unstable.
+</Warning>
+
+## Navigation
+
+Use the sections in order, or jump straight to a specific contract:
+
+- New to the surface? Read [API Conventions](/docs/api-reference/conventions)
+  first.
+- Calling a specific service? Open the relevant API page — each service page
+  documents its methods, parameters, return types, errors and examples.
+- Looking up a shape or signature? Use [Interfaces](/docs/api-reference/interfaces),
+  [Classes](/docs/api-reference/classes) or [Types](/docs/api-reference/types).
+- Failing a call? Look up the identifier in [Error Codes](/docs/api-reference/error-codes).
+
+<Success title="Search">
+  Every member documented here is indexed by search. Filter by section, or
+  search the exact identifier to jump straight to its signature.
+</Success>

@@ -1,0 +1,146 @@
+---
+title: "Networking Whitepaper"
+description: "The networking paper: protocol stack, peer-to-peer communication, decentralized DNS, and the trade-offs of leaving client–server."
+readingTime: 30
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["research", "whitepaper", "networking"]
+keywords: "networking whitepaper, P2P, protocol stack, decentralized DNS, peer-to-peer, latency, scalability"
+---
+
+*Orivon Research Group · Networking Research · Version 1.0 · Published 2026-07-30 · Status: Published*
+
+## Abstract
+
+Orivon's networking layer connects users directly to decentralized
+infrastructure. It provides HTTP(S) for the open web, peer-to-peer transport
+for decentralized applications, and a decentralized DNS that replaces
+gatekeeper-controlled naming. This paper specifies the protocol stack,
+describes the P2P transport design, and analyzes the trade-offs of moving from
+client–server to peer-to-peer communication.
+
+## Background
+
+The internet's naming, routing, and transport were designed for a world of
+servers and clients. As the web became centralized, control of naming
+(DNS), transport (CDNs), and access (ISPs) consolidated in a few entities.
+Meanwhile, the P2P research literature — from Chord and Kademlia to IPFS and
+libp2p — has demonstrated that self-organizing overlay networks are practical
+at scale.
+
+Orivon's networking stack is an attempt to make these P2P results usable
+inside a browser, with the reliability users expect from the web.
+
+## Problem Statement
+
+The networking layer must solve:
+
+1. **Direct access.** Users must reach decentralized applications without
+   centralized intermediaries.
+2. **Naming without gatekeepers.** Name resolution must not depend on a
+   registrar that can revoke or censor names.
+3. **Reliability.** P2P communication must approach the reliability of
+   client–server for interactive use.
+4. **NAT and mobility.** Peer-to-peer transport must work behind NATs and
+   across address changes.
+5. **Safety.** Transport must not expose the user's device to unmediated
+   attack.
+
+## Architecture
+
+### Protocol stack
+
+| Layer | Protocol | Role |
+| --- | --- | --- |
+| Transport | HTTP(S) / WebTransport | Open-web and streaming access. |
+| Overlay | P2P transport (libp2p-style) | Direct peer addressing and routing. |
+| Routing | DHT + relays | Peer discovery and NAT traversal. |
+| Naming | Decentralized DNS | Human-readable, user-owned names. |
+| Security | TLS-like channel encryption | End-to-end transport security. |
+
+### Decentralized DNS
+
+Naming is a first-class citizen:
+
+| Property | Behavior |
+| --- | --- |
+| Ownership | Names are registered on-chain; the registrant owns the records. |
+| Resolution | Resolution prefers the decentralized path, falling back to legacy DNS. |
+| Records | A, AAAA, TXT, CNAME; extensible to new record types. |
+| Censorship resistance | No single entity can revoke a name. |
+
+### P2P transport
+
+Peer-to-peer communication is layered and conservative:
+
+1. **Discovery** via a DHT for peers and content.
+2. **Connection** via direct addressing, relayed when NAT traversal fails.
+3. **Multiplexing** so one transport carries many streams.
+4. **Encryption** end-to-end between peers.
+
+### Addressing
+
+- Peers are addressed by public keys or content identifiers, not by location.
+- Legacy URLS continue to work through the HTTP path.
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| HTTP + P2P dual stack | The open web must keep working while P2P is adopted. |
+| Decentralized DNS as overlay | Naming gains decentralization without breaking resolution. |
+| Conservative P2P | Browser peers are protected by the sandbox; transport cannot bypass it. |
+| Content-addressed storage integration | Networking and storage share an addressing model. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| P2P vs. client–server | Both, context-dependent | More complex to operate and explain. |
+| Decentralized DNS vs. legacy DNS | Decentralized preferred | Resolution latency on the decentralized path. |
+| Relay vs. direct connection | Direct when possible | Relays add latency but improve reachability. |
+| Location-independent addressing | Content/peer IDs | Adds indirection vs. IP addressing. |
+
+## Implementation Strategy
+
+1. Ship the HTTP stack and the decentralized DNS resolver.
+2. Add the P2P transport behind the same interface.
+3. Add DHT discovery and NAT traversal.
+4. Integrate content addressing with storage.
+5. Measure and publish latency benchmarks (see
+   [Networking Research](/docs/research/networking-research)).
+
+## Future Work
+
+- WebTransport-native P2P for browser peers.
+- Autonomous system (AS)-aware routing for latency.
+- Reputation-aware peer selection to resist eclipse attacks.
+- Formal analysis of the naming layer's security.
+
+## References
+
+- I. Stoica et al., "Chord: A scalable peer-to-peer lookup service for
+  internet applications," *SIGCOMM 2001*.
+- P. Maymounkov and D. Mazières, "Kademlia: A peer-to-peer information system
+  based on the XOR metric," *IPTPS 2002*.
+- J. Benet, "IPFS — Content addressed, versioned, P2P file system," 2014.
+- libp2p project, *Design documentation*.
+- Orivon, *Storage Whitepaper*, 2026.
+
+## Appendix A — DNS record lifecycle
+
+```
+register → (renew) → update → release
+     └──► expiry warning before release
+```
+
+## Appendix B — Latency budget
+
+| Operation | Budget |
+| --- | --- |
+| DNS resolution (decentralized) | < 200 ms p95 |
+| DHT lookup | < 1 s p95 |
+| Direct peer connection | < 100 ms p95 |
+| Relay fallback | < 500 ms p95 |
+
+**Related:** [Networking Layer](/docs/research/networking-layer) · [Networking Research](/docs/research/networking-research) · [DNS API](/docs/api-reference/dns-api)

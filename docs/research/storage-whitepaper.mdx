@@ -1,0 +1,167 @@
+---
+title: "Storage Whitepaper"
+description: "The storage paper: local-first, encrypted storage, content addressing, quotas, and the path toward distributed storage."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["research", "whitepaper", "storage"]
+keywords: "storage whitepaper, local-first, encryption, content addressing, quota, distributed storage, DSN"
+---
+
+*Orivon Research Group · Storage Research · Version 1.0 · Published 2026-07-31 · Status: Published*
+
+## Abstract
+
+Storage in Orivon is local-first, encrypted, and addressable. User data lives
+on the user's device by default; remote systems are replicas, never sources of
+truth. This paper explains the storage stack — key-value store, files, and
+collections — the encryption model, content addressing, quota enforcement, and
+the research path toward a distributed storage network (DSN).
+
+## Background
+
+The cloud storage model made data convenient but centralized: providers hold
+user data, can read it, can be compelled to disclose it, and can disappear.
+The local-first movement (Ink & Switch) argues that the right default is data
+on the device, with sync as a feature rather than a premise. Content-addressed
+systems (IPFS, Arweave) add durability and provenance without a single owner.
+
+Orivon's storage design combines both: local-first as the default posture and
+content addressing as the model that makes distribution and deduplication
+natural.
+
+## Problem Statement
+
+Storage must solve:
+
+1. **Ownership.** Data must remain the user's, under the user's control.
+2. **Confidentiality.** Data must be unreadable to anyone without the key —
+   including platform operators.
+3. **Durability.** Data must survive device loss.
+4. **Portability.** Data must move between devices and platforms without
+   vendor lock-in.
+5. **Quota discipline.** Modules must not be able to exhaust device or
+   platform resources.
+
+## Motivation
+
+The platform principle "users own their data" (see the [Orivon Whitepaper](/docs/research/orivon-whitepaper))
+rests on this subsystem. If data is cloud-only, ownership is nominal. If data
+is unencrypted, confidentiality is nominal. Local-first, encrypted storage is
+therefore the concrete mechanism behind the platform's central promise.
+
+## Architecture
+
+### Storage stack
+
+```
+┌──────────────────────────────────────┐
+│ Modules (via storage APIs)          │
+├──────────────────────────────────────┤
+│ Collection layer (documents)        │
+├──────────────────────────────────────┤
+│ File layer (blobs)                  │
+├──────────────────────────────────────┤
+│ Key-value layer (settings, state)   │
+├──────────────────────────────────────┤
+│ Encryption layer (per-entity keys)  │
+├──────────────────────────────────────┤
+│ Local engine (SQLite-backed)        │
+└──────────────────────────────────────┘
+```
+
+### Data model
+
+| Layer | Abstraction | Use |
+| --- | --- | --- |
+| Key-value | `string → value` | Settings, small state. |
+| Files | named blobs | Documents, media, data files. |
+| Collections | schemaless documents | Application data. |
+
+### Encryption model
+
+| Property | Design |
+| --- | --- |
+| Default | Everything at rest is encrypted. |
+| Key hierarchy | A device key protects per-entity data keys. |
+| Key storage | Wrapped keys live in the native keychain. |
+| Sharing | Data shared with others uses recipient-scoped keys. |
+
+### Content addressing
+
+Content-addressed references identify data by its digest:
+
+```text
+blob id = sha256(content)
+```
+
+Properties: deduplication, integrity (any change changes the id), and
+provenance (the id is the content). This is the substrate for distributed
+replication.
+
+### Quotas
+
+| Scope | Default limit | Enforcement |
+| --- | --- | --- |
+| Per module | 1 GB | `ERR_QUOTA_EXCEEDED` on write. |
+| Per scope | Configurable | Rejected on write. |
+| Platform cache | Managed | Eviction policy. |
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Local-first default | Ownership is physical, not contractual. |
+| Per-entity encryption | Breaches leak a key, not a corpus. |
+| Content addressing | Deduplication, integrity, and distribution-ready. |
+| Quotas at every layer | Predictability and resource isolation. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Local-first vs. cloud convenience | Local-first | Sync requires a replication layer. |
+| Per-entity keys vs. one key | Per-entity keys | Key management overhead. |
+| Content addressing vs. path addressing | Content addressing | Indirection; mapping layer needed. |
+| Local durability vs. cloud durability | Local + replication | User must opt into remote replication. |
+
+## Implementation Strategy
+
+1. Ship the key-value, file, and collection layers on a local engine.
+2. Add the encryption layer and keychain integration.
+3. Add content addressing and quota enforcement.
+4. Add explicit, user-controlled replication and sync.
+5. Introduce the DSN as an opt-in durability tier.
+
+## Future Work
+
+- A DSN with incentive-compatible storage providers.
+- Erasure coding for durable, cheap replication.
+- Search over encrypted data (see [Cryptography Research](/docs/research/cryptography-research)).
+- Conflict resolution and CRDTs for collaborative data.
+
+## References
+
+- Ink & Switch, *Local-First Software*, 2019.
+- J. Benet, "IPFS — Content addressed, versioned, P2P file system," 2014.
+- Orivon, *Security Whitepaper*, 2026.
+- Orivon, *Networking Whitepaper*, 2026.
+- W3C, *Web Storage* and *Indexed Database API* specifications.
+
+## Appendix A — Key hierarchy
+
+```
+device key (keychain)
+   └── data key (per namespace)
+          └── entity keys (per file / collection)
+```
+
+## Appendix B — Storage grants
+
+| Capability | Meaning |
+| --- | --- |
+| `storage.read` | Read within granted scopes. |
+| `storage.write` | Write within granted scopes. |
+| `storage.clear` | Evict managed cache. |
+
+**Related:** [Storage Layer](/docs/research/storage-layer) · [Storage Research](/docs/research/storage-research) · [Storage API](/docs/api-reference/storage-api)

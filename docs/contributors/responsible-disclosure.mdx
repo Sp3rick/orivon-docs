@@ -1,0 +1,148 @@
+---
+title: "Responsible Disclosure"
+description: "The Orivon vulnerability disclosure policy: how to report, what happens after reporting, coordinated disclosure and recognition."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["contributors", "security"]
+keywords: "responsible disclosure, vulnerability reporting, coordinated disclosure, security reports"
+---
+
+If you find a security vulnerability in Orivon, we want to hear about it,
+and we want to fix it safely. This policy describes how to report
+vulnerabilities responsibly, what happens after you report, and how you are
+recognized for the finding.
+
+<Callout type="danger" title="Do not disclose publicly">
+  Never report a security vulnerability in a public issue, PR or chat
+  channel. Public disclosure before a fix endangers users. The private
+  reporting path below is the only route for security issues.
+</Callout>
+
+## What to report
+
+Report any security issue, including:
+
+<CheckList
+  items={[
+    'Sandbox escapes or isolation failures.',
+    'Permission or capability bypasses.',
+    'Identity spoofing or verification weaknesses.',
+    'Secret or key exposure.',
+    'Denial of service in core services.',
+    'Dependency vulnerabilities with real impact.',
+  ]}
+/>
+
+If you are unsure whether something is a security issue, report it through
+the security path and the team will assess it.
+
+## How to report
+
+<Steps>
+  <Step title="Open a security report">
+    Use the [security report template](/docs/contributors/templates/security-report),
+    filed through the private security channel (the address is in the
+    repository SECURITY.md).
+  </Step>
+  <Step title="Include what is needed">
+    A reproduction, affected versions, impact assessment, and a suggested
+    fix if you have one.
+  </Step>
+  <Step title="Communicate privately">
+    The security team responds and coordinates from there.
+  </Step>
+</Steps>
+
+## The coordinated disclosure process
+
+<Diagram caption="From report to disclosure.">
+  <Flow column>
+    <DiagramNode accent>Report received</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Acknowledged, assessed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Fix developed and tested</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Release prepared</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Coordinated public disclosure</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Stage | Timeframe |
+| --- | --- |
+| Acknowledge | Within a few business days |
+| Assess | Within the first week |
+| Fix and test | Depends on severity and complexity |
+| Release | Coordinated with the reporter |
+| Disclose | After the fix is available |
+
+The team keeps reporters informed at every stage. You decide how much of
+your identity is shared in the public disclosure.
+
+## What we ask of reporters
+
+<CheckList
+  items={[
+    'Give the team a reasonable window to fix before public disclosure.',
+    'Share details privately first, including proof of concept.',
+    'Do not test in ways that harm users or the network.',
+    'Coordinate public announcements with the team.',
+  ]}
+/>
+
+## What you can expect from us
+
+<CheckList
+  items={[
+    'A prompt, serious response.',
+    'Confidential handling of your report.',
+    'Credit for the finding in the advisory and release notes.',
+    'Recognition consistent with the [recognition](/docs/contributors/recognition) program.',
+  ]}
+/>
+
+## Handling the window
+
+The standard window is 90 days for confirmed issues, aligned with industry
+practice. The team may request longer for complex fixes, and you are free to
+decline, but we ask that you coordinate.
+
+<Callout type="success" title="Reporting is a contribution">
+  A responsible disclosure is one of the most valuable contributions there
+  is. It protects every user of the platform, and it is treated with the
+  seriousness it deserves.
+</Callout>
+
+## The security report template
+
+A good security report includes:
+
+```markdown
+### Summary
+A one line description of the vulnerability.
+
+### Affected versions
+The versions the issue impacts.
+
+### Description
+What the vulnerability is and how it can be exploited.
+
+### Reproduction
+Steps, minimal inputs, and the impact demonstrated.
+
+### Impact
+What an attacker could do, and to whom.
+
+### Suggested fix
+A fix sketch, if you have one.
+```
+
+Use the [template](/docs/contributors/templates/security-report) when filing.
+
+## Related pages
+
+- [Security Policy](/docs/contributors/security-policy): the expectations.
+- [Security Model](/docs/ecosystem/security-model): the guarantees at risk.
+- [Security report template](/docs/contributors/templates/security-report): the form to use.

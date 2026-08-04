@@ -1,0 +1,159 @@
+---
+title: "Compliance"
+description: "Orivon compliance initiatives: SOC, ISO, GDPR, accessibility, and industry standards roadmap."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["project", "compliance", "soc", "iso", "gdpr", "accessibility"]
+keywords: "compliance, soc 2, iso 27001, gdpr, accessibility, wcag, orivon compliance"
+---
+
+Orivon's compliance roadmap documents current and planned certifications,
+regulatory alignments, and industry standard adherence. This page is for
+enterprise evaluators, auditors, and compliance officers.
+
+<Callout type="warning" title="Certifications not yet obtained">
+  **Orivon has not yet achieved any formal certifications.** All items marked
+  "Certified" are **planned or in progress**. This page will be updated as
+  certifications are achieved. Do not rely on this page for compliance evidence
+  until certifications are explicitly confirmed with dates and scope.
+</Callout>
+
+## Certification roadmap
+
+| Certification | Standard | Status | Target | Scope |
+| --- | --- | --- | --- | --- |
+| **SOC 2 Type I** | AICPA Trust Services Criteria | Planning | 2027-H1 | Security, Availability |
+| **SOC 2 Type II** | AICPA Trust Services Criteria | Planning | 2027-H2 | Security, Availability, Confidentiality |
+| **ISO 27001** | ISO/IEC 27001:2022 | Gap Analysis | 2028 | ISMS for platform + infra |
+| **ISO 27701** | ISO/IEC 27701:2019 | Planned | 2028 | Privacy extension to ISO 27001 |
+| **ISO 9001** | ISO 9001:2015 | Not Planned | — | Quality management (evaluate later) |
+| **FedRAMP** | NIST 800-53 | Not Planned | — | US Federal (evaluate if demand) |
+| **Common Criteria** | ISO/IEC 15408 | Research | 2029+ | EAL4+ for runtime sandbox |
+
+## Regulatory alignment
+
+| Regulation | Jurisdiction | Status | Notes |
+| --- | --- | --- | --- |
+| **GDPR** | EU/UK | Readiness Assessment | DPIA for browser data flows; DPA for processors |
+| **CCPA/CPRA** | California, USA | Aligned with GDPR | Opt-out mechanisms; data subject rights |
+| **ePrivacy Directive** | EU | Standards-track | Browser communications; cookie-less by default |
+| **LGPD** | Brazil | Aligned with GDPR | Similar requirements |
+| **PIPL** | China | Monitoring | Data localization considerations |
+| **Accessibility (WCAG 2.1 AA)** | Global | In Progress | Browser UI + Docs site target: v1.3 |
+| **Section 508** | US Federal | Aligned with WCAG | For government procurement |
+
+## Industry standards adherence
+
+| Standard | Area | Status | Evidence |
+| --- | --- | --- | --- |
+| **NIST Cybersecurity Framework (CSF)** | Cybersecurity | Mapping in Progress | CSF v2.0 alignment doc (planned) |
+| **NIST 800-53 Rev. 5** | Security Controls | SOC 2 Prep | Control mapping (planned) |
+| **CIS Benchmarks** | Hardening | Planned | Level 1 for container images |
+| **SLSA** | Supply Chain | Level 3 Target | Provenance, hermetic builds |
+| **OpenSSF Scorecard** | OSS Security | Monitoring | GitHub Security tab |
+| **OSSF Best Practices** | Project Health | Silver Target | Criteria tracking |
+| **SPDX / CycloneDX** | SBOM | Implemented | Every release |
+| **Sigstore / Cosign** | Signing | Implemented | Keyless, transparency log |
+
+## Compliance by component
+
+### Orivon Runtime
+| Requirement | Status | Notes |
+| --- | --- | --- |
+| **Memory safety** | ✅ Rust | No unsafe in public API |
+| **WASM sandbox** | ✅ Capability-based | Formal verification (planned) |
+| **Cryptographic validation** | ✅ Ring/aws-lc-rs | FIPS 140-3 modules (eval) |
+| **SBOM** | ✅ CycloneDX | Every release |
+| **Signed releases** | ✅ Cosign/Sigstore | Keyless, transparency log |
+
+### Orivon Browser
+| Requirement | Status | Notes |
+| --- | --- | --- |
+| **WCAG 2.1 AA** | In Progress | Target v1.3 |
+| **No telemetry default** | ✅ | Opt-in only |
+| **Local-first data** | ✅ | Architecture |
+| **Extension security** | Design | Capability-based extension API |
+| **Update security** | ✅ Signed | Cosign verification |
+
+### Orivon SDKs
+| Requirement | Status | Notes |
+| --- | --- | --- |
+| **Type safety** | ✅ TypeScript/Rust | Strict mode |
+| **Dependency scanning** | ✅ CI | Every PR |
+| **Supply chain** | ✅ SLSA L3 target | Provenance |
+
+### Infrastructure
+| Requirement | Status | Notes |
+| --- | --- | --- |
+| **CI/CD security** | Hardening | SLSA L3, hermetic builds |
+| **Secrets management** | Vault/Env | No secrets in repo |
+| **Access control** | MFA + Least Priv | GitHub Teams, OIDC |
+| **Audit logging** | GitHub Audit | Streamed to SIEM (planned) |
+| **Backup/DR** | GitHub + Multi-region | Docs, registry, forum |
+
+## Compliance program structure
+
+### Roles (Planned)
+| Role | Responsibility |
+| --- | --- |
+| **Compliance Officer** | Program ownership, auditor liaison |
+| **Security Lead** | Technical controls, evidence collection |
+| **Privacy Lead** | DPIA, DPA, data subject rights |
+| **Legal Counsel** | Regulatory interpretation, contracts |
+
+### Processes
+| Process | Cadence | Owner |
+| --- | --- | --- |
+| **Risk assessment** | Annual + trigger-based | Compliance Officer |
+| **Control testing** | Quarterly | Security Lead |
+| **Vendor assessment** | Annual | Compliance Officer |
+| **Incidence response test** | Semi-annual | Security Lead |
+| **Policy review** | Annual | Legal Counsel |
+| **Training** | Annual + onboarding | All roles |
+
+### Evidence management
+- **Centralized repository:** `orivon-compliance` (private, access-controlled).
+- **Artifact types:** Policies, procedures, test results, audit reports, attestations.
+- **Retention:** Per regulatory requirement (minimum 7 years for SOC/ISO).
+- **Access:** Need-to-know; auditors granted time-limited access.
+
+## Current gaps (honest assessment)
+
+| Gap | Risk | Mitigation | Target |
+| --- | --- | --- | --- |
+| **No formal certifications** | Enterprise blockers | Transparent roadmap; compensating controls doc | 2027-H1 |
+| **No dedicated compliance team** | Resource constraint | Shared responsibility; grant-funded role (planned) | 2027-H1 |
+| **Accessibility not certified** | Public sector | WCAG 2.1 AA target v1.3; third-party audit planned | 2027-H1 |
+| **No penetration test report** | Security assurance | First pentest planned 2027-H1 (grant-funded) | 2027-H1 |
+| **Supply chain not SLSA L3** | Integrity | In progress; hermetic builds, provenance | 2027-H2 |
+
+## Compliance for enterprise evaluators
+
+| Question | Answer |
+| --- | --- |
+| **Can I use Orivon in regulated environments?** | Platform architecture supports compliance (local-first, no telemetry, signed releases, SBOMs). Formal certifications in progress. |
+| **Do you have a SOC 2 report?** | Not yet. Type I target 2027-H1, Type II target 2027-H2. |
+| **Is there a DPA for GDPR?** | Template in draft; will execute upon Foundation incorporation. |
+| **Can you complete our security questionnaire?** | Yes — see [Trust Center](/docs/project/trust-center) for standard answers; custom questionnaires for qualified evaluations. |
+| **Do you support FIPS 140-3?** | Using FIPS-validated modules (aws-lc-rs); full validation planned post-SOC 2. |
+| **What is your vulnerability disclosure policy?** | See [Security Policy](/docs/project/security-policy) and [Responsible Disclosure](/docs/contributors/responsible-disclosure). |
+
+## Requesting compliance artifacts
+
+| Artifact | Availability | Request |
+| --- | --- | --- |
+| **Security questionnaire (CAIQ/SIG)** | Template available | compliance@orivon.dev |
+| **Architecture diagrams** | Public + detailed | [Project Structure](/docs/project/structure) |
+| **Threat model** | Summary public; detailed on request | security@orivon.dev |
+| **Penetration test report** | Planned 2027-H1 | — |
+| **SOC 2 report** | Planned 2027-H1/2027-H2 | — |
+| **ISO 27001 certificate** | Planned 2028 | — |
+
+<Callout type="success" title="Transparency over theater">
+  We publish our roadmap, gaps, and progress honestly. Enterprise evaluators
+  get the full picture — not a marketing brochure. Contact compliance@orivon.dev
+  for evaluation support.
+</Callout>
+
+**Related:** [Trust Center](/docs/project/trust-center) · [Security Policy](/docs/project/security-policy) · [Privacy Policy](/docs/project/privacy-policy) · [Licensing](/docs/project/licensing) · [Version Support Policy](/docs/project/version-support)

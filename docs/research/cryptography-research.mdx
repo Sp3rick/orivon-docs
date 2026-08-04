@@ -1,0 +1,68 @@
+---
+title: "Cryptography Research"
+description: "Active cryptography research: hashing, encryption, key management, digital signatures, and future cryptographic technologies."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 32
+tags: ["research", "cryptography-research"]
+keywords: "cryptography research, hashing, encryption, key management, digital signatures, post-quantum, zero-knowledge"
+---
+
+*Orivon Research Group · Security Research · Status: Active Research*
+
+This area tracks the cryptographic foundations of the platform and the open
+research problems. The [Security API](/docs/api-reference/security-api) is the
+shipped contract; this page is the research agenda.
+
+## Hashing
+
+| Algorithm | Use | Status |
+| --- | --- | --- |
+| SHA-256 | Content addressing, integrity. | Shipped. |
+| SHA-384/512 | Digests, HKDF inputs. | Shipped. |
+| BLAKE3 | High-throughput hashing (evaluation). | Research. |
+| Poseidon/Argon2 | zk-friendly hashes / KDF (evaluation). | Research. |
+
+## Encryption
+
+| Scheme | Use | Status |
+| --- | --- | --- |
+| AES-256-GCM | Data at rest. | Shipped. |
+| XChaCha20-Poly1305 | High-speed AEAD (evaluation). | Research. |
+| ChaCha20-Poly1305 | Transport. | Shipped. |
+| FHE / searchable encryption | Private queries. | Research. |
+
+## Key management
+
+| Topic | Design | Open question |
+| --- | --- | --- |
+| Storage | Native keychain, wrapped keys. | Hardware-enforced wrapping. |
+| Rotation | Re-wrap without re-encrypt. | Rotation orchestration. |
+| Recovery | Backup bundles, social recovery. | Usability under loss. |
+| HSM | Hardware signing keys. | Cost and availability. |
+
+## Digital signatures
+
+| Algorithm | Use | Status |
+| --- | --- | --- |
+| Ed25519 | Identity, module signing. | Shipped. |
+| secp256k1 | Wallet compatibility. | Shipped. |
+| BLS | Aggregation (evaluation). | Research. |
+| ML-DSA / SLH-DSA | Post-quantum signing. | Research. |
+
+## Future cryptographic technologies
+
+| Technology | Application | Maturity |
+| --- | --- | --- |
+| Post-quantum algorithms | Signing, KEM migration. | Standards maturing. |
+| Zero-knowledge proofs | Private credential presentation. | Research. |
+| Verifiable delay functions | Fair randomness. | Research. |
+| Homomorphic encryption | Computation on encrypted data. | Research. |
+| Threshold cryptography | Distributed key custody. | Research. |
+
+<Note title="Conservative posture">
+  Cryptographic choices favor well-analyzed, widely deployed algorithms.
+  Novel schemes enter only after peer review and standards alignment.
+</Note>
+
+**Related:** [Security API](/docs/api-reference/security-api) · [Identity Whitepaper](/docs/research/identity-whitepaper) · [Security Research](/docs/research/security-research)

@@ -1,0 +1,191 @@
+---
+title: "Rendering Pipeline"
+description: "The internal design of Orivon's rendering: web content rendering, browser UI, runtime application surfaces, graphics and compositing."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["technical-design", "rendering"]
+keywords: "rendering, pipeline, compositing, graphics, browser UI, layout, paint, GPU"
+---
+
+Rendering is how Orivon turns content into pixels. Three surfaces render in a
+browser: web content, the browser UI itself, and runtime application
+interfaces. They share the same compositor and GPU pipeline. This page documents
+the rendering architecture.
+
+## The rendering surfaces
+
+<CardGrid columns={2}>
+  <Card title="Web content">
+    Classic pages rendered by the renderer processes, inside the sandbox.
+  </Card>
+  <Card title="Browser UI">
+    The chrome: tabs, address bar, menus. Rendered by the browser process
+    compositor.
+  </Card>
+  <Card title="Runtime applications">
+    Non web applications rendered from the runtime host through a canvas
+    surface.
+  </Card>
+</CardGrid>
+
+All three produce layers that the compositor assembles into a final frame.
+
+## The web rendering pipeline
+
+Web content follows the classic web rendering pipeline, executed inside a
+sandboxed renderer:
+
+<Diagram caption="The web content pipeline from bytes to pixels.">
+  <Flow column>
+    <DiagramNode>Bytes</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Parse (HTML, CSS)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>DOM + style tree</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Layout</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Paint (layer tree)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Compositor</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>GPU raster + display</DiagramNode>
+  </Flow>
+</Diagram>
+
+The stages:
+
+| Stage | Work | Runs on |
+| --- | --- | --- |
+| **Parse** | HTML and CSS into DOM and style trees | Main thread |
+| **Style** | Computed styles and style recalculation | Main thread |
+| **Layout** | Geometry of every box | Main thread |
+| **Paint** | Records draw operations into layers | Main thread and raster threads |
+| **Composite** | Assembles layers into a frame | Compositor thread |
+| **Raster** | GPU accelerated tile rasterization | GPU process |
+
+The heavy stages run off the main thread where possible, which is what keeps
+scrolling and input responsive. See [Process Model](/docs/technical-design/process-model).
+
+## Browser UI rendering
+
+The browser UI (the chrome around the page) is rendered separately from web
+content:
+
+- UI elements produce their own layers.
+- The UI compositor runs in the browser process, so the interface stays
+  responsive even when a page is slow.
+- The UI can be drawn over a page without repainting the page.
+
+This separation is why the address bar and tab strip do not freeze when a page
+hangs: they are different layers on the same compositor.
+
+## Runtime application rendering
+
+Runtime applications render through a dedicated surface, not the web layout
+engine:
+
+<Steps>
+  <Step title="Create">
+    The runtime host creates a rendering surface for the application.
+  </Step>
+  <Step title="Draw">
+    The application draws through a GPU friendly API (WGPU/WebGPU), producing
+    frames.
+  </Step>
+  <Step title="Composite">
+    The frames are submitted to the same compositor as web layers.
+  </Step>
+  <Step title="Display">
+    The compositor blends runtime frames with the browser UI.
+  </Step>
+</Steps>
+
+Using the shared compositor means runtime applications and web content
+coexist in one window with one display path. See
+[Runtime Architecture](/docs/technical-design/runtime-architecture).
+
+## Graphics and GPU
+
+All rasterization is GPU accelerated through the GPU process:
+
+<CardGrid columns={2}>
+  <Card title="GPU process">
+    Owns the GPU contexts, isolated from every other process.
+  </Card>
+  <Card title="Shared compositor">
+    One composition path for all three rendering surfaces.
+  </Card>
+  <Card title="Software fallback">
+    A software rasterizer for machines without a usable GPU.
+  </Card>
+</CardGrid>
+
+The GPU process runs with a restricted profile: it can touch GPU APIs but not
+the system surface the way a sandboxed context could. Its compromise is
+contained, exactly like every other child.
+
+## Compositing
+
+Compositing is where all the surfaces meet. The compositor thread:
+
+1. Collects the visible layers from web content, UI and runtime surfaces.
+2. Resolves occlusion, transforms and effects.
+3. Rasterizes visible tiles (GPU or software).
+4. Presents the final frame.
+
+The compositor is what makes smooth scrolling possible: only the transform of
+the page changes between frames, so the compositor re-uses rasterized tiles.
+
+## Why this architecture
+
+The design choices answer clear questions:
+
+| Question | Answer |
+| --- | --- |
+| Why is rendering split off the main thread? | So input and composition never wait for layout |
+| Why a shared compositor? | So all surfaces compose and animate consistently |
+| Why a dedicated GPU process? | So hostile content can never drive the GPU unsandboxed |
+| Why is browser UI separate from content? | So the interface survives a broken page |
+
+The result is the same experience the ecosystem promises at the
+[user level](/docs/ecosystem/browser): familiar, fast and safe.
+
+## Security notes
+
+- Web content parses only inside sandboxed renderers; the compositor receives
+  layers, not hostile bytes.
+- The GPU process is isolated and restricted, like every child process.
+- The browser UI compositor never parses untrusted content.
+
+## Performance notes
+
+- Composition is transform based, so scroll and animation skip layout and
+  paint.
+- GPU raster offloads pixel work from the main thread.
+- Layer promotion is budgeted; runaway layers are capped.
+
+<Callout type="success" title="Best practice">
+  Keep the main thread free of layout work during interaction. If a feature
+  needs animation, prefer compositor driven transforms over layout thrashing
+  on the main thread.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include a unified frame graph for all surfaces, async
+  layout for large documents, and GPU accelerated text shaping. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Process Model](/docs/technical-design/process-model): which process renders what.
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): runtime surfaces.
+- [Sandbox](/docs/technical-design/sandbox): where rendering runs safely.
+
+## Further reading
+
+- [Performance](/docs/technical-design/performance): rendering performance budgets.
+- [Browser Architecture](/docs/technical-design/browser-architecture): the UI that hosts content.
+- [Memory Management](/docs/technical-design/memory-management): layer memory budgets.

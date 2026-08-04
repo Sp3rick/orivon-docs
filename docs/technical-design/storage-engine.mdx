@@ -1,0 +1,250 @@
+---
+title: "Storage Engine"
+description: "The internal design of the Orivon storage engine: the content addressed store, encryption, caching, persistence, providers and synchronization."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["technical-design", "storage"]
+keywords: "storage engine, content addressing, encryption, caching, persistence, providers, database, synchronization"
+---
+
+The storage engine is how Orivon persists everything: identity documents,
+module packages, application data, session snapshots and the metadata databases.
+It runs in the storage service process, and it is built around content
+addressing. This page documents the engine's architecture.
+
+## Why a dedicated storage process
+
+Storage work involves untrusted bytes (fetched content, module packages) and
+sensitive bytes (encrypted identity data). Both are kept out of the privileged
+browser process. The storage service is its own process with its own disk
+footprint, so:
+
+- No other process can touch storage internals directly.
+- A storage bug is contained to the storage process.
+- Every other component reaches storage through the API and permission layers.
+
+<Diagram caption="All persistence flows through the storage service.">
+  <Flow column>
+    <DiagramNode dim>Any component</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Storage API (scoped + quota)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Storage service</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>CAS + metadata DB</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Content addressed store
+
+The heart of the engine is the content addressed store (CAS). Data is stored
+under addresses derived from the data itself:
+
+<Diagram caption="Content is chunked, hashed and stored by address.">
+  <Flow column>
+    <DiagramNode>Blob</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Chunking (fixed or content based)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Content addresses</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Merkle DAG root</DiagramNode>
+  </Flow>
+</Diagram>
+
+Properties of the CAS:
+
+<CardGrid columns={2}>
+  <Card title="Integrity by construction">
+    The address proves the content. A changed byte is a different address.
+  </Card>
+  <Card title="Deduplication">
+    Identical chunks are stored once, which makes module and page caches
+    efficient.
+  </Card>
+  <Card title="Verifiable reads">
+    A read verifies the chunk hashes against the address before returning.
+  </Card>
+  <Card title="Portable">
+    Any peer can serve the same content by address, which powers the P2P
+    transport.
+  </Card>
+</CardGrid>
+
+## The metadata database
+
+Addresses are immutable, but the engine also needs mutable state: where things
+are, who owns them, what the quota says. That state lives in a metadata
+database:
+
+| Store | Holds | Structure |
+| --- | --- | --- |
+| **Blob store** | Raw content chunks | Address indexed, immutable |
+| **Object store** | Merkle DAG nodes | Parent/child links |
+| **Metadata DB** | Quotas, references, ownership | Key/value with transactions |
+| **Key store** | Identity scoped encryption keys | Encrypted at rest |
+
+The metadata DB is transactional, so a crash mid-write never leaves partial
+state. See [Error Handling](/docs/technical-design/error-handling) for crash
+recovery.
+
+## Encryption
+
+Data at rest is encrypted, and the encryption model is identity scoped:
+
+<Steps>
+  <Step title="Derive">
+    A per identity data key is derived from the identity's master key.
+  </Step>
+  <Step title="Encrypt">
+    User data is encrypted with the data key before it reaches the blob store.
+  </Step>
+  <Step title="Isolate">
+    Different identities use different keys, so one identity's data cannot be
+    read with another's key.
+  </Step>
+  <Step title="Wrap">
+    Data keys are wrapped by the wallet service's key hierarchy and never
+    stored in the clear.
+  </Step>
+</Steps>
+
+The storage process encrypts and decrypts on request but never holds the keys
+that would let it decrypt at rest. See
+[Security Architecture](/docs/technical-design/security-architecture) and
+[Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+<Callout type="warning" title="Security">
+  The storage process can access ciphertext and perform crypto, but it cannot
+  derive keys. Key material lives only in the wallet service. A storage
+  compromise yields encrypted data and nothing that decrypts it.
+</Callout>
+
+## Caching
+
+The engine caches aggressively because content addressing makes caching always
+valid:
+
+- Fetched content is cached by address in the CAS; the cache never returns
+  stale data because the address encodes the content.
+- A memory cache fronts the on-disk store for hot addresses.
+- The cache respects quotas and eviction policy under memory pressure.
+
+The cache is what makes the [Performance](/docs/technical-design/performance)
+startup and navigation goals achievable.
+
+## Persistence and durability
+
+Persistence rules separate durable from disposable data:
+
+<CardGrid columns={2}>
+  <Card title="Durable">
+    User data, identity documents and session state. Written transactionally
+    and replicated where possible.
+  </Card>
+  <Card title="Reconstructible">
+    Cache entries that can be re-fetched by address. Evicted freely, never
+    lost.
+  </Card>
+</CardGrid>
+
+Durability is decided by the owner (identity, quota, replication), not by the
+storage engine's mood. The engine applies the policy the caller requested.
+
+## Storage providers
+
+Storage backends are pluggable. The engine defines a provider interface and
+ships with two implementations:
+
+| Provider | Role |
+| --- | --- |
+| **LocalProvider** | On disk storage on the user's device |
+| **NetworkProvider** | Replication and serving through the P2P network |
+
+A provider is selected per address class, and the selection is recorded so
+reads always find the data. Future providers are covered in the future storage
+architecture section below.
+
+## Synchronization
+
+Synchronization keeps a user's data consistent across their devices and across
+the network:
+
+1. Changes are recorded as content addressed snapshots under the owner's
+   identity.
+2. The sync layer propagates new addresses to subscribed devices and peers.
+3. Conflicts are resolved by the owner's identity policy, not by "last writer
+   wins" guessing.
+4. Everything is authenticated by the owner's signature.
+
+Synchronization is identity scoped: a device can only sync data it is
+authorized to see, and the authorization is checked per snapshot.
+
+## Local databases
+
+The metadata DB uses embedded database technology with two important
+properties:
+
+- **Transactional writes** for crash safety.
+- **Streaming reads** so large results never load wholly into memory.
+
+The DB is internal to the storage process. Components never run SQL; they call
+the storage API, which keeps the schema free to evolve.
+
+## Future storage architecture
+
+The engine is designed to grow in three directions:
+
+<CardGrid columns={2}>
+  <Card title="Name and blob separation">
+    Splitting the metadata store from the blob store so each scales
+    independently.
+  </Card>
+  <Card title="Differential sync">
+    Syncing only changed chunks instead of whole snapshots.
+  </Card>
+  <Card title="Provider federation">
+    Multiple replicating providers cooperating under one owner policy.
+  </Card>
+</CardGrid>
+
+These are tracked under [Future Improvements](/docs/technical-design/future-improvements).
+
+## Security notes
+
+- All persistence goes through the storage API with scoping and quotas.
+- Content addressing provides integrity by construction for all stored bytes.
+- The storage process cannot derive the keys that would decrypt user data.
+
+## Performance notes
+
+- The address cache makes reads exact and fast; no invalidation logic exists
+  because it is not needed.
+- Writes are transactional and batched; the metadata DB is tuned for the write
+  pattern.
+- Streaming reads keep memory flat for large objects.
+
+<Callout type="success" title="Best practice">
+  Store data by content address whenever possible. If you need mutability, store
+  the address of a new snapshot rather than overwriting bytes in place. This
+  keeps integrity and deduplication for free.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  The engine's future work centers on differential sync, provider federation and
+  a split name/blob architecture, all detailed in
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Identity Layer](/docs/technical-design/identity-layer): the identities that scope storage.
+- [Wallet Architecture](/docs/technical-design/wallet-architecture): the keys that encrypt data.
+- [Sandbox](/docs/technical-design/sandbox): why storage stays isolated.
+
+## Further reading
+
+- [Networking Stack](/docs/technical-design/networking-stack): how content travels.
+- [Security Architecture](/docs/technical-design/security-architecture): the encryption model.
+- [Performance](/docs/technical-design/performance): the caching layer.

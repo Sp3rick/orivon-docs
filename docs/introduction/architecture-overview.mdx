@@ -1,0 +1,126 @@
+---
+title: "Architecture Overview"
+description: "How the Orivon stack fits together: browser, runtime, core, modules, standards, applications, wallets and networks, with clean diagrams."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["introduction", "architecture"]
+keywords: "architecture, browser, runtime, core, modules, standards, wallets, networks, diagrams"
+---
+
+The architecture is designed around a simple idea: a **neutral core**, a **runtime** that
+executes applications, a **browser** that presents them, and **modules** that extend the
+whole, all grounded in **open standards**. This page maps the layers and how they relate.
+
+## The three layers at a glance
+
+<Diagram caption="From the user's perspective, everything runs through the browser.">
+  <Flow>
+    <DiagramNode dim>Applications</DiagramNode>
+    <FlowArrow />
+    <DiagramNode accent>Browser</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Runtime</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Core</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Layer by layer
+
+### Standards
+
+The bottom layer is **not code**. It is specifications. Standards define how objects,
+identities, transactions, modules and the runtime behave, so that any implementation
+interoperates with any other. Standards make the ecosystem open.
+
+### Core
+
+The **Core** provides the fundamental services every implementation needs: identity,
+value, storage and connectivity. It is deliberately small, neutral and shared so that
+different browsers and runtimes speak the same language.
+
+### Runtime
+
+The **Runtime** executes applications, including the existing web stack (HTML, CSS,
+JavaScript, WebAssembly) plus the new capabilities defined by the standards. It is what
+makes applications behave like software while remaining as portable as a URL.
+
+### Browser
+
+The **Browser** is the user-facing layer. It builds on the classic web platform and adds
+Web3 capabilities natively: wallets, decentralized DNS, sandboxing and the Web3 Score. It
+is where security, privacy and usability meet.
+
+## The relationship between components
+
+<Diagram caption="How the main components connect. Wallets, DNS and modules plug into the core through public interfaces.">
+  <Flow>
+    <DiagramNode accent>Browser</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Runtime</DiagramNode>
+    <FlowArrow />
+    <DiagramNode>Core</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Standards</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Wallets</DiagramNode>
+    <DiagramNode dim>DNS</DiagramNode>
+    <DiagramNode dim>Modules</DiagramNode>
+    <DiagramNode dim>Storage</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Where modules live
+
+Modules are the extension mechanism. They connect to the Core through defined interfaces,
+which means they can be built and distributed by anyone without forking the browser.
+
+<Diagram caption="Modules attach to the core, never to a specific browser implementation.">
+  <Flow>
+    <DiagramNode dim>Module A</DiagramNode>
+    <FlowArrow />
+    <DiagramNode accent>Core interfaces</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Module B</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Applications and networks
+
+Applications run on the runtime and reach users through the browser. Networks such as
+chains, storage systems and identity providers connect through the same core services, so
+users interact with any network through a single, consistent interface.
+
+<Diagram caption="The browser as the single point of contact between users, applications and networks.">
+  <Flow column>
+    <DiagramNode>User</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Orivon Browser</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Applications</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Networks & services</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Design rules
+
+The architecture follows a few rules that keep it consistent and scalable:
+
+1. **Separation of concerns.** Standards define; the core provides; the runtime executes;
+   the browser presents; modules extend.
+2. **Interfaces over implementations.** Components talk through public interfaces, so any
+   piece can be replaced.
+3. **Backward compatibility.** The existing web platform is preserved and extended, never
+   broken.
+4. **One definition of truth.** Capabilities are specified once, in the standards, and
+   referenced everywhere else.
+
+<Callout type="success" title="Next">
+  Now that you have the full picture, see how it is being built in the
+  [Roadmap](/docs/introduction/roadmap), or skip ahead to the
+  [Key Features](/docs/introduction/key-features) for a feature-level tour.
+</Callout>

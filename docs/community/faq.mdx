@@ -1,0 +1,123 @@
+---
+title: "Frequently Asked Questions"
+description: "Answers to common questions about Orivon: the project, community, governance, contributing, licensing, and more."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 39
+tags: ["community", "faq", "questions", "answers"]
+keywords: "faq, frequently asked questions, orivon, community, governance, contributing, license"
+---
+
+Answers to the most common questions about Orivon. If your question is not
+here, ask in the [Forum](https://forum.orivon.dev) or [Discord](https://discord.gg/orivon).
+
+<Faq
+  items={[
+    {
+      q: "What is Orivon?",
+      a: "Orivon is an open-source browser and platform that returns control of the web to its users. It is built on WebAssembly, capability-based security, and open standards. The project is governed by its community under the Apache License 2.0."
+    },
+    {
+      q: "How is Orivon different from other browsers?",
+      a: "Orivon is not just a browser — it is a platform. It runs WebAssembly modules with capability-based permissions, includes a user-owned identity system (DIDs), a reputation layer (Web3 Score), and a naming system. The browser is one client on this platform."
+    },
+    {
+      q: "Is Orivon a cryptocurrency or blockchain project?",
+      a: "No. Orivon uses cryptographic primitives (DIDs, verifiable credentials, capability tokens) but does not have a native token, blockchain, or consensus mechanism. The Web3 Score is a reputation signal, not a financial asset."
+    },
+    {
+      q: "What license does Orivon use?",
+      a: "Apache License 2.0. It is a permissive license that grants patent rights, allows commercial use, and requires attribution. See the [LICENSE](/LICENSE) file and [Open Source Philosophy](/docs/community/open-source-philosophy)."
+    },
+    {
+      q: "Who owns Orivon?",
+      a: "The community. Orivon is governed by contributors through an Apache-style model: maintainers own repositories, working groups coordinate topics, and a Technical Steering Committee sets technical direction. No single company or individual controls the project."
+    },
+    {
+      q: "Can I build a commercial product on Orivon?",
+      a: "Yes. The Apache 2.0 license explicitly permits commercial use, modification, and distribution. Many companies build products and services on Orivon. We encourage it — a healthy ecosystem needs commercial participants."
+    },
+    {
+      q: "How do I contribute?",
+      a: "Start with the [Contributor Guide](/docs/contributors/overview). Pick a good-first-issue, open a PR, and join the discussion. Contributions include code, docs, review, testing, design, translation, and community support."
+    },
+    {
+      q: "Do I need to sign a CLA?",
+      a: "No. Orivon uses the [Developer Certificate of Origin (DCO)](https://developercertificate.org/) — by committing with `git commit -s`, you certify you have the right to contribute the code. No separate agreement required."
+    },
+    {
+      q: "How are decisions made?",
+      a: "Through a documented [decision-making process](/docs/community/decision-making): proposals, public comment, lazy consensus for project decisions, and recorded votes for foundational decisions. The Technical Steering Committee resolves escalated disputes."
+    },
+    {
+      q: "What is the Technical Steering Committee (TSC)?",
+      a: "The TSC is the project's highest technical authority, elected by maintainers. It sets technical direction, approves standards, and resolves cross-cutting disagreements. See [Technical Steering Committee](/docs/community/technical-steering-committee)."
+    },
+    {
+      q: "What are working groups?",
+      a: "Working groups coordinate cross-cutting topics (runtime, browser, security, docs, community, etc.). They are open to anyone and make recommendations to the TSC. See [Working Groups](/docs/community/working-groups)."
+    },
+    {
+      q: "How do I become a maintainer?",
+      a: "Earn it through sustained, high-quality contribution. There is no application — maintainers nominate based on demonstrated work. See [Maintainers](/docs/community/maintainers)."
+    },
+    {
+      q: "Is there a bug bounty program?",
+      a: "Security vulnerabilities should be reported via the [Responsible Disclosure](/docs/contributors/responsible-disclosure) process. A formal bug bounty program is planned (see [Community Roadmap](/docs/community/community-roadmap))."
+    },
+    {
+      q: "How do I get funding for my Orivon project?",
+      a: "Apply to the [Grants Program](/docs/community/grants-program) (quarterly cycles), enter a [Hackathon](/docs/community/hackathons), or explore [Partnership](/docs/community/partners) opportunities."
+    },
+    {
+      q: "Where can I find the roadmap?",
+      a: "The [Project Roadmap](/docs/community/project-roadmap) covers platform features and releases. The [Community Roadmap](/docs/community/community-roadmap) covers programs and governance. The [Research Roadmap](/docs/research/research-roadmap) covers the research program."
+    },
+    {
+      q: "How do I start a meetup in my city?",
+      a: "Apply via the [Meetups](/docs/community/meetups#starting-a-new-meetup) page. The community provides a starter kit, swag, promotion, and a stipend budget."
+    },
+    {
+      q: "Can I translate the documentation?",
+      a: "Yes! Translation is a valued contribution. Join the #translation channel on Discord or open a PR to the docs repository. The Documentation Working Group coordinates translations."
+    },
+    {
+      q: "What is the Web3 Score?",
+      a: "A reputation and trust layer for the open web. It aggregates on-chain and off-chain signals into a portable, privacy-preserving score. See the [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper)."
+    },
+    {
+      q: "How does Orivon handle privacy?",
+      a: "Privacy by design: capability-based permissions, no telemetry by default, local-first architecture, and user-controlled identity. See the [Privacy Model](/docs/ecosystem/privacy-model) and [Security Model](/docs/ecosystem/security-model)."
+    },
+    {
+      q: "Where can I get help?",
+      a: "Quick questions: Discord #questions. Design discussions: Forum. Bugs: GitHub Issues. Security: responsible disclosure email. All channels are listed on [Social Channels](/docs/community/social-channels)."
+    },
+    {
+      q: "How do I report a security vulnerability?",
+      a: "Use the [Responsible Disclosure](/docs/contributors/responsible-disclosure) process. Do not open a public issue for security vulnerabilities."
+    },
+    {
+      q: "Can I use the Orivon logo for my project?",
+      a: "Yes, per the [Brand Guidelines](/docs/community/brand-guidelines). Download assets from [Logos & Assets](/docs/community/logos-and-assets). Do not imply endorsement by the Orivon project."
+    },
+    {
+      q: "Is Orivon ready for production use?",
+      a: "Orivon is in beta (v1.x). The platform is usable for development and early adoption. Production readiness varies by subsystem — check the [API Reference](/docs/api-reference/overview) and release notes for stability markers."
+    },
+  ]}
+/>
+
+## Still have questions?
+
+- **Search the forum** — many questions are already answered.
+- **Ask in Discord** — #questions channel for quick help.
+- **Open a discussion** — for design or governance questions.
+- **Email us** — community@orivon.dev for general inquiries.
+
+<Callout type="success" title="No question is too basic">
+  Every expert was once a beginner. If the docs don't answer it, ask — the
+  community is here to help.
+</Callout>
+
+**Related:** [Social Channels](/docs/community/social-channels) · [Contributor Guide](/docs/contributors/overview) · [Governance](/docs/community/governance)

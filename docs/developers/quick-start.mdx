@@ -1,0 +1,194 @@
+---
+title: "Quick Start"
+description: "Create and run your first Orivon project in minutes: scaffold, build, test and run, with every step explained."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["developers", "quick-start"]
+keywords: "quick start, first project, scaffold, build, run, orivon new"
+---
+
+This tutorial gets you from an empty machine to a running Orivon project.
+Every step is explained, so you understand not just what to run but why. If
+you have not installed Orivon yet, do that first:
+[Installation](/docs/developers/installation).
+
+## Step 1: Check the environment
+
+Open a terminal and confirm the toolchain is healthy:
+
+```sh
+orivon doctor
+```
+
+You should see a passing report. If anything is red, follow the printed fix
+before continuing. This step exists so problems surface now, when they are
+cheap, instead of halfway through a tutorial.
+
+## Step 2: Create a project
+
+Create your first project:
+
+```sh
+orivon new hello-world
+cd hello-world
+```
+
+<Diagram caption="Scaffolding turns a template into a working project.">
+  <Flow column>
+    <DiagramNode accent>orivon new hello-world</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Copy the project template</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Generate the manifest</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Install default dependencies</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Ready project</DiagramNode>
+  </Flow>
+</Diagram>
+
+The command creates a directory with a manifest, source folders and a test
+harness. The layout is documented in
+[Project Structure](/docs/developers/project-structure).
+
+## Step 3: Look at the project
+
+Open the manifest to see what was created:
+
+```sh
+cat orivon.toml
+```
+
+```toml
+[package]
+name = "hello-world"
+version = "0.1.0"
+authors = ["you.orivon"]
+
+[permissions]
+allow = []
+```
+
+The manifest declares what the project is and what it is allowed to do. The
+empty `allow` list means the project starts with no capabilities, which is the
+safe default. See [Module Manifest](/docs/developers/module-manifest) for every
+field.
+
+## Step 4: Write some code
+
+Open `src/main.ts` and replace the content with:
+
+```ts
+import {Orivon} from '@orivon/sdk';
+
+const app = new Orivon();
+
+app.on('ready', () => {
+  app.log.info('Hello from Orivon!');
+});
+```
+
+This is a complete Orivon application: it creates the app object, waits for
+the runtime to be ready, and logs a message. The `Orivon` object is your entry
+point to every API in the [Runtime APIs](/docs/developers/runtime-apis).
+
+## Step 5: Build
+
+Compile the project:
+
+```sh
+orivon build
+```
+
+Expected output, roughly:
+
+```text
+Building hello-world 0.1.0
+Compiled in 1.2s
+Package ready: dist/hello-world.omp
+```
+
+The build compiles your code into the Orivon package format. It also catches
+type errors, so a successful build means the code is valid.
+
+## Step 6: Test
+
+Run the built in test:
+
+```sh
+orivon test
+```
+
+Expected output:
+
+```text
+Running 1 test
+test hello-world ... ok
+```
+
+Every scaffold includes at least one test so you can verify your toolchain
+works end to end. Testing is covered in depth in
+[Testing](/docs/developers/testing).
+
+## Step 7: Run
+
+Run the project in the local runtime:
+
+```sh
+orivon run
+```
+
+You should see the log line from your application:
+
+```text
+Hello from Orivon!
+```
+
+`orivon run` starts a local runtime host, loads your project with the
+permissions it declared, and runs it. The runtime is documented in the
+[Runtime Architecture](/docs/technical-design/runtime-architecture) page.
+
+## Step 8: Modify and iterate
+
+Change the log message, rebuild and run again:
+
+```sh
+orivon build && orivon run
+```
+
+The loop is now yours: write, build, test, run. This is the workflow described
+in [Getting Started](/docs/developers/getting-started).
+
+## What just happened
+
+Putting it together:
+
+| Step | Command | Purpose |
+| --- | --- | --- |
+| Check | `orivon doctor` | Verify the toolchain |
+| Create | `orivon new hello-world` | Scaffold the project |
+| Write | edit `src/main.ts` | Implement the application |
+| Build | `orivon build` | Compile to the package format |
+| Test | `orivon test` | Verify behavior |
+| Run | `orivon run` | Execute in the local runtime |
+
+You now have a working Orivon development setup and a running project.
+
+<Callout type="success" title="Next step">
+  The Quick Start used an application template. To learn the other artifact,
+  follow [Building Your First Module](/docs/developers/building-your-first-module),
+  or go deeper with the [Runtime APIs](/docs/developers/runtime-apis).
+</Callout>
+
+<Callout type="warning" title="Common mistakes">
+  Running commands from the wrong directory is the most common mistake. Always
+  run `orivon` commands from inside the project directory, which is where the
+  manifest lives.
+</Callout>
+
+## Related pages
+
+- [Project Structure](/docs/developers/project-structure): what the scaffold created.
+- [CLI](/docs/developers/cli): the commands used here in full detail.
+- [Building Your First Module](/docs/developers/building-your-first-module): the module path.

@@ -1,0 +1,179 @@
+---
+title: "Wallet API"
+description: "Reference for the Wallet API: accounts, balances, signing, verification, transactions and recovery."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["api-reference", "wallet-api"]
+keywords: "wallet api, accounts, balance, sign, verify, send transaction, mnemonic, keypair, wallet events"
+---
+
+The Wallet API manages user wallets: accounts, balances, signing, transaction
+submission and recovery. All key material is held in hardware-backed secure
+storage and never exposed through this facade.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: WalletFacade
+
+### `wallet.createAccount(label?, algorithm?)`
+
+Creates a new wallet account and returns its public record.
+
+```ts
+const account = await app.wallet.createAccount('Daily spend', {
+  algorithm: 'ed25519',
+});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `label` | `string \| undefined` | Human label. Default generated. |
+| `algorithm` | `"ed25519" \| "secp256k1" \| undefined` | Key algorithm. Default `"ed25519"`. |
+
+**Returns:** `Promise<WalletAccount>`
+
+**Throws:** `ERR_PERMISSION_DENIED` · `ERR_KEY_LIMIT_REACHED`
+
+### `wallet.listAccounts()`
+
+Lists accounts in the current wallet.
+
+**Returns:** `Promise<WalletAccount[]>`
+
+### `wallet.removeAccount(id)`
+
+Removes an account and its key material after user confirmation.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_NOT_FOUND` · `ERR_USER_DENIED`
+
+### `wallet.getBalance(accountId, asset?)`
+
+Returns the balance of one asset for an account.
+
+**Returns:** `Promise<Balance>`
+
+**Throws:** `ERR_NOT_FOUND`
+
+### `wallet.listBalances(accountId)`
+
+Returns all balances for an account.
+
+**Returns:** `Promise<Balance[]>`
+
+### `wallet.sign(payload, options?)`
+
+Signs a payload with an account's key. The private key never leaves secure
+storage.
+
+```ts
+const sig = await app.wallet.sign(messageBytes, {
+  accountId: account.id,
+  algorithm: 'ed25519',
+});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `payload` | `Uint8Array` | Data to sign. |
+| `options.accountId` | `string` | Account to sign with. Required if more than one account. |
+| `options.algorithm` | `string \| undefined` | Algorithm override. |
+
+**Returns:** `Promise<SignedPayload>` — `{publicKey, signature, algorithm, payloadHash}`.
+
+**Throws:** `ERR_PERMISSION_DENIED` · `ERR_USER_DENIED` · `ERR_NOT_FOUND`
+
+### `wallet.verify(message, signature, publicKey, algorithm?)`
+
+Verifies a signature against a public key. Pure function; no key access.
+
+**Returns:** `Promise<boolean>`
+
+### `wallet.send(transaction, options?)`
+
+Submits a signed transaction for settlement.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `transaction` | `Transaction` | See below. |
+| `options.waitForConfirmation` | `boolean \| undefined` | Resolve only after settlement. Default `false`. |
+
+**Returns:** `Promise<TxReceipt>`
+
+**Throws:** `ERR_INSUFFICIENT_FUNDS` · `ERR_INVALID_TRANSACTION` · `ERR_USER_DENIED`
+
+### `wallet.listTransactions(options?)`
+
+Lists the transaction history for an account.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `options.accountId` | `string` | Required filter. |
+| `options.status` | `TxStatus \| undefined` | Filter by status. |
+| `options.cursor` | `string \| undefined` | Pagination cursor. |
+
+**Returns:** `Promise<Page<Transaction>>`
+
+### `wallet.importMnemonic(mnemonic, options?)`
+
+Restores an account from a mnemonic phrase.
+
+**Returns:** `Promise<WalletAccount>`
+
+**Throws:** `ERR_INVALID_MNEMONIC` · `ERR_USER_DENIED`
+
+### `wallet.exportMnemonic(accountId)`
+
+Reveals the recovery phrase for an account after authentication. Requires
+`wallet.recovery` permission and explicit user consent.
+
+**Returns:** `Promise<string>`
+
+**Throws:** `ERR_PERMISSION_DENIED` · `ERR_USER_DENIED`
+
+## Types
+
+### `WalletAccount`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Account identifier. |
+| `label` | `string` | Human label. |
+| `algorithm` | `string` | Key algorithm. |
+| `publicKey` | `string` | Base64 public key. |
+| `createdAt` | `number` | Epoch milliseconds. |
+
+### `Balance`
+
+`{asset, amount: string, decimals: number}` — amounts are decimal strings, not
+floats.
+
+### `Transaction`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Transaction identifier. |
+| `accountId` | `string` | Originating account. |
+| `from` / `to` | `string` | Addresses. |
+| `amount` | `string` | Amount as decimal string. |
+| `asset` | `string` | Asset identifier. |
+| `status` | `TxStatus` | See enum below. |
+| `createdAt` | `number` | Epoch milliseconds. |
+
+### `TxStatus`
+
+`pending` · `confirmed` · `settled` · `failed` · `rejected`
+
+## Wallet events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `wallet:account-added` | `WalletAccount` | An account was created or imported. |
+| `wallet:account-removed` | `{id}` | An account was removed. |
+| `wallet:balance-changed` | `{accountId, asset, amount}` | A balance changed. |
+| `wallet:transaction-created` | `Transaction` | A transaction was submitted. |
+| `wallet:transaction-settled` | `Transaction` | A transaction settled. |
+
+**Related:** [Security API](/docs/api-reference/security-api) · [Identity API](/docs/api-reference/identity-api) · [Error Codes](/docs/api-reference/error-codes)

@@ -1,0 +1,132 @@
+---
+title: "Enterprise Features"
+description: "Enterprise-oriented capabilities in Orivon: current features and future plans clearly distinguished."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 23
+tags: ["project", "enterprise", "features", "capabilities"]
+keywords: "enterprise features, orivon enterprise, capabilities, roadmap, current vs planned"
+---
+
+This page describes Orivon's enterprise-oriented capabilities, clearly
+distinguishing **current features** (shipped in v1.2) from **planned features**
+(on the roadmap) and **future initiatives** (research/design phase).
+
+<Callout type="warning" title="No unsupported claims">
+  Features marked **Planned** or **Future** are not yet implemented. They
+  represent roadmap intent and may change based on community feedback,
+  technical discovery, and resource availability.
+</Callout>
+
+## Feature status legend
+
+| Badge | Meaning |
+| :--- | :--- |
+| **✅ Current** | Implemented and shipped in v1.2 (or specified version) |
+| **🚧 Planned** | On roadmap with target release; design/implementation in progress |
+| **🔬 Future** | Research/design phase; no committed timeline |
+| **❌ Not Planned** | Explicitly not on roadmap |
+
+## Security & Isolation
+
+| Feature | Status | Version | Details |
+| --- | --- | --- | --- |
+| **Capability-based sandbox** | ✅ Current | v1.0 | Per-module, fine-grained, deny-by-default |
+| **Module signing & verification** | ✅ Current | v1.0 | Cosign/Sigstore, allowlist enforcement |
+| **Policy engine (allowlists)** | ✅ Current | v1.2 | Centralized capability policies |
+| **Audit logging (structured)** | 🚧 Planned | v1.4 | JSON/CEF, SIEM integration (Splunk, Elastic, Sentinel) |
+| **Hardware isolation (TEE/SGX)** | 🔬 Future | v2.0+ | Confidential computing for sensitive modules |
+| **FIPS 140-3 validated crypto** | 🔬 Future | v2.0+ | Full module validation (aws-lc-rs uses FIPS internals) |
+| **Remote attestation** | 🔬 Future | v2.0+ | TPM/TEE attestation for module integrity |
+| **Zero-trust network segmentation** | 🚧 Planned | v1.5 | Per-module network policies, mTLS |
+
+## Identity & Access Management
+
+| Feature | Status | Version | Details |
+| :--- | :--- | :--- | :--- |
+| **DID-based identity** | ✅ Current | v1.0 | did:key, did:web, did:ion (planned) |
+| **Verifiable credentials** | ✅ Current | v1.0 | W3C VC Data Model, selective disclosure |
+| **Web3 Score (reputation)** | ✅ Current | v1.0 | Portable, privacy-preserving |
+| **SCIM provisioning** | 🚧 Planned | v1.5 | Okta, Azure AD, generic SCIM 2.0 |
+| **SAML/OIDC federation** | 🚧 Planned | v1.5 | Enterprise IdP integration |
+| **RBAC/ABAC for admin** | 🚧 Planned | v1.4 | Role/attribute-based admin policies |
+| **Session management** | ✅ Current | v1.0 | Capability delegation, revocation |
+| **Device trust / posture** | 🔬 Future | v2.0+ | Hardware-bound keys, posture assessment |
+
+## Deployment & Operations
+
+| Feature | Status | Version | Details |
+| :--- | :--- | :--- | :--- |
+| **Self-hosted registry** | ✅ Current | v1.0 | `orivon-registry`, S3/GCS/Azure backend |
+| **Air-gapped deployment kit** | 🚧 Planned | v1.5 | Offline install, mirror tooling, SBOM bundle |
+| **Centralized config management** | 🚧 Planned | v1.4 | Policy-as-code, GitOps, drift detection |
+| **Fleet management API** | 🔬 Future | v2.0+ | Enrollment, monitoring, remote wipe |
+| **Automated update pipeline** | ✅ Current | v1.0 | Signed releases, staged rollouts |
+| **Rollback / hotfix support** | ✅ Current | v1.0 | LTS point releases, emergency patches |
+| **Resource quotas (per module)** | ✅ Current | v1.0 | CPU, memory, network, storage limits |
+| **Multi-region registry** | 🔬 Future | v2.0+ | Geo-replication, latency routing |
+
+## Monitoring & Observability
+
+| Feature | Status | Version | Details |
+| :--- | :--- | :--- | :--- |
+| **Structured logging (JSON)** | ✅ Current | v1.0 | Configurable levels, redaction |
+| **Metrics (Prometheus/OpenTelemetry)** | ✅ Current | v1.0 | Runtime, browser, registry metrics |
+| **Distributed tracing (W3C TraceContext)** | ✅ Current | v1.0 | Cross-module, cross-process |
+| **Health checks / readiness** | ✅ Current | v1.0 | Kubernetes-ready probes |
+| **Custom dashboards (Grafana)** | 🚧 Planned | v1.4 | Pre-built dashboards for enterprise |
+| **Alerting rules (PrometheusRule)** | 🚧 Planned | v1.4 | Pre-configured critical alerts |
+| **Log retention / archival** | ✅ Current | v1.0 | Configurable, S3-compatible |
+| **Forensic data export** | 🔬 Future | v2.0+ | Immutable audit trail export |
+
+## Developer Experience (Enterprise)
+
+| Feature | Status | Version | Details |
+| :--- | :--- | :--- | :--- |
+| **Internal module marketplace** | ✅ Current | v1.0 | Private registry, namespaces |
+| **Policy-as-code (Rego/OPA)** | 🚧 Planned | v1.4 | Capability policies as code |
+| **IDE integration (VS Code, JetBrains)** | ✅ Current | v1.1 | LSP, debugging, scaffolding |
+| **CI/CD templates** | ✅ Current | v1.2 | GitHub Actions, GitLab, Azure Pipelines |
+| **Security scanning (SAST/SCA)** | ✅ Current | v1.0 | Integrated in CI, SARIF output |
+| **License compliance scanning** | ✅ Current | v1.0 | `cargo-license`, `license-checker` |
+| **Internal documentation portal** | 🚧 Planned | v1.4 | Private docs deployment |
+| **Developer portal (Backstage)** | 🔬 Future | v2.0+ | Plugin for Backstage.io |
+
+## Compliance & Governance
+
+| Feature | Status | Version | Details |
+| :--- | :--- | :--- | :--- |
+| **SBOM (CycloneDX + SPDX)** | ✅ Current | v1.0 | Every release, every artifact |
+| **Provenance attestation (SLSA L3)** | 🚧 Planned | v1.4 | Hermetic builds, reproducibility |
+| **Vulnerability scanning (OSV/Grype)** | ✅ Current | v1.0 | CI + scheduled, SARIF |
+| **License compliance reports** | ✅ Current | v1.0 | SPDX, summary per release |
+| **Regulatory mapping (GDPR, etc.)** | 🚧 Planned | v1.4 | Control matrix, evidence packs |
+| **Data residency controls** | 🔬 Future | v2.0+ | Geo-fencing, region-locked modules |
+| **Export control classification** | ✅ Current | v1.0 | ECCN self-classification (EAR99) |
+
+## Comparison: Current vs. Planned vs. Future
+
+| Category | Current (v1.2) | Planned (v1.3–v1.5) | Future (v2.0+) |
+| :--- | :--- | :--- | :--- |
+| **Security** | Sandbox, signing, policies | Audit logging, zero-trust net | TEE, remote attestation, FIPS |
+| **Identity** | DID, VC, Web3 Score | SCIM, SAML/OIDC, RBAC | Device trust, posture |
+| **Deployment** | Self-hosted registry, updates | Air-gapped, GitOps, fleet API | Multi-region, geo-replication |
+| **Observability** | Logs, metrics, tracing | Dashboards, alerts, Grafana | Forensic export |
+| **Developer** | Private registry, IDE, CI/CD | Policy-as-code, internal docs | Backstage plugin |
+| **Compliance** | SBOM, scanning, licenses | Provenance, regulatory mapping | Data residency, export controls |
+
+## Feature request process
+
+Enterprise needs drive roadmap priorities. To request a feature:
+
+1. **Check roadmap** — [Roadmap](/docs/project/roadmap) and [Enterprise](/docs/project/enterprise).
+2. **Open discussion** — Forum `#enterprise` category with use case, requirements, priority.
+3. **Engage** — Join Enterprise Working Group (forming) or TSC office hours.
+4. **Contribute** — Sponsor development via [Grants Program](/docs/community/grants-program) or [Professional Services](/docs/project/professional-services).
+
+<Callout type="success" title="Your requirements shape the roadmap">
+  Enterprise feature requests from organizations evaluating or adopting Orivon
+  get priority attention. The community values real-world deployment feedback.
+</Callout>
+
+**Related:** [Enterprise](/docs/project/enterprise) · [Enterprise Deployment](/docs/project/enterprise-deployment) · [Roadmap](/docs/project/roadmap) · [Professional Services](/docs/project/professional-services)

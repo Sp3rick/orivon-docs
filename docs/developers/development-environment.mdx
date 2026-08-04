@@ -1,0 +1,153 @@
+---
+title: "Development Environment"
+description: "Set up a productive Orivon development environment: editors, extensions, terminal setup, tooling, environment variables and workspace organization."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["developers", "environment"]
+keywords: "development environment, editor, extensions, terminal, tooling, environment variables, workspace"
+---
+
+A good development environment is the difference between fighting your tools
+and forgetting they exist. This page recommends a setup for Orivon development
+that stays out of your way.
+
+## Editors
+
+Orivon projects are plain text: manifests, TypeScript, Rust and JSON. Any
+editor works. The best support today is in:
+
+<CardGrid columns={2}>
+  <Card title="VS Code">
+    Strong TypeScript, TOML and Rust extensions, plus the Orivon extension for
+    commands and diagnostics.
+  </Card>
+  <Card title="Zed">
+    Fast native editing with built in TypeScript and language server support.
+  </Card>
+</CardGrid>
+
+The most important editor feature is schema support: an editor that understands
+the `orivon.toml` schema validates your manifest as you type. See
+[Module Manifest](/docs/developers/module-manifest) for how to enable it.
+
+## Extensions
+
+Install these for the smoothest experience:
+
+| Extension | Purpose |
+| --- | --- |
+| **Orivon** | Runs CLI commands and surfaces diagnostics |
+| **TOML** | Syntax highlighting and manifest validation |
+| **TypeScript** | Language support for SDK code |
+| **rust-analyzer** | Language support for Rust modules |
+| **Error lens** | Inline display of errors and warnings |
+
+The Orivon extension is the most valuable: it wires `orivon build`, `orivon
+test` and `orivon run` into the editor so you never leave the file you are
+editing.
+
+## Terminal setup
+
+The terminal is where the CLI lives, so make it comfortable:
+
+<CheckList
+  items={[
+    'Use a shell with syntax highlighting if available.',
+    'Keep the current project in your prompt, so you always know where you are.',
+    'Configure aliases for the commands you run constantly, for example `orivon run`.',
+    'Use a terminal multiplexer for long running `orivon dev` sessions.',
+  ]}
+/>
+
+The CLI prints colored output by default and is designed to be read in a
+terminal. If you need plain output for scripts, see the `--json` option in the
+[CLI reference](/docs/developers/cli).
+
+## Recommended tooling
+
+Beyond the editor, these tools earn their place:
+
+<CardGrid columns={3}>
+  <Card title="mise or asdf">
+    Manage the Node and Rust toolchains per project, so versions are
+    reproducible.
+  </Card>
+  <Card title="direnv">
+    Load project environment variables when you enter the directory.
+  </Card>
+  <Card title="just">
+    Define project level command recipes on top of the CLI.
+  </Card>
+</CardGrid>
+
+None of these are required. They are convenience tools that reduce the distance
+between "I want to run this" and "it is running".
+
+## Environment variables
+
+The CLI and SDK read a small set of environment variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `ORIVON_HOME` | Overrides the config and cache directory |
+| `ORIVON_LOG` | Sets the log level, for example `debug` |
+| `ORIVON_REGISTRY` | Points at a package registry |
+| `ORIVON_NO_TELEMETRY` | Disables anonymous usage reporting |
+
+Variables override configuration files, which override defaults. The full
+precedence order is on the [Configuration](/docs/developers/configuration)
+page.
+
+<Callout type="warning" title="Secrets are not config">
+  Never store keys or tokens in environment variables that are committed to
+  source control. Environment variables are configuration; secrets belong in a
+  secret manager or the wallet's secure storage.
+</Callout>
+
+## Workspace organization
+
+A healthy workspace keeps projects separate and shares only what should be
+shared:
+
+<Steps>
+  <Step title="One project per directory">
+    Each Orivon project lives in its own directory with its own manifest.
+  </Step>
+  <Step title="Version control per project">
+    Each project is its own repository, so releases and tags are clean.
+  </Step>
+  <Step title="Workspaces for related projects">
+    When projects genuinely share code, use a workspace that groups them.
+  </Step>
+</Steps>
+
+The [Project Structure](/docs/developers/project-structure) page documents
+what a project directory looks like from the inside.
+
+## A recommended layout
+
+A typical setup for a developer working on several Orivon projects:
+
+```text
+~/code/
+  orivon/
+    my-app/          the application you are building
+    my-module/       a module you maintain
+    tools/           shared scripts and tooling
+```
+
+Tools that are used across projects live outside any single project, so a
+project stays self contained and portable.
+
+<Callout type="success" title="Best practice">
+  Make your environment reproducible. Pin toolchain versions with a version
+  manager, commit `.tool-versions` or equivalent, and document the setup in the
+  project README. The person who benefits is future you.
+</Callout>
+
+## Related pages
+
+- [System Requirements](/docs/developers/system-requirements): the machine baseline.
+- [Installation](/docs/developers/installation): installing the CLI and SDK.
+- [Configuration](/docs/developers/configuration): environment variables and config files.

@@ -1,0 +1,135 @@
+---
+title: "Open Source Philosophy"
+description: "Orivon's open source philosophy: Apache License 2.0, community ownership, transparency, and why we chose this model."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["community", "open source", "license", "philosophy"]
+keywords: "open source philosophy, apache license 2.0, community ownership, transparency, orivon license"
+---
+
+Open source is not just a license choice — it is a governance choice, a
+business choice, and a values choice. This page explains why Orivon is open
+source, what that means in practice, and how it shapes the project.
+
+## The license: Apache 2.0
+
+Orivon is licensed under the **Apache License 2.0**.
+
+<Callout type="info" title="License file">
+  The full license text is in the repository root: [LICENSE](/LICENSE).
+  It is a permissive license that grants patent rights, allows commercial use,
+  and requires attribution and preservation of notices.
+</Callout>
+
+### Why Apache 2.0?
+
+| Factor | Why Apache 2.0 fits |
+| --- | --- |
+| **Permissive** | Anyone can use, modify, distribute, and sell Orivon — including in proprietary products. |
+| **Patent grant** | Contributors grant patent rights, protecting users and downstream adopters. |
+| **Attribution** | Credit is required, preserving the project's identity. |
+| **No viral effect** | Unlike copyleft licenses, Apache 2.0 does not force derivative works to be open source. |
+| **Enterprise-friendly** | Widely understood and accepted by corporate legal teams. |
+| **Foundation-compatible** | The license used by the Apache Software Foundation and many neutral foundations. |
+
+<Warning title="License is not governance">
+  The license governs *copyright and patent rights*. It does not govern *how
+  the project makes decisions*. Governance is a separate, community-owned
+  process documented in [Governance](/docs/community/governance).
+</Warning>
+
+## What open source means for Orivon
+
+### Source is open by default
+
+All code, documentation, standards, and research are developed in public
+repositories. There is no private development track.
+
+### Process is open by default
+
+- Discussions happen in public forums.
+- Decisions are recorded in public decision logs.
+- Roadmaps are published and updated in the open.
+- Meetings are scheduled on public calendars; minutes are published.
+
+### Governance is community-owned
+
+The project is not owned by a single company. It is governed by contributors
+through the model in [Governance](/docs/community/governance). The license
+permits forks; the governance model makes forks unnecessary by giving the
+community a voice.
+
+### Community over vendors
+
+No vendor — not even the original authors — has special rights. Influence
+comes from contribution, not from employment or sponsorship.
+
+## What open source does NOT mean
+
+| Myth | Reality |
+| --- | --- |
+| "Anyone can push to main" | All changes go through review; maintainers merge. |
+| "No one is accountable" | Maintainers and the TSC are accountable for quality and direction. |
+| "Free labor" | Contributors choose to contribute; the project recognizes and rewards them. |
+| "No business model" | Companies build businesses *on* Orivon; the project benefits from the ecosystem. |
+| "Chaos" | The project has rigorous processes: review, testing, security, release. |
+
+## The open source commitment
+
+The project commits to:
+
+<CheckList
+  items={[
+    'Keeping the source, process, and governance open indefinitely.',
+    'Not relicensing to a more restrictive license.',
+    'Not adding proprietary modules to the core platform.',
+    'Publishing security issues responsibly (see Responsible Disclosure).',
+    'Recognizing contributors fairly and publicly.',
+  ]}
+/>
+
+## Why this matters for you
+
+| If you are… | This means… |
+| --- | --- |
+| A **user** | You can inspect, modify, and self-host the browser. No vendor lock-in. |
+| A **developer** | You can build on the platform without asking permission or paying royalties. |
+| A **company** | You can embed Orivon in products, offer services, and contribute back. |
+| A **researcher** | You can cite, extend, and challenge the published research. |
+| A **contributor** | Your work is visible, credited, and governs the project's direction. |
+
+## Common questions
+
+<Accordion
+  items={[
+    {
+      q: "Can Orivon be relicensed?",
+      a: "Relicensing would require agreement from all copyright holders — practically impossible for a project with many contributors. The Apache 2.0 license is stable."
+    },
+    {
+      q: "What if a company tries to take over?",
+      a: "Governance is meritocratic, not corporate. The TSC is elected by maintainers. A company can contribute heavily, but it cannot buy votes or veto community decisions."
+    },
+    {
+      q: "Can I build a commercial product on Orivon?",
+      a: "Yes. The Apache 2.0 license explicitly permits commercial use, modification, and distribution. We encourage it — a healthy ecosystem needs commercial participants."
+    },
+    {
+      q: "What about patents?",
+      a: "Apache 2.0 includes a patent grant from contributors to users. If you contribute, you grant patent rights. If you use Orivon, you receive them."
+    },
+    {
+      q: "How is this different from 'open core'?",
+      a: "Open core keeps key features proprietary. Orivon has no proprietary core — the entire platform is Apache 2.0. Commercial value comes from services, hosting, and ecosystem products, not from withholding features."
+    },
+  ]}
+/>
+
+<Callout type="success" title="Open source is a practice, not a label">
+  The license is the floor. The community's daily choices — reviewing in
+  public, deciding in the open, welcoming newcomers — are the ceiling. That
+  is what makes Orivon open source.
+</Callout>
+
+**Related:** [Governance](/docs/community/governance) · [Contribution Recognition](/docs/community/contribution-recognition) · [Ecosystem Governance](/docs/ecosystem/governance)

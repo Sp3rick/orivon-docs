@@ -1,0 +1,114 @@
+---
+title: "Feature Requests"
+description: "How to propose features for Orivon: the proposal template, the evaluation process, and what makes a feature request effective."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["contributors", "issues"]
+keywords: "feature requests, feature proposals, roadmap, feature process"
+---
+
+Feature requests are how the roadmap is proposed. Good proposals describe
+the problem clearly, scope the audience, and invite discussion of tradeoffs.
+This page explains the process and how to make your proposal effective.
+
+<Callout type="info" title="Start with the template">
+  Use the [feature request template](/docs/contributors/templates/feature-request)
+  when you open your proposal.
+</Callout>
+
+## The problem is the point
+
+A feature request lives or dies on the problem statement:
+
+<CheckList
+  items={[
+    'Describe the problem, not the solution.',
+    'Name who is affected and how.',
+    'Show the current workaround and its cost.',
+    'State what success looks like, concretely.',
+  ]}
+/>
+
+<Callout type="success" title="Best practice">
+  "Users cannot sign without a local wallet" states a problem. "Add a hardware
+  wallet plugin" states a solution. Both belong in the proposal, but the
+  problem is what the community evaluates.
+</Callout>
+
+## The proposal anatomy
+
+```markdown
+### Problem
+Storage providers cannot advertise capacity tiers, so users discover
+providers by trial and error.
+
+### Impact
+Provider operators and users selecting storage. Affects adoption of
+self-hosted storage.
+
+### Proposed solution
+Allow providers to advertise a capacity and price tier with their service
+record, surfaced in the naming system.
+
+### Alternatives
+- A registry of provider ratings (heavier, slower to trust).
+- Documentation only (no mechanism).
+
+### Tradeoffs
+Adds a field to service records; needs schema versioning care.
+
+### Scope
+Core services, DNS records, and the storage APIs.
+```
+
+## The evaluation process
+
+<Diagram caption="How a feature request moves.">
+  <Flow column>
+    <DiagramNode accent>Proposal filed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Discussion and refinement</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Maintainer decision</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Roadmap or standards process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Implementation and release</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Stage | What happens |
+| --- | --- |
+| Filed | Your proposal is opened |
+| Discussion | Contributors refine the problem and scope |
+| Decision | Maintainers accept, defer or close |
+| Design | Accepted ideas go through the standards process |
+| Build | A contributor implements the feature |
+
+## What makes a proposal effective
+
+| Effective | Less effective |
+| --- | --- |
+| Narrow problem, clear audience | Vague "it would be nice to have" |
+| Realistic scope | "Rewrite the whole architecture" |
+| Acknowledges tradeoffs | Assumes no costs |
+| Suggests how to evaluate | No success criteria |
+
+## After you file
+
+- Engage in the discussion; refine the proposal with feedback.
+- Be open to a narrower or different solution to the same problem.
+- If the proposal is accepted, consider being the implementer.
+
+<Callout type="info" title="Big features go through standards">
+  Large or protocol level features are specified through the
+  [standards process](/docs/standards/specification-lifecycle) before they are
+  built. Your feature request is the seed of that process.
+</Callout>
+
+## Related pages
+
+- [Feature request template](/docs/contributors/templates/feature-request): the form to use.
+- [Issue Guidelines](/docs/contributors/issue-guidelines): the filing rules.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): how accepted ideas become specs.

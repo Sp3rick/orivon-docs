@@ -1,0 +1,108 @@
+---
+title: "OSP-012: Web3 Score"
+description: "Draft specification for the Web3 Score: the score format, its computation and how it can be verified."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["standards", "osp-012", "web3-score"]
+keywords: "OSP-012, Web3 Score, score format, reputation, computation, verifiable"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+The Web3 Score is Orivon's reputation concept for sites, identities and
+applications. This draft defines the score format and how it is computed.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-012 |
+| Title | Web3 Score |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | SDK |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The Web3 Score is a structured reputation record with a defined format, a
+defined computation over on-chain and behavioral signals, and a path to
+verifiability. The concept is described in the
+[Web3 Score](/docs/ecosystem/web3-score) ecosystem page.
+
+## Purpose
+
+Users need a trustworthy signal about what they are interacting with. The score
+exists to make reputation a data format instead of an unverifiable claim, so
+that sites, identities and applications can be compared on transparent terms.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The score data format and its fields.',
+    'The computation model and its inputs.',
+    'Score verification and provenance.',
+    'Consumer interfaces in the SDK.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'The user interface that displays scores (covered by the User Experience category).',
+    'Which on-chain metrics are meaningful (an ongoing product question).',
+    'Game resistance guarantees (an open research problem).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): the identities scored.
+- [OSP-015 SDK](/docs/standards/osp-015-sdk): how consumers read scores.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): tamper resistance.
+
+## Related specifications
+
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): score update events.
+- [OSP-002 Core Architecture](/docs/standards/osp-002-core-architecture): the service that computes scores.
+
+## Implementation status
+
+The Web3 Score is at the concept stage. The draft defines the intended format
+and computation, and the reference implementation has not yet shipped a
+complete scorer. This is reflected in the draft status and in the
+[Future Products](/docs/ecosystem/future-products) ecosystem page.
+
+<Callout type="warning" title="Concept in progress">
+  The Web3 Score is an evolving product concept. This draft records the current
+  direction, not a shipped feature. Expect the format and computation to change
+  during discussion.
+</Callout>
+
+## Future work
+
+- A defined computation with a verifiable output.
+- An open scoring committee to review signals.
+- Standardized score verification for third parties.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Web3 Score](/docs/ecosystem/web3-score): the user facing concept.

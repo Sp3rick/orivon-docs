@@ -1,0 +1,102 @@
+---
+title: "OSP-010: Storage"
+description: "Draft specification for storage: content addressing, the storage engine, metadata, synchronization and encryption at rest."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["standards", "osp-010", "storage"]
+keywords: "OSP-010, storage, content addressing, CAS, synchronization, encryption, blobs"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Data outlives code, so storage is where integrity and durability matter most.
+This draft defines the storage engine, content addressing and synchronization.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-010 |
+| Title | Storage |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Storage |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+Storage combines a content addressed blob store, a metadata database and a key
+store. Data is identity scoped and encrypted, and durable data is
+distinguished from reconstructible data. The reference design is the
+[Storage Engine](/docs/technical-design/storage-engine) page.
+
+## Purpose
+
+Storage must be safe from substitution, safe from loss, and portable across
+devices. Content addressing gives integrity by construction; identity scoped
+encryption gives privacy; synchronization gives continuity.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'Content addressing and the blob/object stores.',
+    'The metadata database and key store.',
+    'Identity scoped encryption and data keys.',
+    'Durable versus reconstructible data.',
+    'Synchronization and conflict handling.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Transport of data between devices (covered by OSP-009).',
+    'Identity and key derivation (covered by OSP-008 and OSP-007).',
+    'Cryptographic primitives (covered by the Cryptography category).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): identity scopes and data keys.
+- [OSP-013 Security Model](/docs/standards/osp-013-security-model): integrity guarantees.
+- [OSP-009 Networking](/docs/standards/osp-009-networking): data transport.
+
+## Related specifications
+
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): storage change events.
+- [OSP-014 Configuration](/docs/standards/osp-014-configuration): storage configuration.
+
+## Implementation status
+
+The reference implementation includes content addressing, the metadata store
+and synchronization with conflict handling. The draft tracks the design at
+0.1.0. No conformance suite has been published yet.
+
+## Future work
+
+- Multi device synchronization improvements.
+- Retention and cleanup policies.
+- Standards for encrypted data portability.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Storage Engine](/docs/technical-design/storage-engine): the reference design.

@@ -1,0 +1,164 @@
+---
+title: "Organization"
+description: "How the Orivon project is organized: structure, responsibilities, governance relationship, working groups, and technical leadership."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["project", "organization", "governance", "working groups"]
+keywords: "orivon organization, project structure, governance, working groups, technical leadership"
+---
+
+The Orivon project is organized to scale technically and socially while
+remaining true to its open-source, community-governed principles. This page
+describes the organizational structure, responsibilities, and how the pieces
+fit together.
+
+<Callout type="note" title="Project vs. Ecosystem">
+  This page describes the **project organization** (code, releases, governance).
+  The wider **ecosystem organization** (standards, naming, Foundation) is
+  covered in [Ecosystem Governance](/docs/ecosystem/governance) and the
+  [Community, Governance & Ecosystem](/docs/community/overview) section.
+</Callout>
+
+## Organizational principles
+
+| Principle | Practice |
+| --- | --- |
+| **Meritocracy** | Influence follows demonstrated contribution, not affiliation. |
+| **Transparency** | Decisions, meetings, budgets, and roadmaps are public. |
+| **Distributed leadership** | No single point of control; leadership is role-based and rotating. |
+| **Scalability** | Structure supports growth from dozens to thousands of contributors. |
+| **Accountability** | Roles have clear responsibilities and public records. |
+
+## Organizational structure
+
+<Flow>
+  <DiagramNode title="Community" description="All participants: users, contributors, maintainers, partners" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Working Groups" description="Cross-cutting coordination: runtime, browser, security, docs, community, research, DX, SDK, core" />
+  <FlowArrowDown />
+  <DiagramNode title="Maintainers" description="Repository/area ownership: review, merge, release, triage" />
+  <FlowArrowDown />
+  <DiagramNode title="Technical Steering Committee (TSC)" description="Technical direction, standards, escalation resolution" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Orivon Foundation (Planned)" description="Legal stewardship: assets, funding, trademark, compliance" />
+</Flow>
+
+## Roles and responsibilities
+
+### Community
+The broadest layer. Anyone who uses, contributes to, or participates in Orivon.
+- Proposes and discusses ideas in public forums.
+- Contributes code, docs, designs, tests, translations, events.
+- Elects maintainers (indirectly, through demonstrated work).
+- Participates in governance through [decision proposals](/docs/community/decision-making).
+
+### Working Groups
+Cross-cutting coordination bodies chartered by the TSC. Each group owns a
+topic — not a repository — and coordinates work across the project.
+
+| Working Group | Scope |
+| --- | --- |
+| **Runtime** | Execution engine, WASM, performance, sandboxing |
+| **Browser** | Rendering, UI, platform integration, accessibility |
+| **Core** | Cross-cutting architecture, stability, shared infrastructure |
+| **SDK** | Developer tooling, APIs, templates, DX |
+| **Security** | Threat modeling, audits, disclosure, cryptography |
+| **Documentation** | Docs site, guides, standards docs, research library |
+| **Community** | Events, Code of Conduct, recognition, meetups |
+| **Developer Experience** | Onboarding, tooling, error messages, migration |
+| **Research** | Whitepapers, architecture papers, exploratory research |
+
+See [Working Groups](/docs/community/working-groups) for charters and current status.
+
+### Maintainers
+Accountable for specific repositories or areas. Maintainers are the "merge
+authority" and quality gate for their scope.
+
+**Responsibilities:**
+- Review and merge pull requests in a timely manner.
+- Triage and prioritize issues.
+- Manage releases for their scope.
+- Mentor and onboard contributors.
+- Report progress to the TSC.
+
+**Appointment:** By TSC based on demonstrated contribution. See
+[Maintainers](/docs/project/maintainers) for the full process.
+
+### Technical Steering Committee (TSC)
+The project's highest technical authority. Elected by maintainers.
+
+**Responsibilities:**
+- Technical roadmap and release strategy.
+- Standards ratification and versioning.
+- Architecture decisions with cross-subsystem impact.
+- Maintainer appointments and emeritus status.
+- Working group charter approval and review.
+- Resolution of escalated disputes.
+
+See [Technical Steering Committee](/docs/community/technical-steering-committee).
+
+### Orivon Foundation (Planned)
+The legal and financial steward of the project. Not yet incorporated.
+
+**Planned responsibilities:**
+- Hold shared assets: trademarks, domains, funding, canonical registries.
+- Coordinate funding: sponsors, grants, professional services revenue.
+- Legal stewardship: contracts, compliance, IP protection.
+- Accountability: public budgets, community oversight.
+
+See [Funding & Sustainability](/docs/project/funding) and [Ecosystem Governance](/docs/ecosystem/governance).
+
+## Governance relationship
+
+The project governance (TSC, maintainers, working groups) operates
+independently but coordinates with the Foundation on:
+
+- **Funding allocation** — Foundation provides budget; TSC prioritizes technical work.
+- **Legal matters** — Foundation handles contracts, trademarks, compliance.
+- **Strategic alignment** — Foundation ensures long-term sustainability; TSC ensures technical integrity.
+
+<Callout type="info" title="Separation of concerns">
+  Technical decisions are made by the TSC and maintainers. Legal and financial
+  decisions are made by the Foundation. The two coordinate but do not control
+  each other. This mirrors the Apache Software Foundation model.
+</Callout>
+
+## Decision-making flow
+
+| Decision Type | Authority | Process |
+| --- | --- | --- |
+| Code changes (PR-level) | Maintainers | Review + merge |
+| Feature/policy changes | TSC (lazy consensus) | [Decision proposal](/docs/community/decision-making) |
+| Standards ratification | TSC (supermajority) | Standards process |
+| Governance amendments | TSC + Community | Formal proposal + vote |
+| Legal/financial | Foundation | Board decision (public minutes) |
+
+## Communication channels
+
+| Channel | Purpose | Audience |
+| --- | --- | --- |
+| **GitHub Discussions** | Technical proposals, RFCs, design | Contributors, maintainers |
+| **Forum** | Governance, community, long-form | All participants |
+| **Discord** | Real-time coordination, quick questions | Active contributors |
+| **TSC Meetings** | Bi-weekly, public, minutes published | Observers welcome |
+| **Working Group Meetings** | Per-group cadence, public | Members + observers |
+| **Newsletter** | Monthly digest | All subscribers |
+
+## Current status
+
+| Body | Status | Notes |
+| --- | --- | --- |
+| Community | Active | ~120 active contributors (30-day) |
+| Working Groups | 9 chartered | Seeding; backlogs forming |
+| Maintainers | ~25 | Across 15+ repositories |
+| TSC | 7 members | Elected 2026; terms staggered |
+| Foundation | Planned | Incorporation targeted 2027-H1 |
+
+<Callout type="success" title="The structure serves the mission">
+  Organization exists to enable the work, not to create hierarchy. If a
+  structure stops helping, the community can change it through the
+  [governance process](/docs/community/governance).
+</Callout>
+
+**Related:** [Leadership](/docs/project/leadership) · [Core Team](/docs/project/core-team) · [Maintainers](/docs/project/maintainers) · [Working Groups](/docs/community/working-groups)

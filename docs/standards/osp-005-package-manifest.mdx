@@ -1,0 +1,123 @@
+---
+title: "OSP-005: Package Manifest"
+description: "Draft specification for the orivon.toml package manifest: the format, required fields, permissions, hooks, dependencies and validation."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["standards", "osp-005", "package-format"]
+keywords: "OSP-005, package manifest, orivon.toml, OMP, permissions, hooks, dependencies"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+The manifest is the declaration every Orivon package ships: what it is, what
+it needs, and what it may do. This draft defines the manifest format precisely.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-005 |
+| Title | Package Manifest |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Package Format |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+Every package carries an `orivon.toml` manifest declaring identity, version,
+dependencies, permissions and lifecycle hooks. The manifest is validated
+against a schema and is the single source of truth for what a package may do.
+
+## Purpose
+
+The manifest is the contract between a package author and everyone who runs or
+reviews the package. It exists so that capabilities are explicit, reviewable
+and machine checkable before any code runs.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The manifest schema and required fields.',
+    'Package identity and version fields.',
+    'The [permissions] and [hooks] sections.',
+    'The [dependencies] section and its pins.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'The package on disk layout beyond the manifest (covered by OSP-004).',
+    'Permission semantics (covered by OSP-006).',
+    'Dependency resolution at runtime (covered by OSP-004).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-004 Module System](/docs/standards/osp-004-module-system): the package that contains the manifest.
+- [Versioning](/docs/standards/versioning): the version fields the manifest uses.
+
+## Related specifications
+
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): what the permissions section means.
+- [OSP-014 Configuration](/docs/standards/osp-014-configuration): schema validation shared approach.
+
+## Example
+
+A realistic manifest as defined by this draft:
+
+```toml
+[package]
+name = "example-app"
+version = "0.1.0"
+authors = ["alice.orivon"]
+
+[permissions]
+allow = ["identity.read", "wallet.sign"]
+
+[hooks]
+on_install = "install"
+on_activate = "activate"
+
+[dependencies]
+"core-utils" = "0.1.0"
+```
+
+The exact field names, optionality and defaults are the normative content of
+this draft and are subject to review.
+
+## Implementation status
+
+The reference implementation includes a manifest parser and schema validator.
+The draft tracks the format at 0.1.0. No conformance suite has been published
+yet.
+
+## Future work
+
+- Manifest extension points for new hook types.
+- Schema versioning for the manifest itself.
+- Tooling to generate and lint manifests.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Module Architecture](/docs/technical-design/module-architecture): how the manifest is consumed.

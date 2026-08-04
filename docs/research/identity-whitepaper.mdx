@@ -1,0 +1,164 @@
+---
+title: "Identity Whitepaper"
+description: "The identity paper: self-sovereign identity, DIDs, verifiable credentials, sessions, and the privacy design of Orivon."
+readingTime: 30
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["research", "whitepaper", "identity"]
+keywords: "identity whitepaper, DID, verifiable credentials, sessions, privacy, self-sovereignty, authentication"
+---
+
+*Orivon Research Group · Identity Research · Version 1.0 · Published 2026-07-31 · Status: Published*
+
+## Abstract
+
+Identity on Orivon is self-sovereign: users hold their identifiers and
+credentials, and no provider can revoke their existence or read their data
+without consent. This paper specifies the DID layer, verifiable credentials,
+the session model, and the privacy design that keeps identity disclosure
+minimal.
+
+## Background
+
+Web identity is a collection of provider accounts. Users authenticate to sites
+through intermediaries (login providers, email, phone), and the intermediary
+retains the power to lock, sell, or delete the account. This model is
+fundamentally at odds with user ownership: the user's digital existence is
+rented, not owned.
+
+Decentralized identity research (DIDs, verifiable credentials, the W3C DID
+Working Group) offers a technical alternative: identifiers that the user
+generates and controls, and credentials that are issued, held, and presented
+without a central registry.
+
+## Problem Statement
+
+Identity must solve:
+
+1. **Ownership.** Identifiers must be controlled by their holder, not a
+   provider.
+2. **Verifiability.** Claims (age, membership, qualifications) must be
+   provable without contacting the issuer.
+3. **Privacy.** Presenting a claim must reveal the minimum necessary
+   information.
+4. **Usability.** The user must be able to use identity across devices without
+   a central account.
+5. **Security.** Keys, credentials, and sessions must survive device loss and
+   attacks.
+
+## Motivation
+
+Identity is the most concentrated point of power on the web. Whoever controls
+identity controls access: to accounts, to funds, to reputation. Orivon's
+platform principle "users own their identity" is realized by this subsystem.
+Everything else — the wallet, the Web3 Score, the ecosystem — depends on a
+credible answer to the identity problem.
+
+## Architecture
+
+### DID layer
+
+| Component | Design |
+| --- | --- |
+| Method | `did:orivon` with a DHT- or registry-based resolution layer. |
+| Documents | Standard W3C DID documents, self-describing. |
+| Keys | Hardware-backed keys, managed by the [Security API](/docs/api-reference/security-api). |
+| Portability | DID documents are exportable; keys are recoverable via key material in the keychain. |
+
+### Verifiable credentials
+
+| Property | Design |
+| --- | --- |
+| Format | W3C Verifiable Credentials data model. |
+| Issuance | Issuers sign credentials; holders store them locally. |
+| Presentation | Holders present selectively, without issuer round-trip. |
+| Revocation | Revocation registries / accumulators; holder checks status. |
+| Storage | Encrypted in the local storage layer. |
+
+### Session model
+
+Sessions are capability-scoped and short-lived:
+
+| Property | Design |
+| --- | --- |
+| Scope | A session authorizes specific capabilities for a specific site or module. |
+| Lifetime | Configurable, with refresh via holder-approved re-presentation. |
+| Revocation | The user can end a session at any time. |
+| Portability | Sessions survive device change via key material, not via central state. |
+
+### Privacy design
+
+| Mechanism | Purpose |
+| --- | --- |
+| Selective disclosure | Present one attribute, not the whole credential. |
+| Zero-knowledge presentation | Prove a property without revealing it (research). |
+| Correlation minimization | Unlinkable presentation across sites where possible. |
+| Local storage | Credentials never leave the device without consent. |
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Self-sovereign over provider-mediated | Removes the provider as a point of control. |
+| W3C DID/VC standards | Interoperability and auditability. |
+| Hardware-backed keys | Protects keys from software compromise. |
+| Selective disclosure | Privacy by design, not by promise. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Self-sovereign vs. password reset | Self-sovereign | Users must own recovery; backup UX is critical. |
+| Selective disclosure vs. issuer simplicity | Selective disclosure | Presentation complexity. |
+| Local storage vs. sync | Local storage | Cross-device replication is opt-in. |
+| Standards compliance vs. agility | Standards | Standards process can lag research. |
+
+## Implementation Strategy
+
+1. Ship the DID layer and key management.
+2. Add verifiable credential issuance, storage, and presentation.
+3. Add the session model and consent UI.
+4. Add selective disclosure; research zero-knowledge presentation.
+5. Integrate with the Web3 Score and the wallet.
+
+## Future Work
+
+- Zero-knowledge credentials at scale.
+- Cross-ecosystem DID interoperability tests.
+- Recovery UX without centralized fallbacks (social recovery, backups).
+- Formal privacy analysis of the presentation layer.
+
+## References
+
+- W3C DID Working Group, *Decentralized Identifiers (DIDs) v1.0*.
+- W3C, *Verifiable Credentials Data Model v1.1*.
+- C. Allen, "The path to self-sovereign identity," 2016.
+- Orivon, *Security Whitepaper*, 2026.
+- Orivon, *Web3 Score Whitepaper*, 2026.
+
+## Appendix A — DID document sketch
+
+```json
+{
+  "id": "did:orivon:8c2f...",
+  "verificationMethod": [
+    {
+      "id": "did:orivon:8c2f...#keys-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:orivon:8c2f...",
+      "publicKeyMultibase": "z6Mk..."
+    }
+  ],
+  "authentication": ["did:orivon:8c2f...#keys-1"]
+}
+```
+
+## Appendix B — Identity grants
+
+| Capability | Meaning |
+| --- | --- |
+| `identity.did` | Create and resolve DIDs. |
+| `identity.credentials` | Issue and verify credentials. |
+| `identity.session` | Create and manage sessions. |
+
+**Related:** [Identity Layer](/docs/research/identity-research) · [Identity Research](/docs/research/identity-research) · [Identity API](/docs/api-reference/identity-api)

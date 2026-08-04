@@ -1,0 +1,179 @@
+---
+title: "Why Standards Matter"
+description: "The reasoning behind Orivon's standards program: consistency, interoperability, maintainability, third-party implementations, collaboration and stable interfaces."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["standards", "why-standards"]
+keywords: "standards, consistency, interoperability, maintainability, third-party, collaboration, stable interfaces"
+---
+
+Standards are often described as paperwork. In a protocol ecosystem, they are
+the opposite: they are the shared foundation that lets independent teams build
+together without coordinating by email. This page explains why Orivon treats
+standards as engineering infrastructure, not documentation overhead.
+
+## Consistency
+
+Without a standard, every implementation makes its own decisions, and the
+decisions disagree in the details. Two wallets format a signature slightly
+differently. Two SDKs name an error slightly differently. Two runtimes handle
+a lifecycle event slightly differently.
+
+<Diagram caption="Without standards, each implementation drifts.">
+  <Flow column>
+    <DiagramNode>Implementation A</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Different conventions</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implementation B</DiagramNode>
+  </Flow>
+</Diagram>
+
+A standard replaces drift with one documented set of conventions. Consistency
+is not cosmetic. In security software, a subtle disagreement in a message
+format can be a real vulnerability. Standards make the differences visible so
+they can be fixed at design time.
+
+## Interoperability
+
+Interoperability is the practical payoff. Components that follow the same
+specification can be swapped, combined and connected:
+
+<CardGrid columns={2}>
+  <Card title="Runtime + modules">
+    Any compliant module runs on any compliant runtime, not just the reference
+    one.
+  </Card>
+  <Card title="Wallet + applications">
+    Any application can request signing through the standardized wallet API.
+  </Card>
+  <Card title="Network + storage">
+    Any node can fetch and verify content addressed by the same hash.
+  </Card>
+  <Card title="Identity + services">
+    Any service can verify an identity issued under the identity standard.
+  </Card>
+</CardGrid>
+
+Interoperability is what makes an ecosystem instead of a collection of tools.
+The [Technical Design](/docs/technical-design) section describes the reference
+design; the standards here are what let other designs meet it.
+
+## Long-term maintainability
+
+Software changes; specifications should change less often. When the behavior of
+a component is written down and versioned:
+
+- A bug fix can be checked against the document to confirm it is really a fix.
+- A refactor can be verified against the document to confirm behavior is
+  unchanged.
+- A new maintainer can learn the contract from the document, not by reading
+  source code.
+
+The result is that the system can be maintained by people who were not present
+when it was written. See [Versioning](/docs/standards/versioning) for how this
+stays true across time.
+
+## Third-party implementations
+
+Orivon is designed to be implemented by more than one team. The browser, the
+runtime, the wallet, the SDK and the tooling are all surfaces that others can
+build against.
+
+<Steps>
+  <Step title="Publish">
+    A specification is published as a public draft.
+  </Step>
+  <Step title="Implement">
+    A third party builds against the document, not against private access.
+  </Step>
+  <Step title="Verify">
+    The implementation is checked against the conformance suite.
+  </Step>
+  <Step title="Ship">
+    The implementation is certified and joins the ecosystem.
+  </Step>
+</Steps>
+
+A third party that only has the public documents is not a second-class citizen;
+they are exactly the partner the ecosystem wants. See
+[Compliance](/docs/standards/compliance) and
+[Conformance Testing](/docs/standards/conformance-testing).
+
+## Community collaboration
+
+Open standards make decisions auditable. Anyone can read why a format is the
+way it is, propose a change, and track whether it lands. The benefits are
+concrete:
+
+- **Review quality**: more eyes on security critical formats.
+- **Accountability**: changes are discussed in public before they are made.
+- **Continuity**: knowledge is stored in documents, not in one person's head.
+- **Broad input**: users, implementers and researchers all get a voice.
+
+## Stable interfaces
+
+The deepest reason for standards is stability. A platform that changes without
+notice destroys the work built on it. A specification gives consumers a promise
+they can plan around:
+
+<Diagram caption="Stability lets downstream work be planned.">
+  <Flow column>
+    <DiagramNode accent>Accepted specification (versioned)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Downstream builds on it</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Newer versions migrate, do not break</DiagramNode>
+  </Flow>
+</Diagram>
+
+Versioning rules make stability compatible with progress: new versions are
+additive, breaking changes are rare and announced, and migration is a defined
+path. The [Versioning](/docs/standards/versioning) page is the contract that
+makes this promise real.
+
+## The cost of no standards
+
+To make the argument concrete, consider what happens without standards:
+
+<Accordion
+  items={[
+    {
+      q: 'Formats drift',
+      a: 'Two implementations of the same concept ship incompatible encodings, and integration requires fragile translation layers.',
+    },
+    {
+      q: 'Security diverges',
+      a: 'Subtle differences in signing or verification logic create confused-deputy and replay vulnerabilities that are hard to audit.',
+    },
+    {
+      q: 'Vendor lock-in',
+      a: 'Only the original team can build compatible software, because the contract lives in their head and their code.',
+    },
+    {
+      q: 'Change is traumatic',
+      a: 'Without a versioning contract, every update is a breaking change, and the ecosystem never converges.',
+    },
+  ]}
+/>
+
+Each of these failures is precisely what the standards in this section exist to
+prevent.
+
+<Callout type="success" title="Why it matters">
+  Standards convert an ecosystem from a set of coordinated hacks into a set of
+  independent, interoperable implementations. That is the difference between a
+  protocol and a platform.
+</Callout>
+
+<Callout type="info" title="Where this leads">
+  The [Specification Lifecycle](/docs/standards/specification-lifecycle) shows
+  how these principles are put into practice.
+</Callout>
+
+## Related pages
+
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): how standards are made.
+- [Versioning](/docs/standards/versioning): the stability contract.
+- [Compliance](/docs/standards/compliance): what "implementing a standard" means.

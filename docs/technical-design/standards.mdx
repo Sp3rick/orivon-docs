@@ -180,7 +180,7 @@ Such information is going to be used from modules like ***group.crypto.address-b
 
 This is the generic standard that all crypto implementation groups must follow (e.g. *group.crypto.btc0-1*, *group.crypto.eth0-1*, *group.crypto.monero0-1*).
 
-Every crypto implementation group exposes the same set of functions, so that higher level groups like ***group.crypto.address-book*** only need to know this one standard interface — regardless of which specific crypto is behind it.
+Every crypto implementation group exposes the same set of functions, so that higher level groups like ***group.crypto.address-book*** only need to know this one standard interface, regardless of which specific crypto is behind it.
 
 The child modules of a crypto implementation group (e.g. *bitcoin.crypto.orivon*) implement the crypto-specific logic and expose it through this standard interface.
 
@@ -195,7 +195,7 @@ The child modules of a crypto implementation group (e.g. *bitcoin.crypto.orivon*
   Used for signing and other crypto operations
 
 - **Module.\{crypto\}GetKey(accountId, path) | bytes | Error**  
-  Derives a key at the given path — whether the path is valid is determined by the account or the crypto implementation module based on their supported capabilities
+  Derives a key at the given path. Whether the path is valid is determined by the account or the crypto implementation module based on their supported capabilities
 
 #### Provides access to ->
 
@@ -237,7 +237,7 @@ Example modules:
   Used for ECDSA and Schnorr signing operations
 
 - **Module.bitcoinGetKey(accountId, path) | bytes | Error**  
-  Derives keys at BIP44/49/84/86 paths — error is returned by the account or the module if the path is not supported
+  Derives keys at BIP44/49/84/86 paths. An error is returned by the account or the module if the path is not supported
 
 #### Provides access to ->
 
@@ -260,15 +260,15 @@ Additionally exposes:
 ### group.crypto.address-book
 
 Manages address lists across all connected crypto implementation groups.  
-Does not know which specific cryptos exist — only interacts with groups implementing the ***group.crypto-impl.\{crypto\}*** standard.
+Does not know which specific cryptos exist. It only interacts with groups implementing the ***group.crypto-impl.\{crypto\}*** standard.
 
 The website uses ***AB.getCapabilities()*** to know what derivation paths and address types are available for a given account and crypto group, before requesting any addresses.
 
 Child modules under address-book implement specific address list strategies. The website decides which address list module to use, or it can use all available ones based on the CapabilityDescriptor.
 
 Example child modules:  
-*bitcoin.address-book.orivon* — default Bitcoin address list following BIP44/84/86  
-*vanity-ethereum.address-book.devbob* — generates vanity Ethereum addresses
+*bitcoin.address-book.orivon*: default Bitcoin address list following BIP44/84/86  
+*vanity-ethereum.address-book.devbob*: generates vanity Ethereum addresses
 
 #### Requires ->
 

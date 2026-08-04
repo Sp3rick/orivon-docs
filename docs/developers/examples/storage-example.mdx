@@ -1,0 +1,129 @@
+---
+title: "Example: Storage Provider"
+description: "A storage provider that pins and serves content by address, with integrity checking, pricing and the provider loop."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 29.3
+tags: ["developers", "examples"]
+keywords: "storage provider example, content addressing, pinning, provider"
+---
+
+A storage provider stores content for users and serves it back by address.
+This example implements a provider with the storage services: putting,
+getting, and verifying content by its address.
+
+## Project structure
+
+```text
+storage-provider/
+  orivon.toml
+  src/
+    provider.ts
+    index.ts
+```
+
+## The manifest
+
+```toml
+[package]
+name = "storage-provider"
+version = "0.1.0"
+description = "Pins and serves content by address"
+
+[interface]
+methods = ["put", "get", "pin", "delete"]
+
+[permissions]
+storage = ["write", "read"]
+network = ["advertise"]
+```
+
+The provider writes and reads storage, and advertises its service on the
+network so users can find it. See
+[Storage APIs](/docs/developers/storage-apis).
+
+## The provider loop
+
+<Diagram caption="Content goes in, gets an address, and comes back by that address.">
+  <Flow column>
+    <DiagramNode accent>put(blob)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Address derived from content</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Blob pinned</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>get(address) returns the blob</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The implementation
+
+```ts
+export async function put(input: {blob: Uint8Array}) {
+  const address = await app.storage.put(input.blob);
+  await app.storage.pin(address);
+  return {address};
+}
+
+export async function get(input: {address: string}) {
+  return {blob: await app.storage.get(input.address)};
+}
+
+export async function deleteBlob(input: {address: string}) {
+  await app.storage.unpin(input.address);
+  return {status: 'unpinned'};
+}
+```
+
+`put` returns an address derived from the content. The same content always
+has the same address, which is what makes it possible to verify that what you
+get is what was stored.
+
+## Verifying integrity
+
+Addresses let the provider prove it stored exactly what was given:
+
+```ts
+export async function verify(input: {address: string}) {
+  const blob = await app.storage.get(input.address);
+  const recomputed = await app.storage.addressOf(blob);
+  return {verified: recomputed === input.address};
+}
+```
+
+If `verified` is false, the content was corrupted or swapped. Content
+addressing makes this check cheap and local.
+
+## Advertising the service
+
+The provider lets users find it:
+
+```ts
+export function activate() {
+  app.network.advertise('storage:provider', '/storage');
+}
+```
+
+Users resolve `storage:provider` services through the naming system and route
+their requests to the provider. See
+[Networking APIs](/docs/developers/networking-apis) and
+[DNS APIs](/docs/developers/dns-apis).
+
+## What this example teaches
+
+- Content addressing is the storage model: address equals content.
+- Providers pin content and serve it; users pay for capacity.
+- Providers advertise so the network can route to them.
+
+<Callout type="info" title="Next">
+  The [storage tutorial](/docs/developers/tutorials/creating-a-storage-provider)
+  builds this provider step by step, adding pricing and replication. The
+  [networking example](/docs/developers/examples/networking-example) shows the
+  transport side.
+</Callout>
+
+## Related pages
+
+- [Storage APIs](/docs/developers/storage-apis): the full surface.
+- [Storage](/docs/ecosystem/storage): the ecosystem model.
+- [Examples](/docs/developers/examples): the example index.

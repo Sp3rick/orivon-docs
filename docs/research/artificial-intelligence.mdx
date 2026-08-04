@@ -1,0 +1,78 @@
+---
+title: "Artificial Intelligence"
+description: "Research into the future of AI in the platform: AI-assisted browsing, intelligent runtime, developer assistance, local AI execution, and privacy-preserving AI."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 35
+tags: ["research", "artificial-intelligence"]
+keywords: "artificial intelligence, AI-assisted browsing, intelligent runtime, developer assistance, local AI, privacy-preserving AI"
+---
+
+*Orivon Research Group · Status: Concept*
+
+This area explores how AI can improve the platform while preserving its
+principles — user ownership and privacy. All items are concepts under study,
+not shipped features.
+
+## Design constraints
+
+AI features must respect the platform's invariants:
+
+1. **Local by default** — inference runs on-device where possible.
+2. **User-controlled** — AI actions are visible and revocable.
+3. **Private** — prompts and data do not leave the device without consent.
+4. **Non-surveillant** — no data collection for model training by default.
+
+## AI-assisted browsing
+
+| Concept | Description |
+| --- | --- |
+| Summarization | On-device page and article summaries. |
+| Translation | Privacy-preserving on-device translation. |
+| Search assistance | Semantic query understanding. |
+| Form assistance | Local autofill that never exfiltrates data. |
+
+## Intelligent runtime
+
+| Concept | Description |
+| --- | --- |
+| Adaptive scheduling | Learn usage patterns to prioritize tasks. |
+| Anomaly detection | Detect module behavior that deviates from manifest. |
+| Energy management | Predict and reduce power consumption. |
+| Memory planning | Predict allocations to reduce churn. |
+
+## Developer assistance
+
+| Concept | Description |
+| --- | --- |
+| Code generation | Suggest module code from intent. |
+| Permission analysis | Predict the capabilities a module needs. |
+| Documentation generation | Draft docs from code and manifests. |
+| Security review | Flag capability misuse in review. |
+
+## Local AI execution
+
+| Topic | Direction |
+| --- | --- |
+| On-device models | Models that fit device memory and compute. |
+| WASM inference | Models running inside the WASM sandbox. |
+| Model distribution | Signed, content-addressed model artifacts. |
+| Hardware acceleration | GPU/NPU backends where present. |
+
+## Privacy-preserving AI
+
+| Topic | Question |
+| --- | --- |
+| Differential privacy | Aggregate learning without individual data. |
+| Federated learning | Improve shared models without centralizing data. |
+| ZK-inference | Prove a result without revealing the input. |
+| On-device personalization | Personalize without sending data. |
+
+<Danger title="Concept status">
+  This page is a research agenda. None of these capabilities are available.
+  Any that ship will be documented as features in the appropriate level and
+  listed in [Experimental Features](/docs/research/experimental-features)
+  first.
+</Danger>
+
+**Related:** [Future Internet](/docs/research/future-internet) · [Decentralized Computing](/docs/research/decentralized-computing) · [Cryptography Research](/docs/research/cryptography-research)

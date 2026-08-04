@@ -1,0 +1,193 @@
+---
+title: "Performance"
+description: "Make your Orivon code fast: optimization techniques, caching, lazy loading, memory and startup optimization, and profiling."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 27
+tags: ["developers", "performance"]
+keywords: "performance, optimization, caching, lazy loading, memory, startup, profiling"
+---
+
+Users notice performance instantly. This page explains how to make your
+Orivon package fast: where time goes, how to optimize, and how to measure so
+you optimize the right thing.
+
+## Start with measurement
+
+Optimizing without measuring is guessing. Profile first:
+
+```sh
+orivon run --profile
+```
+
+Profiling reports where time and memory go. See
+[Debugging](/docs/developers/debugging) for the diagnostics tooling and
+[Performance](/docs/technical-design/performance) for the platform budgets.
+
+<Callout type="success" title="Best practice">
+  Measure before and after every optimization. If the number did not move, the
+  optimization did not matter, and that is valuable information, not failure.
+</Callout>
+
+## Where time goes
+
+The common cost centers in Orivon packages:
+
+| Cost | Where it shows |
+| --- | --- |
+| **Network** | `fetch`, peer and RPC calls |
+| **Storage** | Large blob reads and writes |
+| **Serialization** | Large payloads crossing the bus |
+| **WASM work** | CPU bound module logic |
+| **Startup** | Loading dependencies and initialization |
+
+The rule: fix the biggest cost first, and re measure. Premature optimization
+optimizes the wrong cost.
+
+## Optimization techniques
+
+### Cache the right things
+
+```ts
+const cached = await cache.get(key);
+if (cached) return cached;
+
+const result = await expensiveCall();
+await cache.put(key, result);
+return result;
+```
+
+Cache anything that is expensive and repeatable: resolved names, verified
+documents, and derived data. The
+[Storage APIs](/docs/developers/storage-apis) give you content addressed
+caching with integrity.
+
+### Lazy load
+
+Load only what the current flow needs:
+
+```ts
+const heavy = await import('./heavy-feature');
+
+app.on('userAction', () => {
+  heavy.run();
+});
+```
+
+Lazy loading cuts startup cost and keeps the main flow light. The runtime
+supports loading modules on demand. See
+[Runtime APIs](/docs/developers/runtime-apis).
+
+<Diagram caption="Lazy loading moves cost from startup to use.">
+  <Flow column>
+    <DiagramNode accent>Startup: load only what is needed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Feature reached</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Load the heavy part then</DiagramNode>
+  </Flow>
+</Diagram>
+
+### Reduce serialization
+
+Large messages cost time on every crossing:
+
+```ts
+// avoid sending whole documents
+app.events.emit('storage.changed', {address});
+// the consumer fetches the content on demand
+```
+
+Prefer identifiers and small payloads over large bodies. Let the consumer
+fetch what it needs through the storage APIs.
+
+## Memory optimization
+
+Memory pressure shows up as slower startup and eviction of your data:
+
+<CheckList
+  items={[
+    'Classify data as durable or reconstructible. See [Storage APIs](/docs/developers/storage-apis).',
+    'Release references on deactivate; the runtime recycles suspended packages.',
+    'Avoid holding large blobs in memory; stream them.',
+    'Use subscriptions and timers deliberately, and clean them up.',
+  ]}
+/>
+
+The memory model is documented in
+[Memory Management](/docs/technical-design/memory-management).
+
+## Startup optimization
+
+Startup is when users form first impressions. Optimize it:
+
+```ts
+export function activate() {
+  // do not fetch everything here
+  // fetch lazily when the first request arrives
+}
+```
+
+| Technique | Effect |
+| --- | --- |
+| Defer work to first use | Startup feels instant |
+| Load dependencies lazily | Fewer bytes at boot |
+| Warm caches from last session | Skip repeat work |
+| Keep activate small | Lifecycle stays responsive |
+
+## Profiling
+
+When a real problem appears, profile precisely:
+
+```sh
+orivon run --profile --out profile.json
+```
+
+The profile report shows per function cost, memory growth, and event volume.
+Look for:
+
+- Hot loops that do redundant work.
+- Serialization spikes on large payloads.
+- Memory growth that never returns.
+- Blocked async chains (a fast function that waits on a slow one).
+
+## Performance budgets
+
+Set budgets so performance is protected:
+
+| Budget | Suggested |
+| --- | --- |
+| Startup (cold) | Under 300 ms |
+| First interaction | Under 100 ms |
+| Scroll and animation | 60 fps |
+| Storage read (cached) | Under 10 ms |
+
+Budgets give you a red line to defend. The platform side budgets are on the
+[Performance](/docs/technical-design/performance) page.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Optimizing the wrong thing">
+    Always profile first. The hot path is rarely the one you guessed.
+  </Card>
+  <Card title="Caching without invalidation">
+    A stale cache is worse than a slow call. Know your invalidation policy.
+  </Card>
+  <Card title="Blocking the main thread">
+    Never run heavy work on the runtime's main thread. Async and workers
+    exist for this.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  Performance is a platform property first; see
+  [Performance](/docs/technical-design/performance) and
+  [Memory Management](/docs/technical-design/memory-management).
+</Callout>
+
+## Related pages
+
+- [Debugging](/docs/developers/debugging): the diagnostics behind profiling.
+- [Storage APIs](/docs/developers/storage-apis): caching with integrity.
+- [Best Practices](/docs/developers/best-practices): performance in practice.

@@ -1,0 +1,192 @@
+---
+title: "Leadership"
+description: "Orivon leadership roles and responsibilities: TSC, maintainers, working group chairs, and community leads — described without inventing names."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["project", "leadership", "roles", "responsibilities"]
+keywords: "orivon leadership, technical steering committee, maintainers, working group chairs, community leads"
+---
+
+Leadership in Orivon is **role-based, earned through contribution, and
+accountable to the community**. This page describes the leadership roles,
+their responsibilities, and how they are selected — without inventing specific
+individuals.
+
+<Callout type="info" title="No invented names">
+  Per project policy, this documentation does not invent real names for
+  leadership positions. Actual officeholders are listed on the project website
+  and in public governance records (GitHub, forum, meeting minutes).
+</Callout>
+
+## Leadership philosophy
+
+| Principle | Practice |
+| --- | --- |
+| **Service, not status** | Leadership roles are service positions with defined responsibilities. |
+| **Earned, not appointed** | Roles follow demonstrated contribution and community trust. |
+| **Rotating, not permanent** | Terms are limited; renewal requires re-election or re-confirmation. |
+| **Transparent, not opaque** | Selection processes, decisions, and meeting minutes are public. |
+| **Distributed, not concentrated** | No single role has unilateral authority over significant decisions. |
+
+## Leadership roles
+
+### Technical Steering Committee (TSC) Members
+
+**Role:** The project's highest technical authority.
+
+**Responsibilities:**
+- Set technical roadmap and release strategy.
+- Ratify standards and architectural decisions.
+- Approve maintainer appointments.
+- Charter and review working groups.
+- Resolve escalated technical disputes.
+- Represent the project's technical direction publicly.
+
+**Selection:** Elected by maintainers. 7–11 members, 1-year terms, staggered.
+
+**Accountability:** Public meeting minutes, recorded votes, annual re-election.
+
+**Current composition:** 7 members (elected 2026). See [TSC page](/docs/community/technical-steering-committee) for details.
+
+### TSC Chair
+
+**Role:** Facilitates TSC operations; elected by TSC members from within the committee.
+
+**Responsibilities:**
+- Set meeting agendas and cadence.
+- Ensure decisions are documented and published.
+- Coordinate with Foundation on funding/legal matters.
+- Serve as primary technical spokesperson (with TSC consensus).
+
+**Term:** 1 year, renewable, elected by TSC peers.
+
+### Maintainers
+
+**Role:** Accountable for specific repositories or cross-cutting areas.
+
+**Responsibilities:**
+- Review and merge pull requests.
+- Triage and prioritize issues.
+- Manage releases for their scope.
+- Mentor and onboard contributors.
+- Report progress to TSC.
+
+**Selection:** Appointed by TSC based on demonstrated contribution in the scope.
+
+**Types:**
+- **Repository maintainers** — Own a single repository (e.g., runtime, browser, docs).
+- **Area maintainers** — Own cross-cutting concerns (security, CI, accessibility, community).
+- **Release maintainers** — Manage the release train process.
+
+**Accountability:** Public contribution record; emeritus status on step-back.
+
+See [Maintainers](/docs/project/maintainers) for the full appointment process.
+
+### Working Group Chairs
+
+**Role:** Lead a chartered working group; coordinate cross-cutting work.
+
+**Responsibilities:**
+- Run regular public meetings; publish minutes.
+- Maintain group backlog and priorities.
+- Coordinate with maintainers and TSC.
+- Produce recommendations as [decision proposals](/docs/community/decision-making).
+- Onboard and mentor group participants.
+
+**Selection:** Volunteered or nominated by group members; ratified by TSC.
+
+**Term:** 1 year, renewable. Groups may have co-chairs.
+
+**Current working groups (9):**
+1. Runtime
+2. Browser
+3. Core
+4. SDK
+5. Security
+6. Documentation
+7. Community
+8. Developer Experience
+9. Research
+
+See [Working Groups](/docs/community/working-groups) for charters.
+
+### Community Leads
+
+**Role:** Organize and support regional and thematic community activities.
+
+**Types:**
+- **Regional leads** — Organize meetups, local events, regional communication.
+- **Program leads** — Mentorship, hackathons, grants review, showcase curation.
+- **Translation leads** — Coordinate documentation and UI localization.
+
+**Selection:** Application to Community Working Group; ratified by CWG chair.
+
+**Support:** Stipends (where budget allows), swag, promotion, speaker bureau.
+
+### Release Managers
+
+**Role:** Execute the release process for each train (stable, beta, nightly).
+
+**Responsibilities:**
+- Coordinate freeze, testing, and sign-off.
+- Publish release notes and artifacts.
+- Communicate with maintainers on blockers.
+- Manage rollback/hotfix decisions.
+
+**Selection:** Rotating among release maintainers; scheduled per release cycle.
+
+## Leadership interaction model
+
+<Flow>
+  <DiagramNode title="Community" description="Proposes, contributes, reviews" />
+  <FlowArrowDown />
+  <DiagramNode title="Working Groups" description="Coordinates topics, recommends" />
+  <FlowArrowDown />
+  <DiagramNode title="Maintainers" description="Owns repos, merges, releases" />
+  <FlowArrowDown />
+  <DiagramNode title="TSC" description="Sets direction, ratifies, resolves" accent />
+  <FlowArrowDown />
+  <DiagramNode title="Foundation" description="Legal, financial, stewardship" />
+</Flow>
+
+## Escalation and checks
+
+| Situation | Escalation Path |
+| --- | --- |
+| PR disagreement | Maintainer → Area Maintainer → TSC |
+| Cross-repo architecture | Working Group → TSC |
+| Standards dispute | Working Group → TSC (supermajority vote) |
+| Governance concern | Community → TSC → Foundation (if legal) |
+| Code of Conduct incident | Community WG → TSC (appeal) → Foundation (legal) |
+
+<Callout type="warning" title="No unilateral authority">
+  No single leader — not the TSC Chair, not a maintainer, not a Foundation
+  director — can unilaterally decide significant technical, governance, or
+  legal matters. All significant decisions require the documented process.
+</Callout>
+
+## Leadership transparency
+
+The project publishes:
+
+- **TSC meeting minutes** — within 48 hours, public.
+- **Maintainer appointments** — announced with rationale.
+- **Working group charters** — public, reviewed annually.
+- **Election results** — vote counts published.
+- **Conflict of interest disclosures** — required for TSC and Foundation roles.
+
+## Current leadership roster
+
+The current roster of TSC members, maintainers, working group chairs, and
+community leads is maintained on the project website and in the public
+governance repository. It is updated after each election, appointment, or
+role change.
+
+<Callout type="success" title="Leadership is open to you">
+  Every current leader started as a contributor. The path from first PR to
+  TSC member is documented, public, and based on demonstrated work. If you
+  want to lead, start by contributing — the community notices.
+</Callout>
+
+**Related:** [Technical Steering Committee](/docs/community/technical-steering-committee) · [Maintainers](/docs/project/maintainers) · [Working Groups](/docs/community/working-groups) · [Organization](/docs/project/organization)

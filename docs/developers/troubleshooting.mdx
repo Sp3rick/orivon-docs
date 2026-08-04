@@ -1,0 +1,153 @@
+---
+title: "Troubleshooting"
+description: "Diagnose and fix common Orivon development problems: installation, build, runtime, permissions, networking, storage and performance issues."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 34
+tags: ["developers", "troubleshooting"]
+keywords: "troubleshooting, debugging problems, errors, fixes, common issues"
+---
+
+Every developer hits problems. This page is the first stop when something
+fails: it lists the common problems, their symptoms, and the fixes, grouped
+by where they occur. Start with the symptom that matches, and follow the
+links to the deeper guides.
+
+<Callout type="success" title="Collect evidence first">
+  Before fixing, capture the evidence: the exact command, the full error
+  output, and the runtime version (`orivon --version`). Most diagnoses are
+  fast once the evidence is on the table.
+</Callout>
+
+## Installation problems
+
+<Accordion title="The CLI is not on PATH">
+  Add the install directory to your PATH, or restart the terminal. The
+  [installation](/docs/developers/installation) page shows each platform's
+  paths.
+</Accordion>
+
+<Accordion title="`orivon doctor` reports a failed check">
+  Run the exact command the check suggests, then re run `orivon doctor`. See
+  [Installation](/docs/developers/installation).
+</Accordion>
+
+<Accordion title="The update did not change the version">
+  Check the running version with `orivon --version`. If it is unchanged, the
+  old install is shadowing the new one; remove it first. See
+  [Installation](/docs/developers/installation).
+</Accordion>
+
+## Build problems
+
+<Accordion title="The manifest does not validate">
+  Run `orivon build` and read the first validation error. Most manifest
+  errors are missing fields or wrong formats. See
+  [Module Manifest](/docs/developers/module-manifest).
+</Accordion>
+
+<Accordion title="The build succeeds but run fails">
+  A build error is caught by the compiler; a runtime error is not. Look for
+  lifecycle, permission and dependency errors in the run output. See
+  [Debugging](/docs/developers/debugging).
+</Accordion>
+
+<Accordion title="Dependency resolution fails">
+  Your manifest declares a dependency that the runtime cannot resolve. Check
+  the address and version in `[dependencies]`. See
+  [Module Manifest](/docs/developers/module-manifest).
+</Accordion>
+
+## Runtime problems
+
+<Accordion title="The package never activates">
+  Check `activate` for an early throw, and confirm the manifest declares the
+  lifecycle hook. Run with `--debug` and watch the lifecycle events. See
+  [Debugging](/docs/developers/debugging) and
+  [Lifecycle](/docs/technical-design/application-lifecycle).
+</Accordion>
+
+<Accordion title="The package is suspended unexpectedly">
+  The runtime suspends idle or over budget packages. Re-activation should be
+  transparent; if state is lost, classify the data as durable. See
+  [Memory Management](/docs/technical-design/memory-management).
+</Accordion>
+
+<Accordion title="Memory keeps growing">
+  Run diagnostics and look for retained references: subscriptions, timers and
+  caches. See [Performance](/docs/developers/performance).
+</Accordion>
+
+## Permission problems
+
+<Accordion title="A privileged call returns `unauthorized`">
+  The permission is not granted. Re-request it, or check whether the manifest
+  declares it. See [Permissions](/docs/developers/permissions).
+</Accordion>
+
+<Accordion title="Permission requests keep failing">
+  The user may have denied the grant, or the scope is too wide. Request the
+  narrowest scope that works. See [Permissions](/docs/developers/permissions).
+</Accordion>
+
+## Networking and storage problems
+
+<Accordion title="A peer cannot be reached">
+  Check the address, whether the peer is online, and the error detail. The
+  networking diagnostics show connection state. See
+  [Networking APIs](/docs/developers/networking-apis).
+</Accordion>
+
+<Accordion title="A storage read fails with `not_found`">
+  The content is not pinned. Providers store by address, so a missing blob is
+  a pinning or replication problem. See
+  [Storage APIs](/docs/developers/storage-apis).
+</Accordion>
+
+## Performance problems
+
+<Accordion title="Startup is slow">
+  Profile the load: dependencies, initialization and heavy imports are the
+  usual causes. See [Performance](/docs/developers/performance).
+</Accordion>
+
+<Accordion title="Interactions feel janky">
+  Look for blocking work on the runtime's main thread and oversized messages
+  on the bus. See [Performance](/docs/developers/performance).
+</Accordion>
+
+## The troubleshooting workflow
+
+When the list does not cover your problem, use the workflow:
+
+<Steps>
+  <Step title="Reproduce">
+    Get a minimal, repeatable case. A failing test is ideal.
+  </Step>
+  <Step title="Gather evidence">
+    Run with `--debug` and `--diagnostics`, and capture the logs.
+  </Step>
+  <Step title="Search the logs">
+    Look for the first error, not the last. Errors cascade.
+  </Step>
+  <Step title="Isolate">
+    Binary search your changes to find the smallest broken case.
+  </Step>
+  <Step title="Fix and verify">
+    Apply the fix and prove it with a test or a re run.
+  </Step>
+</Steps>
+
+See [Debugging](/docs/developers/debugging) for the tooling behind each step.
+
+<Callout type="info" title="Errors are typed and documented">
+  Runtime errors carry a code and context. Look up the code in
+  [Error Handling](/docs/technical-design/error-handling) and check the
+  [FAQ](/docs/developers/faq) for the common questions.
+</Callout>
+
+## Related pages
+
+- [Debugging](/docs/developers/debugging): the tooling.
+- [Logging](/docs/developers/logging): what the logs mean.
+- [FAQ](/docs/developers/faq): common questions.

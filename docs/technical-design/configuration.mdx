@@ -1,0 +1,192 @@
+---
+title: "Configuration"
+description: "The internal design of Orivon's configuration system: configuration files, runtime configuration, module configuration, validation, defaults and environment variables."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["technical-design", "configuration"]
+keywords: "configuration, config files, runtime config, module config, validation, defaults, environment variables"
+---
+
+Configuration is how the browser is told what to do without being rewritten.
+Orivon separates configuration by scope, validates everything against schemas,
+and applies defaults before any user value. This page documents the
+configuration architecture.
+
+## Configuration scopes
+
+Configuration exists at four scopes, each with its own source and lifetime:
+
+| Scope | Source | Lifetime |
+| --- | --- | --- |
+| **Build** | Flags compiled into the binary | Fixed |
+| **System** | Install level config | Per install |
+| **Profile** | Per user profile | Per profile |
+| **Runtime** | User action and session state | Per session |
+
+The scoping is the point: a system setting should never be overridden by a
+single session, and a profile setting should never leak into another profile.
+
+<Diagram caption="Configuration precedence from build to runtime.">
+  <Flow column>
+    <DiagramNode dim>Build defaults</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>System config</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Profile config</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Runtime overrides</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Configuration files
+
+Static configuration lives in files:
+
+- **Install config** applies to all profiles on the machine.
+- **Profile config** applies to one profile and is read from the profile
+  directory.
+- Both use a schema validated format; the same schema is used by tooling and
+  the browser.
+- Files are read once at startup and watched for changes.
+
+Configuration files are human editable, but the browser never trusts them: every
+value is validated against its schema before it takes effect.
+
+## Runtime configuration
+
+Runtime configuration is anything a user changes in a session:
+
+- User preferences set through the UI (search engine, startup behavior).
+- Session settings that apply until the profile closes.
+- Runtime overrides requested by applications through authorized APIs.
+
+Runtime values sit above profile config in precedence and are never persisted
+unless the user's action implies persistence.
+
+## Module configuration
+
+Modules bring their own configuration:
+
+- A module declares its config schema in its manifest.
+- Configuration is scoped to the module, never global.
+- The module service validates module config against the declared schema.
+- Config changes that touch permissions trigger re-consent. See
+  [Permission System](/docs/technical-design/permission-system).
+
+Module config is isolated exactly like module state: a module can only read and
+write its own configuration namespace.
+
+<Callout type="warning" title="Security">
+  A module must never be able to read another module's configuration or the
+  profile's global configuration. Configuration is a privacy surface; it
+  describes what the user has set up.
+</Callout>
+
+## Validation
+
+Validation is the rule that makes configuration safe:
+
+<Steps>
+  <Step title="Declare">
+    Every configuration value has a schema with a type, a range and a default.
+  </Step>
+  <Step title="Validate">
+    Loaded values are checked against the schema before use.
+  </Step>
+  <Step title="Reject">
+    Invalid values are rejected with a typed error, not silently coerced.
+  </Step>
+  <Step title="Report">
+    Rejected values are logged so configuration mistakes are findable.
+  </Step>
+</Steps>
+
+The config service is the single validator. Nothing reads a configuration file
+directly, so there is exactly one place where invalid configuration can slip in
+or be caught. See [Core Architecture](/docs/technical-design/core-architecture).
+
+## Defaults
+
+Defaults are the floor every configuration stands on:
+
+- Every setting has a compiled in default.
+- Defaults are safe by construction: conservative permissions, private
+  defaults, stable behavior.
+- A missing value resolves to its default, never to a guess.
+- Defaults are part of the schema, so tooling and the browser agree.
+
+Defaults also make the system self describing: the schema for any setting shows
+what the browser does with no user input.
+
+## Environment variables
+
+Environment variables exist for build and operational concerns only:
+
+<CardGrid columns={2}>
+  <Card title="Build flags">
+    Compiled into the binary at build time.
+  </Card>
+  <Card title="Operational knobs">
+    Point at services, paths and modes for operators.
+  </Card>
+</CardGrid>
+
+Environment variables are not user configuration and are deliberately not a
+first class way to set user preferences. They cannot override profile config,
+and they are validated like everything else.
+
+## How configuration flows
+
+The whole system receives configuration through one path:
+
+<Diagram caption="Configuration flows from files through validation to services.">
+  <Flow column>
+    <DiagramNode>Files and environment</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Config service (validate, merge, defaults)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Versioned config snapshots</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Consuming services and UI</DiagramNode>
+  </Flow>
+</Diagram>
+
+Services receive a versioned snapshot of the configuration they are allowed to
+see, never the whole config surface. That keeps configuration least privilege:
+a renderer knows about rendering, not about wallet settings.
+
+## Security notes
+
+- Configuration files are untrusted input and are validated before use.
+- Services see only their scoped slice of configuration.
+- Module configuration is isolated per module.
+
+## Performance notes
+
+- Configuration is read once and cached; hot paths never re-validate.
+- Versioned snapshots let services react to changes without polling.
+- Validation is schema driven and happens off the startup hot path.
+
+<Callout type="success" title="Best practice">
+  Treat a new setting as a schema addition: a default, a type, a range and a
+  scope. A setting without a schema is not a setting, it is a leak.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes a configuration UI, remote managed configuration for
+  organizations, and module configuration templates. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Core Architecture](/docs/technical-design/core-architecture): the config service.
+- [Module Architecture](/docs/technical-design/module-architecture): module config scope.
+- [Permission System](/docs/technical-design/permission-system): when config changes re-consent.
+
+## Further reading
+
+- [Logging](/docs/technical-design/logging): how config errors are reported.
+- [Error Handling](/docs/technical-design/error-handling): rejection behavior.
+- [Testing Architecture](/docs/technical-design/testing-architecture): config testing.

@@ -1,0 +1,243 @@
+---
+title: "Communication Bus"
+description: "The internal design of the Orivon communication bus: typed IPC, request/response, events, routing, synchronization and broadcast."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["technical-design", "communication"]
+keywords: "communication bus, IPC, events, messaging, routing, broadcast, request, response, broker"
+---
+
+Everything in Orivon runs in a separate process, so everything must communicate.
+The communication bus is the typed IPC layer that connects every process and
+service. This page documents how messages are defined, routed, delivered and
+synchronized.
+
+## The bus in one paragraph
+
+The bus is a message passing layer on top of platform pipes. Every process
+connects to a broker in the browser process, which routes messages between
+them. Two patterns exist: request/response for method calls, and events for
+notifications. Everything on the bus is typed, versioned and authorized.
+
+<Diagram caption="Every process connects to the broker; no process talks to another directly.">
+  <Flow column>
+    <DiagramNode>Renderer A</DiagramNode>
+    <DiagramNode>Renderer B</DiagramNode>
+    <DiagramNode>Runtime host</DiagramNode>
+    <DiagramNode dim>Network service</DiagramNode>
+    <DiagramNode dim>Storage service</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <FlowArrowDown />
+  </Flow>
+  <div style={{height: 4}} />
+  <Flow>
+    <DiagramNode accent>Bus broker (browser process)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Why a broker
+
+Messages do not travel peer to peer. They pass through the broker for one
+reason: the broker is the only place that knows and enforces who may talk to
+whom. This central point is the enforcement surface of the whole system.
+
+- The broker authenticates every sender and receiver.
+- It checks that a sender is allowed to address a receiver.
+- It applies routing rules, so a renderer cannot message a service it has no
+  relationship with.
+
+The broker being central does not make it a bottleneck: routing is a lookup,
+and message payloads never pass through the broker's logic.
+
+## Message types
+
+The bus distinguishes four kinds of messages:
+
+| Type | Pattern | Used for |
+| --- | --- | --- |
+| **Request** | Request/response | Method calls such as "resolve this name" |
+| **Response** | Matched to a request | Return values and errors |
+| **Event** | Publish/subscribe | Notifications such as "balance changed" |
+| **Broadcast** | One to many | System wide announcements such as "shutdown" |
+
+Requests and responses carry a correlation id so responses always match their
+request, even when interleaved.
+
+## Typed messages
+
+Every message has a schema. The schema is the contract of the bus:
+
+- Messages are defined once, in a shared interface description, and code is
+  generated for both sides.
+- Malformed messages are rejected at the boundary before they reach any logic.
+- The schema is versioned, so a new caller and an old service can still
+  communicate at the highest common version.
+
+```rust
+#[message]
+pub struct ResolveName {
+    pub request_id: u64,
+    pub name: String,
+}
+
+#[message]
+pub struct ResolveNameResult {
+    pub request_id: u64,
+    pub address: Option<String>,
+    pub error: Option<BusError>,
+}
+```
+
+Typed messages are what make the bus auditable: there is no free form string
+channel to hide behavior in.
+
+## Message routing
+
+Routing is a two step process:
+
+1. **Addressing.** Each message carries a target (a process, a service, or a
+   topic).
+2. **Authorization.** The broker checks the sender's right to address the
+   target.
+
+The routing table is derived from the architecture: services can be addressed
+by their authenticated clients, renderers can address their own runtime host,
+and so on. The table is data, reviewed like code.
+
+## Request/response flow
+
+<Diagram caption="A request/response round trip through the broker.">
+  <Flow column>
+    <DiagramNode dim>Caller process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Broker (authorize)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Service process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Broker (return)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Caller process</DiagramNode>
+  </Flow>
+</Diagram>
+
+Requests carry a deadline. If the deadline passes without a response, the caller
+receives a timeout error and the request is cancelled on the service side if
+possible. Deadlines keep the system responsive even when a service stalls.
+
+## Events and broadcast
+
+Events are fire and forget notifications, with two variants:
+
+<CardGrid columns={2}>
+  <Card title="Scoped events">
+    Delivered to subscribed parties, subject to permission. Example: a wallet
+    event delivered only to contexts that hold the wallet permission.
+  </Card>
+  <Card title="Broadcast">
+    Delivered to every connected party. Used only for system wide facts such as
+    shutdown and network changes.
+  </Card>
+</CardGrid>
+
+Broadcast is deliberately rare. It is a power tool, and using it for routine
+traffic would both leak information and make delivery unpredictable.
+
+## Synchronization
+
+State changes are announced with events, and subscribers keep their own views.
+This is a publish/subscribe model:
+
+<Steps>
+  <Step title="Change">
+    A service mutates its state.
+  </Step>
+  <Step title="Emit">
+    The service emits a typed event describing the change.
+  </Step>
+  <Step title="Deliver">
+    The bus delivers the event to subscribed parties with the required
+    permission.
+  </Step>
+  <Step title="Update">
+    Each subscriber updates its view. Views are eventually consistent.
+  </Step>
+</Steps>
+
+There is no shared memory between processes, so there is no lock contention.
+Consistency is provided by the ordering guarantees of the bus, documented
+below.
+
+## Ordering guarantees
+
+The bus makes two ordering promises:
+
+1. **Per sender ordering.** Messages from one sender to one receiver arrive in
+   the order they were sent.
+2. **Event sequence.** Events emitted by one service are delivered in emission
+   order, which lets subscribers reason about state.
+
+Cross-sender ordering is not guaranteed. Applications that need a global order
+must coordinate through a service, which is exactly why the core services exist.
+
+## Response handling
+
+Callers handle responses as futures, not as callbacks stacked in a shared
+global:
+
+```rust
+let result = bus.call(ResolveName { name: "alice.orivon".into() }).await?;
+```
+
+Failures are typed:
+
+| Failure | Meaning | Caller behavior |
+| --- | --- | --- |
+| `Timeout` | No response before the deadline | Retry with backoff, or degrade |
+| `Unauthorized` | The caller is not allowed to address the target | Report; never retry blindly |
+| `Malformed` | The response failed schema validation | Fail closed |
+| `ServiceError` | The service returned an error | Surface the service error |
+
+See [Error Handling](/docs/technical-design/error-handling) for the full error
+model.
+
+## Developer notes
+
+- Never block the main thread waiting for a bus response; use async calls.
+- Keep message payloads small; large data transfers go through the storage
+  service by reference (address), not inline.
+- New message types require schema review, because the schema is the audit
+  trail of the system.
+
+<Callout type="warning" title="Security">
+  The broker is the security boundary of the communication layer. A routing
+  rule that is too broad is a privilege escalation. When adding a message, add
+  the narrowest routing rule that satisfies the need.
+</Callout>
+
+<Callout type="success" title="Best practice">
+  Prefer events for notifications and request/response for decisions. Events
+  should never ask; requests should never assume. This split keeps the bus
+  predictable and auditable.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include encrypted bus segments for high sensitivity
+  traffic, topic hierarchies for finer grained events, and replayable event
+  logs for debugging and audits. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Process Model](/docs/technical-design/process-model): the processes the bus connects.
+- [Core Architecture](/docs/technical-design/core-architecture): the services behind the bus.
+- [API Layer](/docs/technical-design/api-layer): the public face of the same messages.
+
+## Further reading
+
+- [Logging](/docs/technical-design/logging): how bus traffic is traced.
+- [Error Handling](/docs/technical-design/error-handling): bus failure semantics.
+- [Testing Architecture](/docs/technical-design/testing-architecture): how the bus is tested.

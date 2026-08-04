@@ -1,0 +1,209 @@
+---
+title: "Cookbook"
+description: "Small, focused recipes for common Orivon tasks: identities, wallets, storage, networking, permissions, events and configuration."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 31
+tags: ["developers", "cookbook"]
+keywords: "cookbook, recipes, snippets, identity, wallet, storage, networking, permissions, events, configuration"
+---
+
+The cookbook holds small, focused recipes for common tasks. Each recipe is a
+complete snippet you can drop into your own package, with a short note on why
+it works. The [API guides](/docs/developers/runtime-apis) explain the full
+surface; this page collects the everyday combinations.
+
+## Identities
+
+### Resolve a name to an identity
+
+```ts
+const identity = await app.identity.resolve('alice.orivon');
+// {address: '0x...', metadata: {...}}
+```
+
+### Verify that an identity is real
+
+```ts
+const verified = await app.identity.verify(address);
+if (!verified) throw new Error('identity could not be verified');
+```
+
+### Store a resolved identity
+
+```ts
+await app.storage.put(identity.address, identity.metadata);
+```
+
+See the [Identity APIs](/docs/developers/identity-apis) for the full set.
+
+## Wallets
+
+### Sign a message
+
+```ts
+const signature = await app.wallet.sign(message, {from: account});
+```
+
+### Submit a transaction
+
+```ts
+const tx = await app.wallet.send({
+  to: recipient,
+  value: amount,
+  data: '0x00',
+});
+```
+
+### Request a permission that the wallet controls
+
+```ts
+await app.permission.request('wallet.sign');
+```
+
+See the [Wallet APIs](/docs/developers/wallet-apis).
+
+## Storage
+
+### Put a blob and get its address
+
+```ts
+const address = await app.storage.put(blob);
+// address is a content identifier: same content, same address
+```
+
+### Fetch a blob by address
+
+```ts
+const blob = await app.storage.get(address);
+```
+
+### Subscribe to changes on a bucket
+
+```ts
+const sub = app.storage.subscribe(`bucket:${address}`);
+sub.on('change', () => console.log('bucket changed'));
+```
+
+See the [Storage APIs](/docs/developers/storage-apis).
+
+## Networking
+
+### Fetch a resource from a peer
+
+```ts
+const response = await app.network.fetch('orivon://alice.orivon/catalog.json');
+```
+
+### Open a stream to a peer
+
+```ts
+const stream = await app.network.connect(address);
+stream.write('ping');
+```
+
+### Advertise a service
+
+```ts
+await app.network.advertise('storage:provider', '/storage');
+```
+
+See the [Networking APIs](/docs/developers/networking-apis).
+
+## Permissions
+
+### Request a permission at first use
+
+```ts
+async function ensurePermission(name: string) {
+  try {
+    await app.permission.check(name);
+  } catch {
+    await app.permission.request(name);
+  }
+}
+```
+
+### Check a grant without prompting
+
+```ts
+const granted = await app.permission.check('identity.read');
+```
+
+See the [Permissions](/docs/developers/permissions) guide.
+
+## Events
+
+### Publish an event
+
+```ts
+app.events.emit('storage.changed', {address});
+```
+
+### Subscribe with a filter
+
+```ts
+const sub = app.events.subscribe('storage.changed', {from: address});
+sub.on('event', (event) => console.log(event.payload));
+```
+
+### Subscribe once
+
+```ts
+const first = await app.events.once('wallet.ready');
+```
+
+See the [Events](/docs/developers/events) guide.
+
+## Configuration
+
+### Read a config value with a default
+
+```ts
+const cache = app.config.get('cache.enabled', {default: true});
+```
+
+### React to a config change
+
+```ts
+app.config.on('change', ({key, value}) => {
+  if (key === 'theme') applyTheme(value);
+});
+```
+
+See the [Configuration](/docs/developers/configuration) guide.
+
+## Lifecycle
+
+### Keep the package alive while working
+
+```ts
+export function activate() {
+  const timer = setInterval(keepWarm, 30_000);
+  return () => clearInterval(timer);
+}
+```
+
+### Release resources on deactivate
+
+```ts
+export function deactivate() {
+  for (const sub of subscriptions) sub.close();
+  subscriptions = [];
+}
+```
+
+See the [Runtime APIs](/docs/developers/runtime-apis) and the
+[Lifecycle](/docs/technical-design/application-lifecycle) design.
+
+<Callout type="info" title="Recipes build on the guides">
+  These recipes assume the surface described in the
+  [API guides](/docs/developers/core-apis). When a method looks unfamiliar,
+  the guide for that domain has the details and the types.
+</Callout>
+
+## Related pages
+
+- [Examples](/docs/developers/examples): complete projects.
+- [Tutorials](/docs/developers/tutorials): guided learning paths.
+- [Best Practices](/docs/developers/best-practices): how to write maintainable packages.

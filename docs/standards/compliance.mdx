@@ -1,0 +1,187 @@
+---
+title: "Compliance"
+description: "What it means to comply with an Orivon specification: compliance levels, reference implementations, certification, compatibility requirements and validation philosophy."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 26
+tags: ["standards", "compliance"]
+keywords: "compliance, compliance levels, reference implementation, certification, compatibility, validation"
+---
+
+Compliance is what turns an Accepted specification from words into working
+reality. A specification defines the contract; compliance measures whether an
+implementation honors it. This page defines the compliance model: the levels,
+the reference implementations, the certification process and the philosophy
+behind it.
+
+## The compliance model
+
+Compliance is not all or nothing. Orivon defines levels so an implementation
+can be honest about exactly what it supports:
+
+<Diagram caption="Compliance levels from partial to full.">
+  <Flow column>
+    <DiagramNode dim>Informational (implements part)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Conformant (implements the spec)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Certified (independently verified)</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Level | What it means |
+| --- | --- |
+| **Informational** | Implements some behavior inspired by a specification, with no conformance claim |
+| **Conformant** | Meets every MUST and MUST NOT of the specification |
+| **Certified** | Conformance is independently verified against the test suite |
+
+An implementation self-describes as Informational or Conformant; Certification
+comes from a verification process.
+
+<Callout type="warning" title="Only Accepted specifications are compliant">
+  Compliance is defined against **Accepted** specifications only. You cannot be
+  "compliant with a draft", because drafts can change and are not normative.
+  See [Accepted Specifications](/docs/standards/accepted-specifications).
+</Callout>
+
+## What conformance requires
+
+A conformant implementation must satisfy the normative content of the
+specification:
+
+<CheckList
+  items={[
+    'Every MUST and MUST NOT is satisfied.',
+    'Every SHOULD is satisfied or its documented exception applies.',
+    'MAY and OPTIONAL features that are implemented follow the specification.',
+    'The compatibility and versioning rules are honored.',
+    'Normative behavior is verified by the conformance suite, not just asserted.',
+  ]}
+/>
+
+Conformance is about the contract, not the code. Two implementations can be
+conformant and look completely different internally.
+
+## Reference implementations
+
+The reference implementation is the anchor of the compliance model:
+
+<CardGrid columns={2}>
+  <Card title="The authority">
+    The Orivon browser and runtime codebase is the reference implementation.
+  </Card>
+  <Card title="The check">
+    Every Accepted specification must be implemented by the reference
+    implementation.
+  </Card>
+  <Card title="The mirror">
+    Reference behavior is verified by the same conformance suite as everyone
+    else's.
+  </Card>
+  <Card title="The fallback">
+    Where the specification is ambiguous, the reference resolves it through
+    review, not by fiat.
+  </Card>
+</CardGrid>
+
+The reference implementation is not special because it is first. It is special
+because it is tested against the same suite as every third party, so its
+authority comes from conformance, not from being the original author.
+
+## Compatibility requirements
+
+Compliance includes compatibility, not just feature presence:
+
+- **Interface compatibility**: messages, formats and APIs match the
+  specification.
+- **Version compatibility**: version markers are honored; unknown versions are
+  handled as specified. See [Versioning](/docs/standards/versioning).
+- **Behavioral compatibility**: edge cases behave as specified, including
+  failures.
+- **Interoperability**: a conformant implementation can work with another
+  conformant implementation.
+
+The last point is the practical test. Two certified implementations must be
+able to exchange data and services without special cases.
+
+## Certification process
+
+Certification is the independent verification of conformance. The process:
+
+<Steps>
+  <Step title="Apply">
+    An implementation is submitted with its conformance test results.
+  </Step>
+  <Step title="Run the suite">
+    The official conformance suite is run against the submission.
+  </Step>
+  <Step title="Review">
+    Results are reviewed, including interoperability tests with the reference
+    implementation.
+  </Step>
+  <Step title="Certify">
+    A passing implementation receives a compliance badge for the specification
+    and version it passed.
+  </Step>
+</Steps>
+
+The certification process is defined in detail on the
+[Conformance Testing](/docs/standards/conformance-testing) page.
+
+## Compliance badges
+
+A certified implementation displays a compliance badge that names what it
+earned:
+
+```text
+OSP-006 Permission Model: Certified
+Version: 1.0.0
+Suite: conformance-osp-006 v1.0.0
+Date: 2026-07-31
+```
+
+The badge is precise: it names the specification, the version, the test suite
+and the date. A badge without a specification and version is not a badge.
+
+## Validation philosophy
+
+The philosophy behind compliance is simple and worth stating explicitly:
+
+<CardGrid columns={2}>
+  <Card title="Verify, do not assert">
+    A claim of conformance means nothing without a passing test suite.
+  </Card>
+  <Card title="Make it public">
+    The suite and its results are open, so certification is auditable.
+  </Card>
+  <Card title="Keep it honest">
+    A partially compliant implementation says so, and says which parts comply.
+  </Card>
+  <Card title="Start strict">
+    Compliance is measured against the normative text, not against the
+    reference behavior where they differ.
+  </Card>
+</CardGrid>
+
+This philosophy is what separates a mature standard from a marketing claim. It
+is the same honesty the [status rules](/docs/standards/specification-lifecycle)
+apply to every document in this section.
+
+<Callout type="success" title="Best practice">
+  If you implement against an Orivon specification, run the conformance suite
+  in CI. A suite that runs on every commit catches the drift that would
+  otherwise silently break interoperability.
+</Callout>
+
+<Callout type="info" title="Where this leads">
+  Compliance is only meaningful when there is something to test against. The
+  [Conformance Testing](/docs/standards/conformance-testing) page defines the
+  suite, and the [Roadmap](/docs/standards/roadmap) tracks when the first suites
+  ship.
+</Callout>
+
+## Related pages
+
+- [Conformance Testing](/docs/standards/conformance-testing): the suite and framework.
+- [Accepted Specifications](/docs/standards/accepted-specifications): what compliance applies to.
+- [Why Standards Matter](/docs/standards/why-standards-matter): the goals compliance serves.

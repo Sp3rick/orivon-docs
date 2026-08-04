@@ -1,0 +1,176 @@
+---
+title: "Migration Guides"
+description: "Migrate existing code and packages to Orivon: moving from web apps, browser extensions and other ecosystems, plus upgrading between Orivon versions."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 32
+tags: ["developers", "migration"]
+keywords: "migration, migration guides, migrating to orivon, upgrade, porting"
+---
+
+Migration is the practical path from your current stack to Orivon. This page
+explains the common migration scenarios and the upgrade path between Orivon
+versions. The goal is a plan you can follow without pausing to design.
+
+## The migration mindset
+
+Migration is a series of small, verifiable steps, not one big rewrite:
+
+<Diagram caption="Incremental migration keeps the system working.">
+  <Flow column>
+    <DiagramNode accent>Current system</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Add an Orivon package alongside</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Move one capability at a time</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Retire the old path</DiagramNode>
+  </Flow>
+</Diagram>
+
+The rule: at every step the system works. If a step does not keep you working,
+it is too large.
+
+## From a web application
+
+Web applications are the most common starting point. The porting path:
+
+<Steps>
+  <Step title="Scaffold an Orivon module">
+    Create the module shell with the same business logic.
+  </Step>
+  <Step title="Move the logic behind methods">
+    Your routes and actions become methods on the module.
+  </Step>
+  <Step title="Replace browser APIs">
+    `fetch`, `localStorage` and `crypto` move to the Orivon services.
+  </Step>
+  <Step title="Add permissions">
+    Every privileged action gets an explicit permission.
+  </Step>
+  <Step title="Wire events">
+    Server push becomes event subscriptions.
+  </Step>
+  <Step title="Serve the UI">
+    The application loads your module through the runtime.
+  </Step>
+</Steps>
+
+The biggest single change is data ownership: the app stops owning user data,
+and the user's identity and wallet take it over. See the
+[Identity APIs](/docs/developers/identity-apis) and
+[Wallet APIs](/docs/developers/wallet-apis).
+
+## From a browser extension
+
+Browser extensions and Orivon share the model of small, privileged packages:
+
+| Extension concept | Orivon equivalent |
+| --- | --- |
+| Manifest permissions | `[permissions]` in the module manifest |
+| Background service | A module with a service |
+| Content scripts | UI modules loaded by the runtime |
+| `chrome.storage` | Storage services |
+| Message passing | Events and the communication bus |
+
+See [Module Manifest](/docs/developers/module-manifest) for the manifest
+mapping and [Events](/docs/developers/events) for message passing.
+
+## From another decentralized stack
+
+If you are migrating from another chain or decentralized framework, the
+surface changes more than the intent:
+
+<CheckList
+  items={[
+    'Wallet interactions move to the Orivon wallet system.',
+    'Identity moves to DDoc based identity and the naming system.',
+    'Storage moves to content addressed buckets.',
+    'Signatures use the wallet APIs, not a local signer.',
+    'Accounts are replaced by addresses and permissions.',
+  ]}
+/>
+
+The ecosystem pages describe the mental model:
+[Identity](/docs/ecosystem/identity), [Wallet System](/docs/ecosystem/wallet-system)
+and [Storage](/docs/ecosystem/storage).
+
+## Upgrading Orivon versions
+
+Orivon follows semantic versioning. The versioning rules are defined in
+[Versioning](/docs/standards/versioning).
+
+### Patch upgrades
+
+```sh
+orivon update
+```
+
+Patch releases fix bugs without breaking APIs. Upgrade freely, but read the
+release notes because fixes can change behavior you depended on.
+
+### Minor upgrades
+
+Minor releases add features without breaking existing behavior. Upgrade, then
+run your test suite and check for deprecation warnings. See
+[Testing](/docs/developers/testing).
+
+### Major upgrades
+
+Major releases may break APIs. Before upgrading:
+
+<Steps>
+  <Step title="Read the upgrade guide">
+    Major releases ship with a migration path in the changelog.
+  </Step>
+  <Step title="Check your manifest">
+    Update the `orivon_version` field and re validate.
+  </Step>
+  <Step title="Run the conformance tests">
+    The [conformance suite](/docs/standards/conformance-testing) reports
+    contract changes.
+  </Step>
+  <Step title="Fix deprecated calls">
+    Deprecation warnings from the previous minor are now errors.
+  </Step>
+</Steps>
+
+### Versioning your own package
+
+Your package has its own version. Publish compatible versions against the
+installed runtime:
+
+```toml
+[package]
+name = "my-package"
+version = "0.1.0"
+```
+
+Use `1.0.0` only when your API is stable and tested. See
+[Versioning](/docs/standards/versioning) for the rules.
+
+## A migration checklist
+
+<CheckList
+  items={[
+    'Every privileged action has an explicit permission.',
+    'No secrets moved into the new code, config or logs.',
+    'Identity verification happens where it matters.',
+    'User data is owned by the user, not the app.',
+    'The test suite passes before and after each step.',
+    'The old system and new system coexist until the switch.',
+    'The manifest validates against the target version.',
+  ]}
+/>
+
+<Callout type="success" title="Take it in steps">
+  A migration that keeps the system working at every step can always be
+  paused, rolled back or resumed. A big bang migration can only go forward,
+  and it takes one mistake to need the undo you cannot have.
+</Callout>
+
+## Related pages
+
+- [Quick Start](/docs/developers/quick-start): the baseline you migrate toward.
+- [Module Manifest](/docs/developers/module-manifest): the manifest mapping.
+- [Versioning](/docs/standards/versioning): the version rules.

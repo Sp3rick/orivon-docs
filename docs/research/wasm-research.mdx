@@ -1,0 +1,77 @@
+---
+title: "WASM Research"
+description: "Active WASM research: advanced WebAssembly, native capabilities, execution models, sandboxing, performance, and future WASM standards."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 33
+tags: ["research", "wasm-research"]
+keywords: "wasm research, webassembly, native capabilities, execution models, sandboxing, performance, future standards"
+---
+
+*Orivon Research Group · Runtime Engineering · Status: Active Research*
+
+WebAssembly is the execution substrate of the [Runtime](/docs/research/runtime-whitepaper).
+This area tracks advanced WASM topics and the standards that will shape the
+runtime's future.
+
+## Advanced WebAssembly
+
+| Feature | Impact | Status |
+| --- | --- | --- |
+| WASM GC | Garbage-collected languages. | Tracking spec. |
+| wasm64 | Large memories. | Tracking spec. |
+| Component model | Composable, typed modules. | Under evaluation. |
+| Tail calls | Efficient recursion. | Tracking spec. |
+| SIMD | Data-parallel workloads. | Available. |
+
+## Native capabilities
+
+| Capability | Question |
+| --- | --- |
+| WASI (system interfaces) | Which WASI proposals to adopt? |
+| Threads | Shared-memory threading semantics and safety. |
+| Exception handling | Interop with host error model. |
+| Interface types | Cross-language calling without marshaling. |
+
+## Execution models
+
+| Model | Use | Open question |
+| --- | --- | --- |
+| Interpreted + JIT | Baseline and optimized tiers. | Warm-up optimization. |
+| AOT compilation | Cold-start reduction. | Portability of AOT artifacts. |
+| GC-managed | WASM GC workloads. | Memory bounds interaction. |
+| Component hosts | Composition. | Versioning and ABI stability. |
+
+## Sandboxing
+
+| Topic | Direction |
+| --- | --- |
+| Memory safety | Bounds enforcement, capability memory. |
+| Side channels | Mitigation of timing channels. |
+| Code integrity | Signed, verified binaries. |
+| Verification | Formal proofs of sandbox properties. |
+
+## Performance
+
+| Concern | Direction |
+| --- | --- |
+| JIT quality | Profile-guided optimization. |
+| Host-call cost | Reduced dispatch overhead. |
+| Startup | AOT and snapshotting. |
+| Memory | Regional allocators. |
+
+## Future WASM standards
+
+| Proposal | Relevance |
+| --- | --- |
+| Component model | Modules as composable units. |
+| WebAssembly memory64 | Large data. |
+| WASI threading | Safe concurrency. |
+| Deferred/stack switching | Async host interop. |
+
+<Note title="Standards participation">
+  The platform participates in WASM and WASI standardization where the
+  proposals affect the runtime's security or portability guarantees.
+</Note>
+
+**Related:** [Runtime Whitepaper](/docs/research/runtime-whitepaper) · [Runtime Architecture](/docs/research/runtime-architecture) · [Runtime Research](/docs/research/runtime-research)

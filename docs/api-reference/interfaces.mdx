@@ -1,0 +1,95 @@
+---
+title: "Interfaces"
+description: "Reference for the public interfaces shared across the Orivon APIs: shapes, required and optional fields, and usage."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["api-reference", "interfaces"]
+keywords: "interfaces, interface reference, struct, shape, required fields, optional fields, data shapes"
+---
+
+Interfaces are the named data shapes used as parameters and return values
+across the APIs. This page is the index; the defining API page documents each
+interface in its context.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Conventions
+
+- Field names use `lowerCamelCase`.
+- **Required** fields are always present. **Optional** fields may be omitted
+  and are typed `T | undefined`.
+- Unknown fields are rejected by the runtime with `ERR_INVALID_ARGUMENT`;
+  interfaces are closed by default.
+- Dates are epoch milliseconds (`number`), never ISO strings, except in JSON
+  documents and schemas where ISO 8601 is used.
+
+## Interface index
+
+| Interface | Defined in | Purpose |
+| --- | --- | --- |
+| `OrivonOptions` | [Runtime API](/docs/api-reference/runtime-api) | Constructor options. |
+| `PlatformInfo` | [Runtime API](/docs/api-reference/runtime-api) | Host platform metadata. |
+| `MessageEnvelope` | [Runtime API](/docs/api-reference/runtime-api) | Inbound message framing. |
+| `CoreInfo` | [Core API](/docs/api-reference/core-api) | Platform metadata. |
+| `SystemInfo` | [Core API](/docs/api-reference/core-api) | Host resource information. |
+| `MemoryUsage` | [Core API](/docs/api-reference/core-api) | Memory accounting. |
+| `ScheduleSpec` | [Core API](/docs/api-reference/core-api) | Task scheduling spec. |
+| `TaskHandle` | [Core API](/docs/api-reference/core-api) | Task cancellation handle. |
+| `ModuleInfo` | [Core API](/docs/api-reference/core-api) | Module runtime record. |
+| `Tab` | [Browser API](/docs/api-reference/browser-api) | Open tab. |
+| `Bookmark` | [Browser API](/docs/api-reference/browser-api) | Bookmark record. |
+| `HistoryEntry` | [Browser API](/docs/api-reference/browser-api) | History entry. |
+| `ApplicationRecord` | [Application API](/docs/api-reference/application-api) | Application runtime record. |
+| `Window` | [Application API](/docs/api-reference/application-api) | Application window. |
+| `WalletAccount` | [Wallet API](/docs/api-reference/wallet-api) | Wallet account. |
+| `Balance` | [Wallet API](/docs/api-reference/wallet-api) | Asset balance. |
+| `SignedPayload` | [Wallet API](/docs/api-reference/wallet-api) | Signature output. |
+| `Transaction` | [Wallet API](/docs/api-reference/wallet-api) | Transaction record. |
+| `TxReceipt` | [Wallet API](/docs/api-reference/wallet-api) | Submission receipt. |
+| `DidDocument` | [Identity API](/docs/api-reference/identity-api) | DID document. |
+| `Credential` | [Identity API](/docs/api-reference/identity-api) | Verifiable credential. |
+| `VerificationResult` | [Identity API](/docs/api-reference/identity-api) | Credential check result. |
+| `Session` | [Identity API](/docs/api-reference/identity-api) | Session record. |
+| `FileHandle` | [Storage API](/docs/api-reference/storage-api) | File reference. |
+| `Collection` | [Storage API](/docs/api-reference/storage-api) | Document collection. |
+| `HttpResponse` | [Networking API](/docs/api-reference/networking-api) | HTTP response. |
+| `Connection` | [Networking API](/docs/api-reference/networking-api) | Streaming connection. |
+| `Headers` | [Networking API](/docs/api-reference/networking-api) | HTTP headers. |
+| `DnsRecord` | [DNS API](/docs/api-reference/dns-api) | DNS resource record. |
+| `Registration` | [DNS API](/docs/api-reference/dns-api) | Name ownership record. |
+| `PermissionDescriptor` | [Permissions API](/docs/api-reference/permissions-api) | Capability request. |
+| `Grant` | [Permissions API](/docs/api-reference/permissions-api) | Held grant. |
+| `GrantResult` | [Permissions API](/docs/api-reference/permissions-api) | Request outcome. |
+| `KeyPair` | [Security API](/docs/api-reference/security-api) | Generated key pair. |
+| `Page<T>` | [Types](/docs/api-reference/types) | Pagination envelope. |
+
+## Example: `MessageEnvelope`
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `from` | `string` | yes | Sender package identifier. |
+| `to` | `string` | yes | Recipient package identifier. |
+| `id` | `string` | yes | Message identifier. |
+| `type` | `string` | yes | Message discriminator. |
+| `message` | `unknown` | yes | JSON-serializable payload. |
+| `timestamp` | `number` | yes | Epoch milliseconds. |
+| `reply` | `(payload) => Promise<void>` | no | Reply callback, when request/response. |
+
+## Example: `Page<T>`
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `items` | `T[]` | yes | Page items. |
+| `cursor` | `string \| undefined` | no | Pass to the next call for the next page. |
+| `hasMore` | `boolean` | yes | Whether more items exist. |
+
+```ts
+const page = await app.storage.list({prefix: 'settings', limit: 50});
+while (page.hasMore) {
+  // process page.items
+  const next = await app.storage.list({prefix: 'settings', limit: 50, cursor: page.cursor});
+}
+```
+
+**Related:** [Types](/docs/api-reference/types) · [Classes](/docs/api-reference/classes) · [Enums](/docs/api-reference/enums)

@@ -1,0 +1,146 @@
+---
+title: "Storage"
+description: "How data works in the ecosystem: decentralized, addressable and user owned, with encryption, durability and portability built in."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["ecosystem", "storage", "data"]
+keywords: "storage, data, content addressing, encryption, durability, user owned, DDoc"
+---
+
+Where does data live in a user owned web? Not in a company's database. The
+ecosystem's Storage service keeps data decentralized, addressable and under the
+user's control. This page explains how storage works and why it matters for
+ownership.
+
+## What kind of data
+
+The storage service handles the data that makes the web work: DDoc documents,
+identities, application state, published content and user files. It replaces two
+classic things at once: the server's database and the file system behind an
+account.
+
+<CardGrid columns={2}>
+  <Card title="User owned">
+    Data belongs to the identity, not to a platform. It moves when you do.
+  </Card>
+  <Card title="Addressable">
+    Data is found by its content address, so it is unique and verifiable.
+  </Card>
+  <Card title="Available">
+    Data is served by the network, not by one server that can go offline.
+  </Card>
+  <Card title="Portable">
+    Any implementation that follows the standards can read and write the same
+    data.
+  </Card>
+</CardGrid>
+
+## Content addressing, not location addressing
+
+The classic web stores data in a location: `someserver.com/file.pdf`. If the
+location disappears, the data is gone. The ecosystem addresses data by its
+**content**:
+
+<Diagram caption="A content address is derived from the data itself, so the data can be served by anyone.">
+  <Flow column>
+    <DiagramNode>Your data</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Address (hash of content)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Any peer can serve it</DiagramNode>
+  </Flow>
+</Diagram>
+
+A content address is a fingerprint of the data. If the data changes, the address
+changes. If the data is intact, any peer can serve it and the address still
+proves it is the right content. This is the same mechanism that keeps the
+[Security Model](/docs/ecosystem/security-model) honest.
+
+## Where data lives
+
+Data is stored across a decentralized network of participants who offer space in
+exchange for compensation, plus the user's own devices. This distribution has a
+practical shape:
+
+<CardGrid columns={2}>
+  <Card title="User devices">
+    Your devices hold copies of your own data, encrypted and local.
+  </Card>
+  <Card title="Network peers">
+    Other participants host replicated copies, so your data survives device
+    loss.
+  </Card>
+  <Card title="Encryption">
+    User data is encrypted in a way that the hosting peers cannot read it.
+  </Card>
+</CardGrid>
+
+The result is that losing a device does not lose your data, and hosting peers
+cannot turn your files into their business.
+
+## Durability and availability
+
+Decentralized storage has to answer the question a database never asks: who
+keeps the data alive? The answers are part of the service design:
+
+<CheckList
+  items={[
+    'Data is replicated across multiple peers in different parts of the network.',
+    'Availability is monitored and under replicated content is re hosted.',
+    'Content that is meant to be public is promoted so it stays reachable.',
+    'Private data is tied to the owner identity and follows it.',
+  ]}
+/>
+
+## The DDoc documents
+
+Identities, applications and modules all publish a DDoc: a small signed document
+that describes them. DDoc documents live in the same storage service, which is
+what makes the whole system resolvable: name, to DDoc, to data, all the way
+down. See [Identity](/docs/ecosystem/identity) and the
+[Naming System](/docs/ecosystem/naming-system).
+
+## Storage and applications
+
+Developers do not build their own servers for user data. They use the storage
+service through the [SDK](/docs/ecosystem/sdk):
+
+```js
+// Save a profile under the user's identity
+await orivon.storage.put('profile.json', profile);
+
+// Read it back anywhere, on any device
+const profile = await orivon.storage.get('profile.json');
+```
+
+The application asks, the user's storage answers, and the data stays user owned.
+
+<Callout type="warning" title="Watch out">
+  Ownership means you are also responsible. Replication and recovery exist, but
+  deliberately mishandled data can still be lost. The
+  [Security Model](/docs/ecosystem/security-model) explains what the system
+  protects and what it cannot.
+</Callout>
+
+## Storage and governance
+
+What content is allowed to be stored is not decided by the storage service. It
+is decided by communities through [Governance](/docs/ecosystem/governance). The
+infrastructure stays neutral; the rules come from the people using it.
+
+<Callout type="success" title="Next">
+  Rules, disputes and standards all need a process. That is what
+  [Governance](/docs/ecosystem/governance) covers.
+</Callout>
+
+## Related pages
+
+- [Identity](/docs/ecosystem/identity): the DDoc documents storage holds.
+- [Security Model](/docs/ecosystem/security-model): encryption and content integrity.
+- [SDK](/docs/ecosystem/sdk): how applications use storage.
+
+## Further reading
+
+- [Networking](/docs/ecosystem/networking): how stored content is carried.
+- [Governance](/docs/ecosystem/governance): how content rules are made.

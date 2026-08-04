@@ -1,0 +1,191 @@
+---
+title: "Writing Specifications"
+description: "How to write an Orivon specification: documentation style, terminology, normative language, examples, diagrams, references and consistency rules."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["standards", "writing"]
+keywords: "writing, style, terminology, normative language, MUST, SHOULD, MAY, RFC, examples, references"
+---
+
+A specification is only as good as its precision. Vague language produces
+disagreeing implementations, and disagreeing implementations produce broken
+ecosystems. This page defines how Orivon specifications are written: the style,
+the terminology, and the rules that keep every document consistent.
+
+## Documentation style
+
+Specifications are engineering documents, and they read like it:
+
+<CheckList
+  items={[
+    'Write for an implementer who has read the template but nothing else.',
+    'Use short sentences and concrete terms. Explain every abbreviation at first use.',
+    'Prefer plain language over legal or marketing phrasing.',
+    'State facts, not opinions. A claim about behavior is either normative or it is labeled as rationale.',
+    'Keep normative text separate from explanatory text so readers know what binds.',
+  ]}
+/>
+
+The editorial rules of this documentation apply here too: plain language, short
+sentences, and no em dashes or en dashes.
+
+<Callout type="note" title="Plain language">
+  A specification is read by people who may not be native speakers and who may
+  not share the writer's context. If a sentence can be misread, it will be.
+  Rewrite it until it cannot.
+</Callout>
+
+## Terminology
+
+Terminology must be defined before it is used normatively. Every OSP includes a
+Terminology section, per the [template](/docs/standards/specification-template),
+and follows these rules:
+
+<Steps>
+  <Step title="Define">
+    Every technical term is defined in the Terminology section on first use.
+  </Step>
+  <Step title="Reuse">
+    Terms from other OSPs are reused with their existing definitions, not
+    redefined.
+  </Step>
+  <Step title="Reference">
+    Definitions cite their source OSP when the term is shared.
+  </Step>
+  <Step title="Capitalize">
+    Defined terms are written with a stable capitalization so readers can spot
+    them.
+  </Step>
+</Steps>
+
+Shared terms are the reason the 
+[Technical Design](/docs/technical-design) pages and the OSPs can cross
+reference: a DDoc, an identity, a module and a permission mean the same thing in
+every document.
+
+## Normative language
+
+The core of a specification is its normative language: the sentences that state
+requirements. Orivon uses the standard RFC keyword set, and only these keywords
+carry normative weight:
+
+| Keyword | Meaning |
+| --- | --- |
+| **MUST** | An absolute requirement. Violation breaks conformance. |
+| **MUST NOT** | An absolute prohibition. Violation breaks conformance. |
+| **SHOULD** | A strong recommendation; valid reasons may exist to ignore it. |
+| **SHOULD NOT** | A strong recommendation against; valid reasons may exist. |
+| **MAY** | Truly optional; implementations choose. |
+| **OPTIONAL** | The same as MAY, used for optional features. |
+| **RECOMMENDED** | The same as SHOULD, used for recommendations. |
+
+These keywords are written in the defined style and used only for their
+normative meaning. A sentence like "implementations should be fast" is not
+normative and must not use the keyword form.
+
+<Diagram caption="The normative keyword hierarchy.">
+  <Flow column>
+    <DiagramNode accent>MUST / MUST NOT (required)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>SHOULD / SHOULD NOT (recommended)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>MAY / OPTIONAL (permitted)</DiagramNode>
+  </Flow>
+</Diagram>
+
+Normative requirements are written as explicit statements of obligation or
+permission. Example from the permission model draft:
+
+> A module MUST NOT access a resource without a matching grant. A module MAY
+> request additional grants at runtime. Requests that require consent SHOULD be
+> presented to the user before any grant is issued.
+
+## Examples
+
+Examples turn normative text into something implementable. Every specification
+includes:
+
+- At least one worked example per normative behavior.
+- Realistic payloads with the exact field names the spec defines.
+- Both the happy path and at least one failure path.
+- Examples labeled with the version they correspond to.
+
+Example from the wallet API draft:
+
+```json
+{
+  "method": "wallet.sign",
+  "params": {
+    "payload": "0x7a3f...",
+    "purpose": "authentication"
+  },
+  "id": 42
+}
+```
+
+Examples are illustrative, not normative, and a mismatch between an example and
+the normative text is a defect in the specification that review must catch.
+
+## Diagrams
+
+Diagrams explain structure and flow that prose describes poorly. The rules:
+
+- Use the documentation's diagram components: flows, stacks and nodes.
+- Give every diagram a caption that states what it shows.
+- Keep diagrams consistent with the text; a diagram that contradicts the
+  specification is a defect.
+- Prefer ASCII and structured diagrams that survive copy, conversion and
+  accessibility tools.
+
+Diagrams carry no normative weight alone. If a requirement is visible only in a
+diagram, it must also appear in the prose.
+
+## References
+
+References make a specification auditable. The rules:
+
+<CheckList
+  items={[
+    'Every external dependency is a named reference, not an implicit assumption.',
+    'Related OSPs are cited with their identifier and version.',
+    'Normative references are distinguished from informative ones.',
+    'A specification must never depend on an unversioned resource.',
+  ]}
+/>
+
+The [template](/docs/standards/specification-template) defines the References
+section and the [Registry](/docs/standards/specification-registry) keeps
+identifiers stable, so a reference stays valid over time.
+
+## Consistency rules
+
+Consistency is enforced by rules, not goodwill:
+
+| Rule | Purpose |
+| --- | --- |
+| Use the official template | Every document has the same structure |
+| Reuse shared terminology | Documents agree on meaning |
+| Follow the keyword rules | Normative text is unambiguous |
+| Keep identifiers stable | References stay valid |
+| Version everything | History is traceable |
+
+These rules are why the whole series reads as one system rather than fifteen
+unrelated documents.
+
+<Callout type="success" title="Best practice">
+  Write the normative requirements first, in keyword form, then add the
+  explanation around them. A specification written from the requirements out is
+  precise; one written from the prose in usually is not.
+</Callout>
+
+<Callout type="info" title="Ready to write?">
+  The [Specification Template](/docs/standards/specification-template) is the
+  exact structure every document must follow. Start there.
+</Callout>
+
+## Related pages
+
+- [Specification Template](/docs/standards/specification-template): the required structure.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): the review process for written documents.
+- [Why Standards Matter](/docs/standards/why-standards-matter): why precision is worth the effort.

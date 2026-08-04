@@ -1,0 +1,140 @@
+---
+title: "Design Contributions"
+description: "How designers contribute to Orivon: UI, UX, icons, illustrations and diagrams, with the process and standards."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 24
+tags: ["contributors", "design"]
+keywords: "design contributions, UI design, UX, icons, illustrations, diagrams"
+---
+
+Design is how users experience the platform, and design contributions are
+first-class work in Orivon. This page explains the kinds of design work, the
+process for contributing, and the standards design meets.
+
+<Callout type="success" title="Designers welcome">
+  You do not need to be a developer to contribute. A strong design
+  contribution often starts a feature: the mockup is the proposal.
+</Callout>
+
+## Kinds of design work
+
+<CardGrid columns={2}>
+  <Card title="UI design">
+    Screens, components and the visual language of the browser.
+  </Card>
+  <Card title="UX design">
+    Flows, information architecture and usability.
+  </Card>
+  <Card title="Icons">
+    The icon set used across the browser and documentation.
+  </Card>
+  <Card title="Illustrations">
+    Visuals for the product, guides and outreach.
+  </Card>
+  <Card title="Diagrams">
+    The architecture and flow diagrams in the documentation.
+  </Card>
+  <Card title="Accessibility">
+    Design that works for every user, checked and improved.
+  </Card>
+</CardGrid>
+
+## The design process
+
+<Steps>
+  <Step title="Discuss">
+    Share your idea in the community discussions first.
+  </Step>
+  <Step title="Propose">
+    Post a mockup or sketch, with the problem it solves.
+  </Step>
+  <Step title="Refine">
+    Iterate with community feedback.
+  </Step>
+  <Step title="Implement">
+    Ship the design asset or pair with a developer to build it.
+  </Step>
+</Steps>
+
+<Callout type="info" title="Pairing with developers">
+  A mockup plus a developer partner is the fastest path to shipped design.
+  The community discussions are the place to find that partner.
+</Callout>
+
+## The design language
+
+Design work follows the platform's established design language, defined in
+the design system:
+
+<CheckList
+  items={[
+    'Follow the existing tokens: colors, spacing, typography.',
+    'Match established component patterns before inventing new ones.',
+    'Reuse icons from the icon set before proposing new ones.',
+    'Design responsive: the browser runs at many sizes.',
+    'Design accessible: keyboard, contrast and motion.',
+  ]}
+/>
+
+Changes to the design system itself go through the same proposal and review
+process as code, because the design system is shared infrastructure.
+
+## Icons
+
+Icons are a frequent entry point for designers:
+
+| Step | Detail |
+| --- | --- |
+| Check first | The icon set may already have it |
+| Match style | Consistent stroke, size and weight |
+| Name clearly | The name describes the concept |
+| Test at size | Icons must read at small sizes |
+
+## Diagrams
+
+The documentation uses architecture and flow diagrams:
+
+<CheckList
+  items={[
+    'One idea per diagram.',
+    'Consistent node styles and arrow meaning.',
+    'Readable at the site maximum width.',
+    'A caption that works as a text alternative.',
+    'Accessible contrast in every palette.',
+  ]}
+/>
+
+See the diagram conventions in
+[Documentation Standards](/docs/contributors/documentation-standards).
+
+## UX contributions
+
+UX work needs evidence and clear scope:
+
+| Strong | Weak |
+| --- | --- |
+| States the problem and audience | "The UI should look better" |
+| Shows current and proposed flows | A single unrelated mockup |
+| Considers accessibility | Design that excludes users |
+| Small, testable scope | Redesigning everything at once |
+
+## Reviewing design
+
+Design is reviewed like code:
+
+- Design changes to the product open a PR or attach to the feature PR.
+- Review checks the design language, accessibility and scope.
+- Feedback is specific and tied to the problem.
+
+<Callout type="success" title="Best practice">
+  Design for the problem, then for the system. A brilliant screen that breaks
+  the design language is a gift wrapped in debt; the review helps you land
+  both the improvement and the consistency.
+</Callout>
+
+## Related pages
+
+- [Accessibility](/docs/contributors/accessibility): design that works for everyone.
+- [Documentation Standards](/docs/contributors/documentation-standards): the diagrams and docs conventions.
+- [Good First Issues](/docs/contributors/good-first-issues): beginner friendly design tasks.

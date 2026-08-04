@@ -1,0 +1,386 @@
+---
+title: "Design Documents"
+description: "A living record of Orivon's architectural decisions: problem, requirements, alternatives, decision, trade-offs, and future improvements."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["research", "design-documents"]
+keywords: "design documents, ADR, architecture decisions, trade-offs, alternatives, decision record, why"
+---
+
+*Orivon Research Group · Version 1.0 · Living document · Status: Active Research*
+
+Design documents record *why* the platform is shaped the way it is. Each entry
+captures the problem, the requirements, the alternatives considered, the
+decision, its advantages and disadvantages, and the improvements still planned.
+They complement the [whitepapers](/docs/research/orivon-whitepaper), which
+describe the resulting system.
+
+## Format
+
+Every design document follows this structure:
+
+| Section | Content |
+| --- | --- |
+| Problem | What had to be solved. |
+| Requirements | Constraints and success criteria. |
+| Alternatives Considered | Options evaluated, with reasons rejected. |
+| Decision | The chosen direction. |
+| Advantages | What the decision buys. |
+| Disadvantages | What it costs. |
+| Future Improvements | What is still open. |
+
+## Design decision index
+
+| ID | Decision | Status |
+| --- | --- | --- |
+| [ADR-001](#adr-001) | WASM as the module execution substrate | Accepted |
+| [ADR-002](#adr-002) | Capability-based permissioning | Accepted |
+| [ADR-003](#adr-003) | Local-first storage | Accepted |
+| [ADR-004](#adr-004) | Multi-process browser model | Accepted |
+| [ADR-005](#adr-005) | Minimal trusted core | Accepted |
+| [ADR-006](#adr-006) | Self-sovereign identity | Accepted |
+| [ADR-007](#adr-007) | Dual-stack networking (HTTP + P2P) | Accepted |
+| [ADR-008](#adr-008) | Opt-in Web3 Score | Accepted |
+
+---
+
+## ADR-001: WASM as the module execution substrate
+
+**Status:** Accepted · **Date:** 2025-11-10
+
+### Problem
+
+The platform must run third-party modules safely without restricting
+developers to a single language or trusting their code.
+
+### Requirements
+
+- Memory isolation between modules and host.
+- Portability across platforms without recompilation.
+- Language neutrality.
+- Low enough overhead for interactive applications.
+- Mechanical enforcement of permission boundaries.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Language-restricted plugins (e.g. Lua, JS-only) | Restricts the ecosystem to one language. |
+| OS-level containers per module | Heavyweight; not viable for mobile or quick launch. |
+| Trusted extensions (browser-extension model) | Fails structurally; no mechanical isolation. |
+| Native sandboxing (gVisor-style) | Portability and performance unsuitable for a browser platform. |
+| **WebAssembly (chosen)** | Meets all requirements; WASI standardizes host interfaces. |
+
+### Decision
+
+Modules are WASM artifacts executed in sandboxed instances with capability-
+gated host functions.
+
+### Advantages
+
+- One sandbox for all languages.
+- Portable, verifiable binaries.
+- Growing standards ecosystem (WASM, WASI, component model).
+
+### Disadvantages
+
+- ABI and JIT overhead versus native code.
+- Some legacy libraries must be compiled or adapted.
+
+### Future improvements
+
+- wasm64 migration for large memories.
+- Component model for composable modules.
+
+## ADR-002: Capability-based permissioning
+
+**Status:** Accepted · **Date:** 2025-12-02
+
+### Problem
+
+Modules must be prevented from exceeding their authority, mechanically rather
+than by policy.
+
+### Requirements
+
+- Least privilege by default.
+- Explicit, scoped, revocable grants.
+- Enforcement that does not depend on module cooperation.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Ambient authority (like browser extensions) | Anything granted is usable everywhere; history of abuse. |
+| OS user separation per module | Too coarse; cannot express fine-grained capability. |
+| Audit-based enforcement | Detects abuse, does not prevent it. |
+| **Capability-based (chosen)** | Grants are both the permission and the handle. |
+
+### Decision
+
+All host interactions are capability-gated; the grant registry lives in the
+trusted core.
+
+### Advantages
+
+- Mechanically enforced least privilege.
+- Grants are observable and revocable.
+
+### Disadvantages
+
+- Requires careful UX to keep permission decisions simple for users.
+
+### Future improvements
+
+- Formal verification of the capability checker.
+
+## ADR-003: Local-first storage
+
+**Status:** Accepted · **Date:** 2026-01-15
+
+### Problem
+
+User data must be owned by the user, not held hostage by a cloud provider.
+
+### Requirements
+
+- Encrypted at rest.
+- No default dependency on a remote service.
+- Support for sync and sharing without compromising ownership.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Cloud-primary storage | Ownership is nominal; provider can read or revoke. |
+| Encrypted cloud with user keys | Better, but still requires the provider's existence. |
+| **Local-first + replication (chosen)** | Data lives on device; remote copies are replicas. |
+
+### Decision
+
+Data is stored locally and encrypted; replication is explicit and
+user-controlled.
+
+### Advantages
+
+- Physical ownership of data.
+- Offline capability by default.
+- Breaches at remote replicas do not expose plaintext.
+
+### Disadvantages
+
+- Sync and collaboration are more work.
+- Device loss requires a backup/recovery strategy.
+
+### Future improvements
+
+- DSN durability tier with erasure coding.
+
+## ADR-004: Multi-process browser model
+
+**Status:** Accepted · **Date:** 2026-02-20
+
+### Problem
+
+A single compromised renderer must not compromise the browser, the wallet, or
+other tabs.
+
+### Requirements
+
+- Privilege separation between UI, network, rendering, and modules.
+- Crash isolation.
+- A network process that holds credentials and mediates I/O.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Single-process browser | Historically catastrophic for security. |
+| Site-per-process without network process | Network credentials in renderers risk exfiltration. |
+| **Multi-process with network process (chosen)** | Mature, well-understood model; strongest practical isolation. |
+
+### Decision
+
+The browser uses separate processes for UI, network, rendering, GPU, and the
+runtime host.
+
+### Advantages
+
+- Site isolation and crash isolation.
+- Network credentials isolated from renderer compromise.
+
+### Disadvantages
+
+- Higher memory overhead than single-process models.
+
+### Future improvements
+
+- Memory sharing and cost optimization across renderers.
+
+## ADR-005: Minimal trusted core
+
+**Status:** Accepted · **Date:** 2026-03-05
+
+### Problem
+
+The trust boundary must be small enough to review and safe enough to rely on.
+
+### Requirements
+
+- Only trust-requiring code in the core.
+- Feature velocity moves outward into modules.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Fat core with all features | Large attack surface; defeats sandboxing. |
+| No core (everything sandboxed) | Some operations (system integration) cannot be sandboxed. |
+| **Minimal core (chosen)** | Balances trust necessity and reviewability. |
+
+### Decision
+
+The core owns only services, lifecycle, the grant registry, and host
+interfaces; a CI-gated code-surface metric keeps it honest.
+
+### Advantages
+
+- Auditable trust boundary.
+- Sandboxing remains meaningful.
+
+### Disadvantages
+
+- High review bar for core additions.
+
+### Future improvements
+
+- Formal specification of the core ABI.
+
+## ADR-006: Self-sovereign identity
+
+**Status:** Accepted · **Date:** 2026-03-22
+
+### Problem
+
+Provider-mediated identity gives intermediaries control over user existence.
+
+### Requirements
+
+- User-controlled identifiers (DIDs).
+- Verifiable credentials with selective disclosure.
+- Interoperable standards.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Provider-account identity | The status quo; no user ownership. |
+| Federated identity | Better, but still provider-mediated. |
+| **Self-sovereign identity (chosen)** | User owns identifiers and credentials. |
+
+### Decision
+
+Identity is DID-based with W3C verifiable credentials, stored locally,
+presented selectively.
+
+### Advantages
+
+- No provider can revoke existence.
+- Privacy-preserving presentation.
+
+### Disadvantages
+
+- Recovery responsibility shifts to the user; requires strong backup UX.
+
+### Future improvements
+
+- Zero-knowledge presentations at scale.
+
+## ADR-007: Dual-stack networking (HTTP + P2P)
+
+**Status:** Accepted · **Date:** 2026-04-10
+
+### Problem
+
+The platform must support the existing web and decentralized infrastructure
+simultaneously.
+
+### Requirements
+
+- The open web keeps working unchanged.
+- P2P and decentralized DNS are first-class, not add-ons.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| P2P-only | Breaks the open web and adoption. |
+| HTTP-only | Does not address the decentralization goals. |
+| **Dual stack (chosen)** | HTTP for compatibility, P2P for decentralization. |
+
+### Decision
+
+Networking exposes HTTP(S) and P2P behind a common interface, with
+decentralized DNS preferred for resolution.
+
+### Advantages
+
+- Backward compatibility.
+- Gradual migration of the ecosystem to P2P.
+
+### Disadvantages
+
+- Operational complexity of two transports.
+
+### Future improvements
+
+- WebTransport-native P2P for browser peers.
+
+## ADR-008: Opt-in Web3 Score
+
+**Status:** Accepted · **Date:** 2026-05-18
+
+### Problem
+
+Reputation is useful but must not become surveillance.
+
+### Requirements
+
+- Verifiable signals.
+- User control over computation and disclosure.
+- Open, auditable methodology.
+
+### Alternatives considered
+
+| Alternative | Rejected because |
+| --- | --- |
+| Mandatory public score | Privacy-hostile; likely rejected by users. |
+| Closed proprietary model | Undermines trust in the score. |
+| **Opt-in open score (chosen)** | Transparent, user-controlled, credible. |
+
+### Decision
+
+The Web3 Score is opt-in, computed from on-chain signals with a published,
+versioned methodology, and disclosed only at the user's choice.
+
+### Advantages
+
+- Trust through transparency.
+- Privacy by default.
+
+### Disadvantages
+
+- Slower ecosystem adoption until trust grows.
+
+### Future improvements
+
+- Zero-knowledge "threshold" proofs over the score.
+
+<Info title="Contributing decisions">
+  Design documents are living. Proposals for new decisions are discussed as
+  experimental features first (see [Experimental Features](/docs/research/experimental-features))
+  and graduate to this record once accepted. The current index is version 1.0.
+</Info>
+
+**Related:** [Orivon Whitepaper](/docs/research/orivon-whitepaper) · [Architecture Papers](/docs/research/browser-architecture) · [Research Roadmap](/docs/research/research-roadmap)

@@ -1,0 +1,209 @@
+---
+title: "Testing"
+description: "Test your Orivon code: unit tests, integration tests, end-to-end tests, mocking, test organization and continuous integration."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 26
+tags: ["developers", "testing"]
+keywords: "testing, unit tests, integration tests, end-to-end, mocking, CI"
+---
+
+Tests are how your package earns trust: yours, your users' and the
+reviewers'. This page explains the testing model, the test types, and how to
+organize a suite that runs fast and means something.
+
+## The testing model
+
+Tests run in a sandboxed test runtime with the same APIs as production:
+
+```sh
+orivon test
+```
+
+The runtime provides helpers to load packages, call methods, and assert
+behavior. The testing architecture is documented in
+[Testing Architecture](/docs/technical-design/testing-architecture).
+
+## Unit tests
+
+Unit tests verify one function or behavior in isolation:
+
+```ts
+import {greet} from '../src/greeting';
+
+test('greet uses the name', () => {
+  expect(greet('world')).toBe('Hello, world!');
+});
+```
+
+Unit tests are fast and run first. They cover the logic of your package
+without touching services.
+
+## Integration tests
+
+Integration tests verify your package against its dependencies:
+
+```ts
+import {loadModule} from '@orivon/sdk/testing';
+
+test('greeting module answers requests', async () => {
+  const module = await loadModule('./dist/greeting-module.omp');
+  const response = await module.call('greet', {name: 'world'});
+  expect(response.message).toBe('Hello, world!');
+});
+```
+
+Integration tests load the built artifact, so they verify the real package,
+not a reconstructed mock. They cover the seams between your package and the
+system.
+
+## End-to-end tests
+
+End-to-end tests run the whole application:
+
+```ts
+import {launchApp} from '@orivon/sdk/testing';
+
+test('application renders after ready', async () => {
+  const app = await launchApp('./dist/my-app.omp', {
+    permissions: ['identity.read'],
+  });
+  await app.waitFor('ready');
+  expect(app.renderLog()).toContain('Hello, world!');
+});
+```
+
+End-to-end tests exercise the full lifecycle: load, register, initialize,
+run. They are the slowest and most valuable tests, and they are what CI runs
+last.
+
+<Diagram caption="The test pyramid for Orivon packages.">
+  <Flow column>
+    <DiagramNode accent>End-to-end (few)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Integration (some)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Unit (many)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Mocking
+
+Mocks replace external services with controlled stand ins:
+
+```ts
+const app = await launchApp('./dist/my-app.omp', {
+  mocks: {
+    identity: {name: 'Alice'},
+    storage: {get: async () => fixture},
+  },
+});
+```
+
+<CheckList
+  items={[
+    'Mock at the service boundary, not inside your code.',
+    'Provide mocks for every service the test should not really hit.',
+    'Use real services for the subject of the test; mock what it depends on.',
+    'Never mock the code under test.',
+  ]}
+/>
+
+Mocks are how integration tests stay fast and deterministic. The SDK's test
+helpers document every mockable surface.
+
+## Test organization
+
+Organize tests to mirror your source:
+
+```text
+src/
+  greeting.ts
+tests/
+  greeting.test.ts
+  module.integration.test.ts
+  app.e2e.test.ts
+```
+
+| Suffix | Type |
+| --- | --- |
+| `*.test.ts` | Unit tests, mirroring `src/` |
+| `*.integration.test.ts` | Integration tests |
+| `*.e2e.test.ts` | End-to-end tests |
+
+The naming lets `orivon test <name>` target a subset, and lets CI run types in
+order.
+
+## Continuous integration
+
+Wire tests into CI so they run on every change:
+
+<Steps>
+  <Step title="Install">
+    Install the CLI and SDK in the CI image.
+  </Step>
+  <Step title="Build">
+    Run `orivon build` to produce the artifact.
+  </Step>
+  <Step title="Test">
+    Run `orivon test` and `orivon test --coverage`.
+  </Step>
+  <Step title="Gate">
+    Fail the pipeline on failures or coverage regressions.
+  </Step>
+</Steps>
+
+A minimal CI job:
+
+```yaml
+steps:
+  - run: orivon build
+  - run: orivon test
+  - run: orivon test --coverage
+```
+
+CI is what turns "my tests pass" into "our tests pass, forever". See
+[Testing Architecture](/docs/technical-design/testing-architecture) for the
+full CI story.
+
+## Coverage
+
+Measure what your tests exercise:
+
+```sh
+orivon test --coverage
+```
+
+<Callout type="warning" title="Coverage is a floor, not a goal">
+  Chasing 100% coverage produces tests that assert implementation details.
+  Cover behavior: the branches that matter and the paths that fail. Use
+  coverage to find untested code, not to inflate a number.
+</Callout>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Testing against mocks of yourself">
+    Mock the dependencies, not the code under test, or the test proves
+    nothing.
+  </Card>
+  <Card title="Ignoring test output">
+    A red test that is skipped "temporarily" is a promise to forget.
+  </Card>
+  <Card title="Slow integration tests">
+    If integration tests are slow, they get skipped. Keep them fast with
+    mocks.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Write the test that describes the behavior you want, then make it pass. A
+  test that exists to describe intent is worth more than one written to
+  justify the code after the fact.
+</Callout>
+
+## Related pages
+
+- [Debugging](/docs/developers/debugging): fixing what tests find.
+- [Testing Architecture](/docs/technical-design/testing-architecture): how the runtime tests.
+- [Best Practices](/docs/developers/best-practices): quality practices.

@@ -1,0 +1,130 @@
+---
+title: "Example: Module Example"
+description: "A module that uses permissions and events to do real work, showing the full module lifecycle and service integration."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 29.6
+tags: ["developers", "examples"]
+keywords: "module example, permissions, events, lifecycle, services"
+---
+
+This example is a real module: it requests permissions, subscribes to events,
+reacts, and does work across the core services. It is the closest example to
+what a production module looks like.
+
+## Project structure
+
+```text
+module-example/
+  orivon.toml
+  src/
+    index.ts
+```
+
+## The manifest
+
+```toml
+[package]
+name = "module-example"
+version = "0.1.0"
+description = "A module that reacts to events and uses services"
+
+[interface]
+methods = ["report"]
+
+[permissions]
+identity = ["read", "resolve"]
+storage = ["read", "write"]
+
+[dependencies]
+events = "events"
+
+[config]
+report_interval = 60
+```
+
+The module reads identities, stores state, and listens to events. Its config
+drives behavior. See [Module Manifest](/docs/developers/module-manifest).
+
+## The implementation
+
+```ts
+export function activate(config) {
+  const interval = config.report_interval ?? 60;
+  const timer = setInterval(emitReport, interval * 1000);
+
+  const sub = app.events.subscribe('identity.created');
+  sub.on('event', (event) => handleNewIdentity(event));
+
+  return () => {
+    clearInterval(timer);
+    sub.close();
+  };
+}
+
+async function handleNewIdentity(event) {
+  const identity = await app.identity.resolve(event.payload.name);
+  await app.storage.put(`identity:${identity.address}`, JSON.stringify(identity));
+  app.log.info('identity indexed', {address: identity.address});
+}
+
+async function emitReport() {
+  const report = await app.storage.list('identity:');
+  app.events.emit('module-example.report', {count: report.length});
+}
+
+export async function report() {
+  const stored = await app.storage.list('identity:');
+  return {count: stored.length};
+}
+```
+
+## The lifecycle
+
+<Diagram caption="The module activates, works, and cleans up.">
+  <Flow column>
+    <DiagramNode accent>activate</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Subscribe, schedule, index</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>React to events and requests</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>deactivate cleans up</DiagramNode>
+  </Flow>
+</Diagram>
+
+`activate` returns a cleanup function the runtime calls on deactivate. The
+module releases its timer and subscription, which is what keeps it from
+leaking. See [Runtime APIs](/docs/developers/runtime-apis) and
+[Lifecycle](/docs/technical-design/application-lifecycle).
+
+## Events and state
+
+The module reacts to `identity.created`, stores the result, and reports on
+request. That is the full pattern of reactive modules:
+
+- Subscribe to the events that matter.
+- Do the work in response.
+- Store durable state.
+- Expose the state through methods.
+
+See [Events](/docs/developers/events).
+
+## What this example teaches
+
+- Real modules combine permissions, events, services and config.
+- `activate` sets up; the cleanup function tears down.
+- Events trigger work; methods expose results.
+
+<Callout type="info" title="Next">
+  The [application example](/docs/developers/examples/application-example) puts
+  a module together with a UI. The
+  [events tutorial](/docs/developers/tutorials/working-with-events) digs into
+  delivery semantics.
+</Callout>
+
+## Related pages
+
+- [Runtime APIs](/docs/developers/runtime-apis): lifecycle and helpers.
+- [Events](/docs/developers/events): the event model.
+- [Examples](/docs/developers/examples): the example index.

@@ -1,0 +1,221 @@
+---
+title: "Process Model"
+description: "The internal design of Orivon's process and thread model: process topology, threading, IPC, scheduling, resource ownership, lifecycle and crash recovery."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["technical-design", "process-model"]
+keywords: "process, thread, IPC, scheduling, resource ownership, lifecycle, crash recovery"
+---
+
+Orivon is a multi-process browser. The process model is the structural backbone
+of both stability and security: what is isolated, who owns what, and what
+happens when something dies. This page documents the process topology, threads,
+IPC and crash recovery.
+
+## Why processes
+
+The process model exists to answer two threats:
+
+1. **A hostile context must not reach the host.** Processes give the OS a real
+   boundary that no code bug can cross by itself.
+2. **A failing component must not take the browser down.** When a process dies,
+   the rest of the system is untouched.
+
+Both goals require real OS processes, not threads. See
+[Security Architecture](/docs/technical-design/security-architecture).
+
+## Process topology
+
+The topology is stable and deliberately small:
+
+<Diagram caption="The canonical process set.">
+  <Flow column>
+    <DiagramNode accent>Browser process</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Renderer processes (one per site)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime hosts (one per application)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core services (network, storage, wallet, policy)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>GPU process and utility processes</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Process | Role | Privilege |
+| --- | --- | --- |
+| **Browser** | Window management, UI, coordination | Privileged |
+| **Renderer** | One per site; parses and lays out content | Sandboxed |
+| **Runtime host** | One per runtime application; runs WASM | Sandboxed |
+| **Core services** | Network, storage, wallet, policy, module service | Privileged, narrow roles |
+| **GPU** | GPU contexts and raster | Restricted |
+| **Utility** | Media decode, proxies, helpers | Sandboxed |
+
+The topology is the same one the
+[Architecture Overview](/docs/technical-design/architecture-overview)
+describes at the block level.
+
+## Isolation rules
+
+The topology is governed by rules, not exceptions:
+
+<CheckList
+  items={[
+    'Renderers are isolated per site; cross-site content never shares a process.',
+    'Runtime applications each get a dedicated runtime host.',
+    'Core services are separated by role into their own processes.',
+    'The wallet service is a process only the browser can reach.',
+    'The browser process hosts no untrusted parsing.',
+  ]}
+/>
+
+Site isolation is the primary containment for the web. It is not optional, and
+the [Browser Architecture](/docs/technical-design/browser-architecture) page
+documents how tabs map to processes.
+
+## Threading
+
+Processes use threads with clear responsibilities:
+
+<CardGrid columns={2}>
+  <Card title="Main thread">
+    Runs the document or service logic. The only thread allowed to touch DOM.
+  </Card>
+  <Card title="Compositor thread">
+    Owns layer assembly and input for the renderer.
+  </Card>
+  <Card title="Raster threads">
+    Tile rasterization, off the main thread.
+  </Card>
+  <Card title="Service threads">
+    IO, storage and networking inside the service processes.
+  </Card>
+</CardGrid>
+
+The rule: **the main thread never blocks on IO or heavy work.** Everything slow
+moves to a worker thread or a service process, and results arrive back through
+the IPC layer.
+
+## IPC
+
+Processes do not share state; they exchange messages. The IPC layer:
+
+- Is built on OS message passing with typed message schemas.
+- Carries a sender identity that the receiving side can authorize.
+- Delivers messages asynchronously, never with shared memory side effects.
+- Routes through the broker for privileged services. See
+  [Communication Bus](/docs/technical-design/communication-bus).
+
+IPC messages are the only way a sandboxed process talks to a privileged one, so
+the message surface is the security surface. It is validated, versioned and
+authorized per message.
+
+## Scheduling and priorities
+
+The browser does not outsource scheduling to chance:
+
+| Class | Example | Priority |
+| --- | --- | --- |
+| **Interactive** | Active page, UI, input | High |
+| **Foreground** | Visible tab work | Normal |
+| **Background** | Hidden tabs, prefetch | Low |
+| **Idle** | Caching, maintenance | Idle |
+| **Throttled** | Hidden runtime apps | Timed |
+
+Priorities let the system invest CPU where the user is looking and reclaim it
+everywhere else. This is the scheduling half of the
+[Performance](/docs/technical-design/performance) story.
+
+## Resource ownership
+
+Resources are owned by the process that needs them, and reclaimed with it:
+
+| Resource | Owned by |
+| --- | --- |
+| Renderer memory | The renderer process |
+| GPU memory | The GPU process |
+| Sockets | The network service |
+| Files and blobs | The storage service |
+| Keys and secrets | The wallet service |
+
+Because ownership is per process, a dying process cleans up its own resources.
+No global allocator has to chase leaks across boundaries.
+
+## Lifecycle
+
+Every process has a lifecycle:
+
+<Diagram caption="Process lifecycle.">
+  <Flow column>
+    <DiagramNode accent>Start</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Init (handshake, grants)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Active (serving)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Draining (graceful stop)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Exit</DiagramNode>
+  </Flow>
+</Diagram>
+
+Processes start with a handshake that establishes their role and capabilities,
+and exit through draining, which flushes state before teardown. See
+[Application Lifecycle](/docs/technical-design/application-lifecycle) for the
+application level view.
+
+## Crash recovery
+
+Crashes are expected; recovery is designed:
+
+<Steps>
+  <Step title="Detect">
+    The browser process is notified when a child dies.
+  </Step>
+  <Step title="Contain">
+    The dead process's resources are released by the OS.
+  </Step>
+  <Step title="Report">
+    A sanitized crash report is collected, with no user data.
+  </Step>
+  <Step title="Recover">
+    The tab or application is restarted with its last persisted state.
+  </Step>
+</Steps>
+
+<Callout type="success" title="Best practice">
+  The browser process never waits on a child to be healthy. It recovers the
+  surface (tab or application) and lets the child restart in the background.
+</Callout>
+
+## Security notes
+
+- The process boundary is the real security boundary; IPC is the only crossing.
+- No child can reach a privileged service without authorization per message.
+- The wallet process is reachable only from the browser process.
+
+## Performance notes
+
+- Process priority lets the browser starve background work, not the user.
+- Resource ownership per process makes leaks self cleaning.
+- The topology is small, so process overhead is a fixed, known cost.
+
+<Callout type="info" title="Future direction">
+  Planned work includes spare renderer processes for fast tab restoration,
+  memory reduction through process sharing where isolation allows, and
+  snapshotting for instant startup. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Architecture Overview](/docs/technical-design/architecture-overview): the block level view.
+- [Browser Architecture](/docs/technical-design/browser-architecture): how tabs use processes.
+- [Communication Bus](/docs/technical-design/communication-bus): how processes talk.
+
+## Further reading
+
+- [Memory Management](/docs/technical-design/memory-management): how processes budget memory.
+- [Sandbox](/docs/technical-design/sandbox): what the OS boundary enforces.
+- [Error Handling](/docs/technical-design/error-handling): recovery behavior.

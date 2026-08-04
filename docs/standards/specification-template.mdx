@@ -1,0 +1,265 @@
+---
+title: "Specification Template"
+description: "The official template every Orivon specification must follow, from the header block to the appendix."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["standards", "template"]
+keywords: "template, specification, structure, sections, header, abstract, motivation, goals"
+---
+
+Every specification in the Orivon series uses the same template. A shared
+structure is what makes the series reviewable, comparable and searchable. This
+page is the template itself: the required sections, in order, with guidance on
+what each section must contain.
+
+## Template overview
+
+<Diagram caption="The specification template, from header to appendix.">
+  <Flow column>
+    <DiagramNode accent>Header block</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Abstract and motivation</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Design and detailed specification</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Considerations</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Compatibility and migration</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>References and appendix</DiagramNode>
+  </Flow>
+</Diagram>
+
+The template has four movements: what the document is (header), why it exists
+(abstract and motivation), what it specifies (design and detail), and what
+implementers must weigh (considerations, compatibility, references).
+
+## Header block
+
+The header block identifies the document and its state. It must contain:
+
+| Field | Meaning |
+| --- | --- |
+| **Identifier** | The OSP number, for example `OSP-006` |
+| **Title** | A short, specific title |
+| **Status** | Draft, Accepted, Deprecated or Archived |
+| **Version** | Semantic version, for example `0.1.0` |
+| **Authors** | The people who wrote the specification |
+| **Editors** | The people accountable for the document |
+| **Created** | The date the draft was published |
+| **Updated** | The date of the last change |
+
+The header block is also the metadata stored in the
+[specification registry](/docs/standards/specification-registry). Status and
+version are the two fields readers check first; see
+[Versioning](/docs/standards/versioning) for what they mean.
+
+## Abstract and motivation
+
+The first body sections explain the document before it specifies anything:
+
+<CardGrid columns={2}>
+  <Card title="Abstract">
+    A paragraph that states what the specification defines and for whom, with no
+    jargon that the document has not yet explained.
+  </Card>
+  <Card title="Motivation">
+    The problem being solved, with concrete context: who is affected, what fails
+    today, and why the specification is the right response.
+  </Card>
+</CardGrid>
+
+These sections are what a busy reader uses to decide whether to read the rest.
+They must be honest: a specification without a motivation is a solution in
+search of a problem.
+
+## Goals and non-goals
+
+Goals and non-goals bound the specification. They are the contract for what the
+document does and does not cover:
+
+<CheckList
+  items={[
+    'Goals: the outcomes the specification achieves, stated measurably.',
+    'Non-Goals: the outcomes the specification deliberately excludes.',
+    'Each non-goal names the reason for exclusion.',
+    'Anything in the non-goals that is needed later is flagged as future work.',
+  ]}
+/>
+
+Non-goals are as important as goals. They prevent scope creep during review and
+prevent implementers from reading requirements into the document that were
+never intended.
+
+## Terminology
+
+Terminology defines every term the specification uses normatively, per the
+[writing rules](/docs/standards/writing-specifications). Terms shared with
+other specifications are referenced, not redefined.
+
+## Architecture
+
+The architecture section places the specification in the system. It shows:
+
+- Where the specified component sits in the overall design.
+- Its interfaces with neighboring components.
+- A diagram of the structure or flow, when one communicates it better than
+  prose.
+
+The architecture section references the relevant
+[Technical Design](/docs/technical-design) pages for the reader who wants the
+system context.
+
+## Detailed specification
+
+The detailed specification is the normative heart of the document. It defines:
+
+- The exact behavior, formats, messages, algorithms and rules.
+- Requirements written with the RFC keyword set (MUST, SHOULD, MAY).
+- Explicit handling for edge cases and failures.
+- Version markers and versioning behavior. See
+  [Versioning](/docs/standards/versioning).
+
+This section is what conformance testing checks against. It must be complete
+enough that two independent implementers produce compatible results without
+contacting each other.
+
+## Examples
+
+Examples make the normative text concrete. Each normative behavior should have:
+
+- A worked example showing the exact input and output.
+- The happy path and at least one failure path.
+- Payloads with the exact field names and values the specification defines.
+
+Examples are informative, never normative. A mismatch between an example and the
+normative text is a defect.
+
+## Reference implementation
+
+The reference implementation section records the implementation status:
+
+| Item | Content |
+| --- | --- |
+| **Implementation** | Where the reference implementation lives |
+| **Coverage** | Which parts of the specification it implements |
+| **Conformance** | Which conformance tests pass against it |
+| **Gaps** | What remains to be implemented |
+
+See [Conformance Testing](/docs/standards/conformance-testing) for how this is
+verified. An implementation section that is empty is the honest state of every
+draft; it is filled in as the code catches up.
+
+## Considerations
+
+Every specification must analyze each consideration area. Each one has a
+template subsection:
+
+```text
+## Security considerations
+...threats, mitigations, residual risks...
+
+## Privacy considerations
+...data exposure, minimization, retention...
+
+## Performance considerations
+...costs, complexity, resource bounds...
+
+## Accessibility considerations
+...interfaces for diverse users and assistive technology...
+```
+
+None of these sections may be left blank. "No concerns" is a valid analysis
+only when it is argued, not asserted. The
+[Security Model draft](/docs/standards/osp-013-security-model) is a good
+example of the depth expected.
+
+## Backward compatibility and migration
+
+Compatibility sections are mandatory whenever the specification can affect
+existing consumers:
+
+<CardGrid columns={2}>
+  <Card title="Backward compatibility">
+    What breaks, what does not, and which versioning rules apply.
+  </Card>
+  <Card title="Migration">
+    The path for existing consumers, including the deprecation timeline and
+    overlap window.
+  </Card>
+</CardGrid>
+
+A specification that introduces no compatibility concern states that explicitly
+and explains why. The migration model is defined in
+[Versioning](/docs/standards/versioning).
+
+## Future work
+
+The future work section lists what is deliberately out of scope but planned:
+
+- Items from the non-goals that need a future specification.
+- Known extensions under discussion.
+- Questions that implementation experience is expected to answer.
+
+Future work keeps the document honest about its limits without treating them as
+permanent.
+
+## References and appendix
+
+The closing sections make the document complete:
+
+- **References**: normative and informative references, each with its
+  identifier and version. See the [Registry](/docs/standards/specification-registry).
+- **Appendix**: additional material that supports but does not bind, such as
+  extended examples, derivations and change history.
+
+## The template skeleton
+
+Every specification follows this exact skeleton:
+
+```text
+OSP-XXX: Title
+
+Status: Draft | Accepted | Deprecated | Archived
+Version: 0.1.0
+Authors: ...
+Editors: ...
+Created: ...
+Updated: ...
+
+1. Abstract
+2. Motivation
+3. Goals
+4. Non-Goals
+5. Terminology
+6. Architecture
+7. Detailed Specification
+8. Examples
+9. Reference Implementation
+10. Security Considerations
+11. Privacy Considerations
+12. Performance Considerations
+13. Accessibility Considerations
+14. Backward Compatibility
+15. Migration
+16. Future Work
+17. References
+18. Appendix
+```
+
+Draft documents are written from this skeleton with the **Draft** status and a
+0.x version. The fifteen current drafts are listed on the
+[Draft Specifications](/docs/standards/draft-specifications) page.
+
+<Callout type="success" title="Best practice">
+  Fill the template top to bottom, but draft it out of order: write the detailed
+  specification first, then the abstract, goals and non-goals that describe it.
+  The header block is finalized at review, not at creation.
+</Callout>
+
+## Related pages
+
+- [Writing Specifications](/docs/standards/writing-specifications): the rules for each section.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): how the template passes through stages.
+- [Specification Registry](/docs/standards/specification-registry): every document built from this template.

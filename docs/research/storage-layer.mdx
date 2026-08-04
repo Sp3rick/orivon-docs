@@ -1,0 +1,111 @@
+---
+title: "Storage Layer"
+description: "In-depth paper on the Orivon storage layer: key-value, files, collections, encryption, content addressing, and quotas."
+readingTime: 22
+lastUpdated: "July 31, 2026"
+order: 22
+tags: ["research", "architecture-paper", "storage-layer"]
+keywords: "storage layer, key-value, files, collections, encryption, content addressing, quota, local engine"
+---
+
+*Orivon Research Group · Storage Research · Version 1.0 · Published 2026-06-14 · Status: Published*
+
+## Overview
+
+The storage layer is the local, encrypted, addressable data foundation of the
+platform. It provides three abstractions — key-value, files, and collections —
+over a transactional local engine, with content addressing and quota
+enforcement throughout. This paper analyses the storage layer in depth.
+
+## Abstraction stack
+
+| Layer | Abstraction | Use cases |
+| --- | --- | --- |
+| Collections | Schemaless documents | Application data. |
+| Files | Named blobs | Media, documents, data files. |
+| Key-value | `string → value` | Settings, small state. |
+| Encryption | Per-entity keys | Confidentiality. |
+| Local engine | Transactional, SQLite-backed | Durability, atomicity. |
+
+## Local engine
+
+### Properties
+
+| Property | Design |
+| --- | --- |
+| Transactions | ACID within a namespace. |
+| Indexing | Secondary indexes for collections. |
+| Recovery | Write-ahead logging, crash recovery. |
+| Portability | On-disk format is versioned and documented. |
+
+## Encryption model
+
+| Component | Key | Storage |
+| --- | --- | --- |
+| Device | Device key | Native keychain. |
+| Namespace | Data key | Wrapped by device key. |
+| Entity (file/collection) | Entity key | Wrapped by data key. |
+
+### Encryption properties
+
+- Everything at rest is encrypted by default.
+- Keys never leave the device in plaintext.
+- Sharing uses recipient-scoped keys, not re-encryption of the whole store.
+- Key rotation re-wraps, not re-encrypts.
+
+## Content addressing
+
+```text
+id = sha256(content)
+```
+
+| Property | Benefit |
+| --- | --- |
+| Deduplication | Identical content stored once. |
+| Integrity | Any change changes the id. |
+| Provenance | The id is the content. |
+| Distribution | The id is the fetch key for the DSN. |
+
+Content-addressed blobs back files; collection documents may reference blobs
+by id.
+
+## Quotas
+
+| Scope | Default | Enforcement |
+| --- | --- | --- |
+| Module | 1 GB | `ERR_QUOTA_EXCEEDED` on write. |
+| Session | Configurable | Rejected on write. |
+| Cache | Managed | Eviction policy. |
+
+Quotas are enforced at the API boundary, so no module can bypass them.
+
+## Concurrency and sync
+
+- Local operations are ACID.
+- Multi-device sync is an explicit, user-controlled replication layer.
+- Conflict handling uses last-writer-wins with CRDT options for
+  collaborative data (research).
+
+## Security considerations
+
+- Encryption keys live in the keychain, not in the data store.
+- Content addressing prevents tampering after write.
+- Quotas prevent resource exhaustion.
+- Sync never transmits plaintext.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Write amplification | WAL-batched commits. |
+| Large files | Content addressing + chunking. |
+| Query speed | Indexes on collections. |
+| Encryption cost | Hardware-accelerated AEAD. |
+
+## Open questions
+
+- Erasure-coded durability in the DSN.
+- Searchable encryption for full-text over collections.
+- CRDT semantics across the platform's data model.
+
+**Related:** [Storage Whitepaper](/docs/research/storage-whitepaper) · [Storage Research](/docs/research/storage-research) · [Storage API](/docs/api-reference/storage-api)

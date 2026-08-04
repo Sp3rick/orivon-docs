@@ -1,0 +1,166 @@
+---
+title: "Events"
+description: "The event system for developers: subscriptions, publishing, lifecycle events, ordering guarantees and examples."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 22
+tags: ["developers", "events"]
+keywords: "events, event system, subscriptions, publishing, lifecycle events, message bus"
+---
+
+Everything in Orivon communicates by message, and events are the messages
+that flow one way. This page explains the event system: how to subscribe,
+how to publish, and the guarantees the runtime provides.
+
+## What the event system is
+
+The event system is a message bus with four message kinds:
+
+| Kind | Direction | Example |
+| --- | --- | --- |
+| **Request** | Request/response | `greet` |
+| **Response** | The answer to a request | The greeting |
+| **Event** | One way, one topic | `wallet.signature` |
+| **Broadcast** | One to many | `profile.changed` |
+
+Events are the one way kinds. Requests and responses are covered in
+[Runtime APIs](/docs/developers/runtime-apis). The architecture is documented
+in [Communication Bus](/docs/technical-design/communication-bus).
+
+## Subscribing
+
+Subscribe to an event topic:
+
+```ts
+app.events.on('storage.changed', (event) => {
+  const {address} = event.payload;
+  refresh(address);
+});
+```
+
+A subscription receives events matching its topic. Subscriptions are scoped to
+your package; you only see what the runtime routes to you.
+
+## Unsubscribing
+
+Always release subscriptions you no longer need:
+
+```ts
+const off = app.events.on('storage.changed', handler);
+// later
+off();
+```
+
+<Callout type="success" title="Best practice">
+  Unsubscribe in `deactivate`. The runtime recycles suspended packages, and a
+  dangling subscription on a recycled package is a leak that the garbage
+  collector cannot see.
+</Callout>
+
+## Publishing
+
+Publish an event to a topic:
+
+```ts
+await app.events.emit('my-module.updated', {version: '0.2.0'});
+```
+
+Events are one way: `emit` returns when the event is delivered to the bus, not
+when consumers have handled it. If you need an answer, use a request instead.
+
+<Diagram caption="Events flow one way from publisher to subscribers.">
+  <Flow column>
+    <DiagramNode accent>Publisher emits</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Bus routes by topic</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Subscribers handle</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Lifecycle events
+
+The runtime emits lifecycle events your code can observe:
+
+| Topic | Meaning |
+| --- | --- |
+| `runtime.ready` | The runtime finished initialization |
+| `app.activated` | Your package was activated |
+| `app.deactivated` | Your package was deactivated |
+| `app.suspended` | Your package was suspended |
+| `profile.changed` | The user profile changed |
+
+Lifecycle events are how your code reacts to the
+[application lifecycle](/docs/technical-design/application-lifecycle) without
+blocking it.
+
+## Ordering guarantees
+
+Events are ordered, and the guarantees matter:
+
+<CheckList
+  items={[
+    'Events from a single sender arrive in the order they were emitted.',
+    'Events on a single topic arrive in order per sender.',
+    'Broadcasts make no cross sender ordering promise.',
+    'Ordering is per sender and per service, never global.',
+  ]}
+/>
+
+Design your handlers so they work under these guarantees. Do not assume
+global ordering between different senders.
+
+## Examples
+
+### Reacting to wallet activity
+
+```ts
+app.events.on('wallet.signature', (event) => {
+  if (event.payload.status === 'signed') {
+    notify('Transaction signed');
+  }
+});
+```
+
+### Publish a package update
+
+```ts
+await app.events.emit('my-module.updated', {
+  version: currentVersion,
+});
+```
+
+### React to suspension
+
+```ts
+app.events.on('app.suspended', () => {
+  saveSnapshot();
+});
+```
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Leaking subscriptions">
+    Never subscribe without a way to unsubscribe. Tie subscriptions to the
+    lifecycle.
+  </Card>
+  <Card title="Expecting global order">
+    Ordering is per sender. Cross sender ordering is not guaranteed.
+  </Card>
+  <Card title="Using events for answers">
+    If you need a result, use a request. Events do not return values.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  The event system is specified in the
+  [Event System draft](/docs/standards/osp-011-event-system) and defined by
+  [Communication Bus](/docs/technical-design/communication-bus).
+</Callout>
+
+## Related pages
+
+- [Runtime APIs](/docs/developers/runtime-apis): requests and responses.
+- [Working with Events tutorial](/docs/developers/tutorials/working-with-events): a hands on guide.
+- [Module Manifest](/docs/developers/module-manifest): declaring emitted events.

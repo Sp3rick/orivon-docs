@@ -1,0 +1,135 @@
+---
+title: "Core"
+description: "The small, neutral layer of shared services: identity, value, storage, naming and connectivity, used by every product in the ecosystem."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["ecosystem", "core", "architecture"]
+keywords: "core, services, identity, value, storage, connectivity, interfaces, neutrality"
+---
+
+The Core is the shared foundation of the ecosystem. It provides the fundamental
+services that every application, browser and module needs, and it does so
+neutrally, so that no single participant can capture it. This page explains what
+the core is, what services it provides, and how the rest of the ecosystem talks
+to it.
+
+## What the core is
+
+The core is a deliberately small set of services rather than a giant product. It
+exists so that different browsers, runtimes and applications all speak the same
+language when they deal with identity, value, data and connections.
+
+<Diagram caption="The core is the shared middle layer everything attaches to.">
+  <Flow column>
+    <DiagramNode dim>Applications</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Runtime</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Core services</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Open Standards</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The services the core provides
+
+The core groups its work into a small number of service areas. Each one maps to
+a capability the standards define.
+
+| Service | What it does | Documented in |
+| --- | --- | --- |
+| **Identity** | Portable identities for users, applications and devices | [Identity](/docs/ecosystem/identity) |
+| **Value** | Accounts, balances, signing and transfers | [Wallet System](/docs/ecosystem/wallet-system) |
+| **Storage** | Decentralized, addressable data that users own | [Storage](/docs/ecosystem/storage) |
+| **Naming** | Human readable names for identities and content | [Naming System](/docs/ecosystem/naming-system) |
+| **Connectivity** | Reaching the network and other peers | [Networking](/docs/ecosystem/networking) |
+| **Trust signals** | Reputation inputs like the Web3 Score | [Web3 Score](/docs/ecosystem/web3-score) |
+
+## Why the core must be neutral
+
+The neutrality of the core is not a nice to have. It is the property that keeps
+the ecosystem open. If identity or value lived inside one company's product,
+that company would control who can participate and on what terms.
+
+The core avoids that by being:
+
+1. **Small.** It provides services, not features. Value moves; it does not
+   invent new business models.
+2. **Standard defined.** Behavior is specified in the standards, so no
+   implementation can silently change the rules.
+3. **Interface based.** The rest of the ecosystem talks to the core through
+   public interfaces, so the core itself can be replaced by a better
+   implementation.
+
+<Callout type="warning" title="Watch out">
+  "Core" does not mean "central server." The core is a set of services and
+  standards. In practice those services run across a decentralized network of
+  participants, not on a single platform.
+</Callout>
+
+## How applications talk to the core
+
+Applications never reach into the core directly. They use stable, public
+interfaces defined by the standards, and they do so through the runtime.
+
+<Diagram caption="Applications reach core services through the runtime's public APIs.">
+  <Flow column>
+    <DiagramNode dim>Application</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime API</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Core service</DiagramNode>
+  </Flow>
+</Diagram>
+
+This indirection is what makes the ecosystem modular. A wallet, a storage
+provider or a naming resolver that implements the same interface can serve any
+application, and any application can use any of them. That is the entire point:
+interfaces over implementations.
+
+## What the core does not do
+
+Knowing what the core is not is as important as knowing what it is:
+
+<CardGrid columns={2}>
+  <Card title="No content hosting">
+    The core does not decide what content is allowed to exist. Storage is a
+    service; governance handles rules. See [Governance](/docs/ecosystem/governance).
+  </Card>
+  <Card title="No app store">
+    The core does not approve applications. Users choose, and trust signals help
+    them decide. See [Web3 Score](/docs/ecosystem/web3-score).
+  </Card>
+  <Card title="No surveillance">
+    The core is not in the business of watching users. Identity and data belong
+    to the user.
+  </Card>
+  <Card title="No monopoly">
+    Because everything is interface based, no single implementation of the core
+    is required. Anyone can run one.
+  </Card>
+</CardGrid>
+
+## The core and modules
+
+Modules extend the ecosystem by attaching to the core's public interfaces. This
+is how capability grows without forking the browser or the runtime. If you want
+to know how to extend the ecosystem, the [Modules](/docs/ecosystem/modules) page
+is the next stop.
+
+<Callout type="success" title="Next">
+  Now that you know the shared foundation, see how the ecosystem grows beyond
+  it: [Modules](/docs/ecosystem/modules).
+</Callout>
+
+## Related pages
+
+- [Identity](/docs/ecosystem/identity): the identity service in detail.
+- [Storage](/docs/ecosystem/storage): the data service in detail.
+- [Networking](/docs/ecosystem/networking): the connectivity service in detail.
+
+## Further reading
+
+- [Architecture Overview](/docs/introduction/architecture-overview): where the core sits in the stack.
+- [Open Standards](/docs/ecosystem/governance): how core behavior is specified and agreed.

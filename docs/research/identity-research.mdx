@@ -1,0 +1,79 @@
+---
+title: "Identity Research"
+description: "Active identity research: digital identity, authentication, authorization, privacy, identity providers, and future identity standards."
+readingTime: 26
+lastUpdated: "July 31, 2026"
+order: 27
+tags: ["research", "identity-research"]
+keywords: "identity research, digital identity, authentication, authorization, privacy, identity providers, future standards"
+---
+
+*Orivon Research Group · Identity Research · Status: Active Research*
+
+This area investigates the identity problems the platform must solve: how to
+make self-sovereign identity usable, private, and interoperable. The
+[Identity Whitepaper](/docs/research/identity-whitepaper) states the current
+design; this page records the research.
+
+## Digital identity
+
+| Research topic | Question |
+| --- | --- |
+| DID method design | What resolution layer balances decentralization and speed? |
+| Key rotation | Safe rotation and recovery under loss? |
+| Portability | Moving identity between ecosystems without losing history? |
+| Usability | What mental models make self-sovereignty approachable? |
+
+## Authentication
+
+| Topic | Status |
+| --- | --- |
+| Key-based authentication | Shipped via hardware keys. |
+| Passkey interop | Integration under evaluation. |
+| Multi-device auth | Via key material, not central state. |
+| Phishing resistance | Security UI rules; research continues. |
+
+## Authorization
+
+Authorization is capability-based (see [Permission System](/docs/research/permission-system)).
+
+| Research topic | Question |
+| --- | --- |
+| Delegation | Can a user delegate a subset of authority to a module? |
+| Time-bounded access | What semantics for expiring grants? |
+| Revocation propagation | Latency and consistency of revocation. |
+
+## Privacy
+
+| Mechanism | Status |
+| --- | --- |
+| Selective disclosure | Shipped. |
+| Zero-knowledge presentations | Research; prototype under evaluation. |
+| Unlinkable sessions | Research; correlation minimization. |
+| Private queries | DIDs resolvable without leakage — open. |
+
+## Identity providers
+
+The platform's goal is removing providers as points of control. Research
+covers:
+
+| Question | Direction |
+| --- | --- |
+| Can providers add value without control? | Issuers yes; gatekeepers no. |
+| What does issuer diversity require? | Open issuance protocols. |
+| How do legacy providers interoperate? | Bridging standards. |
+
+## Future identity standards
+
+- **W3C** — DID and VC evolution.
+- **OIDC/VC interop** — bridge traditional SSO to verifiable credentials.
+- **Decentralized recovery** — social recovery and backups.
+- **Reputation privacy** — see [Web3 Score Research](/docs/research/web3-score-research).
+
+<Note title="Standards posture">
+  The platform prefers existing standards where they meet the requirements and
+  publishes proposals upstream where they do not. See the
+  [Standards](/docs/standards/overview) section.
+</Note>
+
+**Related:** [Identity Whitepaper](/docs/research/identity-whitepaper) · [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper) · [Cryptography Research](/docs/research/cryptography-research)

@@ -1,0 +1,78 @@
+---
+title: "References"
+description: "The comprehensive reference list behind Orivon research: academic papers, industry standards, specifications, technical reports, and open source projects."
+readingTime: 18
+lastUpdated: "July 31, 2026"
+order: 39
+tags: ["research", "references"]
+keywords: "references, bibliography, academic papers, industry standards, specifications, technical reports, open source projects"
+---
+
+*Orivon Research Group · Status: Published*
+
+This page collects the external work that informs Orivon's research. It is
+organized by type so readers can follow the evidence behind any paper in this
+section.
+
+## Academic papers
+
+| Reference | Subject | Cited in |
+| --- | --- | --- |
+| Saltzer & Schroeder, "The protection of information in computer systems," *Proc. IEEE*, 1975 | Security design principles. | [Security Model](/docs/research/security-model) |
+| Wahbe et al., "Efficient software-based fault isolation," *SOSP 1993* | Software fault isolation. | [Runtime Whitepaper](/docs/research/runtime-whitepaper) |
+| Reis & Gribble, "Isolating web programs in modern browser architectures," *EuroSys 2009* | Browser process isolation. | [Browser Whitepaper](/docs/research/browser-whitepaper) |
+| Stoica et al., "Chord," *SIGCOMM 2001* | Structured P2P lookup. | [Networking Whitepaper](/docs/research/networking-whitepaper) |
+| Maymounkov & Mazières, "Kademlia," *IPTPS 2002* | XOR-metric DHT. | [Networking Whitepaper](/docs/research/networking-whitepaper) |
+| Miller, *Robust Composition*, 2006 | Capability security. | [Module System Whitepaper](/docs/research/module-system-whitepaper) |
+| Resnick et al., "Reputation systems," *Communications of the ACM*, 2000 | Reputation systems. | [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper) |
+
+## Industry standards
+
+| Standard | Organization | Relevance |
+| --- | --- | --- |
+| WebAssembly Core Specification | W3C | Runtime substrate. |
+| WASI (WebAssembly System Interface) | WASI subgroup | Host interfaces. |
+| Decentralized Identifiers (DIDs) v1.0 | W3C | Identity layer. |
+| Verifiable Credentials Data Model | W3C | Credentials. |
+| Web Authentication API | W3C | Authentication. |
+| RFC 7807 Problem Details | IETF | Error envelope. |
+| JSON Schema (draft 2020-12) | JSON Schema org | Schemas. |
+
+## Specifications
+
+| Specification | Role |
+| --- | --- |
+| [Orivon API Reference](/docs/api-reference/overview) | Platform interface contract. |
+| [Orivon Standards](/docs/standards/overview) | Normative platform specifications. |
+| [Manifest Format](/docs/api-reference/manifest-format) | Module contract. |
+| [Configuration Format](/docs/api-reference/configuration) | Package configuration. |
+
+## Technical reports
+
+| Report | Subject |
+| --- | --- |
+| Ink & Switch, *Local-First Software*, 2019 | Local-first data model. |
+| The Chromium Projects, *Security Architecture* | Browser security. |
+| The Chromium Projects, *Process Model and Site Isolation* | Process isolation. |
+| The V8 project, *Sandbox* design documents | Sandboxing. |
+| libp2p project, *Design documentation* | P2P networking. |
+
+## Open source projects
+
+| Project | Relevance |
+| --- | --- |
+| V8 / SpiderMonkey | JS and WASM engines. |
+| libp2p | P2P networking stack. |
+| IPFS | Content addressing and distribution. |
+| Arweave | Permanent decentralized storage. |
+| wasmtime / Wasmer | WASM runtimes. |
+| sqlite | Local storage engine. |
+
+<Note title="Citation practice">
+  Papers in this section cite these references inline. Standards and
+  specifications are preferred over research when the platform ships a
+  normative behavior; research is cited for design rationale and open
+  questions.
+</Note>
+
+**Related:** [Overview](/docs/research/overview) · [Research Library](/docs/research/research-library) · [Research Roadmap](/docs/research/research-roadmap)

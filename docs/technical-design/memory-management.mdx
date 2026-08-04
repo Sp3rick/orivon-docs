@@ -1,0 +1,191 @@
+---
+title: "Memory Management"
+description: "The internal design of Orivon's memory model: allocation, ownership, garbage collection, reference management, resource cleanup and optimization."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["technical-design", "memory-management"]
+keywords: "memory, allocation, garbage collection, ownership, resource cleanup, optimization"
+---
+
+Memory is the resource that most determines how a browser feels: too much, and
+the machine thrashes; leaks, and long sessions die. Orivon manages memory
+explicitly at the architecture level. This page documents allocation, ownership,
+garbage collection, and cleanup across the system.
+
+## The memory model
+
+Each process manages its own memory with the model that fits its language and
+role:
+
+<CardGrid columns={2}>
+  <Card title="Rust services">
+    Ownership based, no garbage collector, explicit lifetimes.
+  </Card>
+  <Card title="Web renderers">
+    V8 heap with managed garbage collection.
+  </Card>
+  <Card title="WASM runtimes">
+    Linear memory owned by the module, GC behind the language.
+  </Card>
+</CardGrid>
+
+The model is per process because the processes are different. What is shared is
+the accounting: every process reports its memory to the browser, and the browser
+enforces budgets.
+
+## Ownership
+
+Ownership is the central rule of the memory model:
+
+<Steps>
+  <Step title="Allocate">
+    Memory is allocated by the process that will use it.
+  </Step>
+  <Step title="Own">
+    The owning process tracks the allocation in its budget.
+  </Step>
+  <Step title="Free">
+    Memory is freed when its owner is done or when the owner dies.
+  </Step>
+  <Step title="Report">
+    Usage is reported to the browser for global accounting.
+  </Step>
+</Steps>
+
+The rule that makes this safe across process boundaries: **nothing is shared
+between processes.** IPC copies messages; it never hands out pointers. When a
+process dies, its entire memory pool is reclaimed by the OS, not by a global
+allocator.
+
+## Garbage collection
+
+Garbage collection applies to the managed heaps, mainly the renderers' V8
+heaps and language managed WASM memory:
+
+- The GC reclaims unreachable objects on the heap.
+- Pauses are kept short through incremental and concurrent collection.
+- The GC is budget aware: the renderer cooperates so collection does not fire
+  during user interaction.
+- Large allocations can be traced to their source, so leaks are diagnosable.
+
+GC is only one part of memory management; it handles the heap, not the system.
+See the [Logging](/docs/technical-design/logging) story for how memory data
+flows to diagnostics.
+
+## Reference management
+
+References are managed at the ownership level in Rust, and at the GC level in
+managed heaps. The shared discipline:
+
+<CheckList
+  items={[
+    'Rust code uses ownership, borrowing and reference counting where sharing is needed.',
+    'Cycles are broken deliberately; cyclic structures in Rust use weak references.',
+    'Managed heaps rely on the GC to break cycles automatically.',
+    'Cross-process references never exist; only copied messages.',
+    'Document and application lifecycles explicitly release their references.',
+  ]}
+/>
+
+The reference model is what converts "no leaks" from a hope into a design
+property.
+
+## Resource cleanup
+
+Memory is not the only resource, but all resources follow the memory rules:
+
+| Resource | Cleaned by |
+| --- | --- |
+| Heap objects | The GC |
+| File handles | The owning service on close |
+| Sockets | The network service on close |
+| GPU buffers | The GPU process on release |
+| Canvas surfaces | The runtime host on destroy |
+
+The pattern is uniform: **the owner cleans up, and death is the backstop.** If a
+resource leaks, the process that owns it will eventually be recycled.
+
+## Budgets
+
+Budgets are how the browser keeps the whole machine healthy:
+
+<Diagram caption="Memory is budgeted per process and globally.">
+  <Flow column>
+    <DiagramNode>Per process usage</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Memory manager (budgets)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Actions: reclaim, discard, restart</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Budget | Purpose |
+| --- | --- |
+| **Per process** | Stops one process eating the machine |
+| **Per tab** | Stops hidden tabs starving the active one |
+| **Global** | Keeps total browser usage within limits |
+
+When a budget is hit, the manager acts: background tabs are discarded,
+non essential caches are trimmed, and failing processes are restarted. See
+[Performance](/docs/technical-design/performance) for the user visible effect.
+
+## Optimization
+
+Optimization is about making the most of what is available:
+
+<CardGrid columns={2}>
+  <Card title="Sharing within budget">
+    Immutable blobs and verified content are shared inside a process.
+  </Card>
+  <Card title="Trim by priority">
+    Caches and buffers trim in priority order, never the active surface.
+  </Card>
+  <Card title="Discard hidden state">
+    Hidden tabs discard their full renderer state and restore on demand.
+  </Card>
+  <Card title="Compressed representations">
+    Large images and buffers stay compressed until drawn.
+  </Card>
+</CardGrid>
+
+None of these touch correctness: discarded state can always be restored from
+its source, because the [Storage Engine](/docs/technical-design/storage-engine)
+distinguishes durable from reconstructible data.
+
+## Security notes
+
+- Memory is never shared across process boundaries; IPC copies are the only
+  transfer.
+- Out of memory in one process triggers that process's recovery, never a crash
+  of the browser.
+- Uninitialized memory is never exposed; allocation zeroes by policy.
+
+## Performance notes
+
+- Budgets prevent jank from one process's memory pressure.
+- GC pauses are scheduled away from interaction.
+- Discard and restore is cheaper than running every hidden tab.
+
+<Callout type="success" title="Best practice">
+  Budget memory by ownership, not by heuristics. A process that can name what it
+  holds can also decide what to release first. Anonymous heuristics leak.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include process sharing for identical sites, tab
+  snapshotting for instant restore, and finer grained GC scheduling. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Process Model](/docs/technical-design/process-model): the units that own memory.
+- [Storage Engine](/docs/technical-design/storage-engine): durable versus reconstructible data.
+- [Performance](/docs/technical-design/performance): what memory budgets buy.
+
+## Further reading
+
+- [Rendering Pipeline](/docs/technical-design/rendering-pipeline): GPU memory use.
+- [Error Handling](/docs/technical-design/error-handling): out of memory recovery.
+- [Logging](/docs/technical-design/logging): memory diagnostics.

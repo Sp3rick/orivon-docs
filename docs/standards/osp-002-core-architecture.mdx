@@ -1,0 +1,107 @@
+---
+title: "OSP-002: Core Architecture"
+description: "Draft specification for the core services: their boundaries, the request pipeline, and how the browser, runtime and modules use them."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["standards", "osp-002", "core"]
+keywords: "OSP-002, core services, request pipeline, authenticate, authorize, execute, emit"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Core services are the privileged middle layer of the system. This draft defines
+their boundaries, the request pipeline every call travels, and the guarantees
+that structure provides.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-002 |
+| Title | Core Architecture |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Core |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The core layer is a set of isolated services (session, wallet, policy, module,
+naming, config) behind a single API. Every privileged operation passes through
+the pipeline `authenticate, authorize, validate, execute, emit`. The reference
+design is the [Core Architecture](/docs/technical-design/core-architecture)
+page.
+
+## Purpose
+
+The core layer exists so that no privileged operation happens by accident. By
+routing every call through one audited pipeline, the system guarantees that
+identity, policy and input validation are always applied, in a fixed order, in
+one place.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The set of core services and their responsibilities.',
+    'The request pipeline and its five stages.',
+    'Service isolation and the broker boundary.',
+    'Lifecycle phases of the core layer.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Module execution (covered by OSP-001).',
+    'The browser process and tabs (covered by OSP-003).',
+    'Individual permission rules (covered by OSP-006).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-001 Runtime Architecture](/docs/standards/osp-001-runtime-architecture): the host that calls the core.
+- [OSP-003 Browser Architecture](/docs/standards/osp-003-browser-architecture): the browser as a core client.
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): the policy the core enforces.
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): identity for authentication.
+
+## Related specifications
+
+- [OSP-007 Wallet API](/docs/standards/osp-007-wallet-api): the wallet service interface.
+- [OSP-014 Configuration](/docs/standards/osp-014-configuration): the config service.
+- [OSP-011 Event System](/docs/standards/osp-011-event-system): the emit stage of the pipeline.
+
+## Implementation status
+
+The reference implementation includes the core services with the five stage
+pipeline, constructor based dependency injection and per service isolation. The
+draft tracks the reference design at 0.1.0. No conformance suite has been
+published yet.
+
+## Future work
+
+- Formal verification of the policy core.
+- Service federation across devices.
+- Deeper audit tracing across the pipeline.
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Core Architecture](/docs/technical-design/core-architecture): the reference design.

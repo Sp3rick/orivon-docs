@@ -1,0 +1,179 @@
+---
+title: "Logging"
+description: "Log from your Orivon code well: structured logging, log levels, best practices and wiring logs into your observability backend."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 25
+tags: ["developers", "logging"]
+keywords: "logging, structured logs, log levels, observability, log export"
+---
+
+Logs are the record of what your package did and why. This page explains how
+to log well: structured output, the right levels, and how to make logs useful
+in production.
+
+## The logging model
+
+The runtime provides a logger on the `Orivon` object:
+
+```ts
+app.log.info('request handled', {method: 'greet', tookMs: 3});
+```
+
+Every log line is structured: a message plus a set of fields. Structured logs
+are machine readable, which is what makes them searchable and analyzable.
+
+<Diagram caption="Structured logs flow from your code to an observer.">
+  <Flow column>
+    <DiagramNode accent>app.log.*</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime logger</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Formatted with fields</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Console or export</DiagramNode>
+  </Flow>
+</Diagram>
+
+The architecture is documented in [Logging](/docs/technical-design/logging).
+
+## Log levels
+
+Log levels let you control verbosity without editing code:
+
+| Level | Use for |
+| --- | --- |
+| `debug` | Detailed flow information, disabled in production |
+| `info` | Normal lifecycle events and milestones |
+| `warn` | Recoverable problems worth attention |
+| `error` | Failures that need investigation |
+
+Choose the level by who cares, not by how important the code feels. Every
+request does not need an `info` line; a surprising one does.
+
+## Structured fields
+
+Put facts in fields, not in the message:
+
+```ts
+app.log.info('build completed', {
+  package: name,
+  version,
+  tookMs: elapsed,
+  outputSize: bytes,
+});
+```
+
+<CheckList
+  items={[
+    'Always include an identifier you can search on (request id, address).',
+    'Include units in field names or values (`tookMs`, not `time`).',
+    'Never interpolate user data into the message; put it in a field.',
+    'Log errors with the error object attached, not as a string.',
+  ]}
+/>
+
+The rule: a log line should answer "what happened" on its own, without the
+reader knowing your code.
+
+## The message
+
+Write the message for a human who is searching, not reading:
+
+```ts
+app.log.info('storage.put started', {address});
+app.log.info('storage.put completed', {address, tookMs: 2});
+```
+
+A consistent subject-verb-object shape ("storage.put completed") makes logs
+grep friendly. Name the component in the message so logs from different
+packages are distinguishable.
+
+## Error logging
+
+Errors deserve their own discipline:
+
+```ts
+try {
+  await riskyCall();
+} catch (error) {
+  app.log.error('network.fetch failed', {url, error});
+  throw error;
+}
+```
+
+<Callout type="warning" title="Do not log secrets">
+  Never log payloads that contain secrets: keys, tokens, recovery shares, or
+  personal data. Log identifiers and metadata, not contents. A log is a data
+  store with a retention policy, and secrets do not belong in it.
+</Callout>
+
+## Level configuration
+
+The level is configurable at runtime:
+
+```sh
+ORIVON_LOG=debug orivon run
+```
+
+Or through the package configuration. See
+[Configuration](/docs/developers/configuration). In production, `info` is the
+usual default; `debug` is for investigation.
+
+## Exporting logs
+
+The runtime forwards your logs to a configured sink:
+
+```toml
+[config.logging]
+format = "json"
+destination = "stdout"
+```
+
+For production, export to your observability backend through the
+[network](/docs/developers/networking-apis) APIs or the SDK's log exporter.
+The log architecture describes the available sinks in
+[Logging](/docs/technical-design/logging).
+
+## Best practices
+
+<Callout type="success" title="Best practice">
+  Log at boundaries: request entry and exit, service calls, permission
+  decisions and lifecycle transitions. Boundary logging gives you the full
+  path of any flow with a few lines per operation.
+</Callout>
+
+| Practice | Why |
+| --- | --- |
+| Structured always | Logs become data |
+| Fields over messages | Facts are queryable |
+| Levels by audience | Debug detail stays out of production |
+| No secrets | Logs are persistent and shared |
+| Named messages | Grep friendly records |
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Logging in hot loops">
+    A log per item in a loop is noise. Log per batch or on threshold.
+  </Card>
+  <Card title="String concatenation">
+    Interpolating fields into messages breaks structured search. Use fields.
+  </Card>
+  <Card title="Logging the whole object">
+    Logging an entire payload leaks data and bloats records. Log what is
+    needed.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  Logging is defined by the [Logging](/docs/technical-design/logging) design
+  and wired into [Debugging](/docs/developers/debugging) and
+  [Performance](/docs/developers/performance).
+</Callout>
+
+## Related pages
+
+- [Debugging](/docs/developers/debugging): using logs to find bugs.
+- [Configuration](/docs/developers/configuration): configuring levels and sinks.
+- [Best Practices](/docs/developers/best-practices): maintainability.

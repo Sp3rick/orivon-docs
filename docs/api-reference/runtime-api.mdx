@@ -1,0 +1,158 @@
+---
+title: "Runtime API"
+description: "Reference for the Runtime API: the Orivon object, lifecycle hooks, messaging and logging available to every module and application."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["api-reference", "runtime-api"]
+keywords: "runtime api, Orivon object, lifecycle, activate, deactivate, messaging, logging, on, once, postMessage"
+---
+
+The Runtime API is the execution contract between a package and the runtime
+host. Every module and application receives one `Orivon` instance through
+which all other APIs are reached. There is exactly one `Orivon` object per
+package execution.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Class: Orivon
+
+The entry point object. Constructing it is only valid at package bootstrap.
+
+### `new Orivon(options?)`
+
+Creates the package instance. In a module this is provided by the runtime; in
+tests you may construct it directly.
+
+```ts
+const app = new Orivon({debug: false});
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `options.debug` | `boolean \| undefined` | Enables verbose runtime logging. Default `false`. |
+
+**Returns:** `Orivon`
+
+**Throws:** `ERR_INVALID_ARGUMENT` if called outside package bootstrap.
+
+## Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `app.version` | `string` | Runtime API version string, for example `"1.0.2"`. |
+| `app.platform` | `PlatformInfo` | Host platform and build identifiers. |
+| `app.runtime` | `RuntimeFacade` | This facade. |
+| `app.core` | `CoreFacade` | Core services. See [Core API](/docs/api-reference/core-api). |
+| `app.browser` | `BrowserFacade \| undefined` | Browser controls; present only with a `browser.*` grant. |
+| `app.wallet` | `WalletFacade \| undefined` | Wallet services; present only with a `wallet.*` grant. |
+| `app.identity` | `IdentityFacade \| undefined` | Identity services; present only with an `identity.*` grant. |
+| `app.storage` | `StorageFacade \| undefined` | Storage services; present only with a `storage.*` grant. |
+| `app.networking` | `NetworkingFacade \| undefined` | Networking; present only with a `networking.*` grant. |
+| `app.dns` | `DnsFacade \| undefined` | DNS services; present only with a `dns.*` grant. |
+| `app.permissions` | `PermissionsFacade` | Grant inspection and requests. |
+| `app.security` | `SecurityFacade` | Cryptographic primitives and key storage. |
+| `app.log` | `Logger` | Logger, see below. |
+
+## Methods
+
+### `app.on(event, listener)`
+
+Subscribes to a runtime event. Returns an unsubscribe function.
+
+```ts
+const off = app.on('module:error', (event) => app.log.error(event.error));
+// later
+off();
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `event` | `string` | Event name. See [Events](/docs/api-reference/events). |
+| `listener` | `(payload: unknown) => void` | Handler invoked with the event payload. |
+
+**Returns:** `() => void`
+
+### `app.once(event, listener)`
+
+Subscribes for a single delivery, then removes the listener automatically.
+
+### `app.off(event, listener)`
+
+Removes a previously registered listener. No-op if not registered.
+
+### `app.activate(options?)`
+
+Signals readiness to the host after bootstrap work completes.
+
+```ts
+await app.activate({autoListen: true});
+```
+
+**Throws:** `ERR_INVALID_STATE` if called twice or after `deactivate`.
+
+### `app.deactivate()`
+
+Signals that the package is shutting down. The runtime stops delivering
+messages and events after resolution.
+
+### `app.postMessage(target, message, options?)`
+
+Sends a structured message to another package.
+
+```ts
+await app.postMessage('com.example.registry', {type: 'lookup', name: 'docs'}, {
+  timeoutMs: 5000,
+});
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `target` | `string` | Package identifier of the recipient. |
+| `message` | `unknown` | JSON-serializable payload. |
+| `options.timeoutMs` | `number \| undefined` | Timeout before `ERR_TIMEOUT`. Default `30000`. |
+
+**Returns:** `Promise<void>` — resolves when the message is queued for delivery.
+
+### `app.onMessage(handler)`
+
+Registers the handler for inbound messages. At most one handler is allowed;
+registering a second throws `ERR_INVALID_STATE`.
+
+```ts
+app.onMessage(async ({from, message, reply}) => {
+  await reply({ok: true});
+});
+```
+
+### `app.sendRequest(target, request, options?)`
+
+Request/response messaging. Resolves with the reply or rejects with the remote
+error, preserving the error code.
+
+**Returns:** `Promise<unknown>`
+
+## Logger
+
+`app.log` exposes leveled logging. Levels: `debug`, `info`, `warn`, `error`.
+
+```ts
+app.log.info('wallet', 'ready', {accounts: 2});
+```
+
+Each method accepts a domain, a message and an optional structured context
+object. Log output is gated by the manifest `logging.minLevel` configuration.
+
+## Runtime events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `ready` | `{}` | After `activate()` resolves |
+| `activated` | `{startReason}` | Package became active |
+| `deactivated` | `{reason}` | Package was deactivated |
+| `message` | `MessageEnvelope` | An inbound message arrived |
+| `module:error` | `{packageId, error}` | An uncaught error was reported |
+
+**Related:** [Events](/docs/api-reference/events) · [Module API](/docs/api-reference/module-api) · [Error Codes](/docs/api-reference/error-codes)

@@ -1,0 +1,86 @@
+---
+title: "Functions"
+description: "Reference for the standalone functions exposed by the Orivon APIs and utility modules."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 20
+tags: ["api-reference", "functions"]
+keywords: "functions, function reference, utilities, helpers, standalone functions, globals"
+---
+
+A small set of functions is exported as module-level utilities. They are pure
+(no hidden state, no side effects on the runtime) and safe to call anywhere in
+a package.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Function index
+
+| Function | Signature | Purpose |
+| --- | --- | --- |
+| `versionOf` | `(pkg: string) => string` | Resolve the version of a package or dependency. |
+| `parseDnsName` | `(name: string) => DnsNameParts` | Split a DNS name into label, TLD and suffix. |
+| `normalizeAsset` | `(asset: string) => string` | Canonicalize an asset symbol. |
+| `isOrivonError` | `(value: unknown) => value is OrivonError` | Type guard for errors. |
+| `validateDid` | `(did: string) => boolean` | Validate a DID identifier format. |
+| `maskSecret` | `(value: string) => string` | Redact secret values for logging. |
+| `deepClone` | `<T>(value: T) => T` | Structured-clone a JSON-serializable value. |
+| `sha256` | `(data: Uint8Array) => Promise<Uint8Array>` | SHA-256 digest (pure helper). |
+
+## `parseDnsName`
+
+```ts
+function parseDnsName(name: string): DnsNameParts;
+```
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `label` | `string` | Leftmost label, e.g. `myname`. |
+| `tld` | `string` | Top-level domain, e.g. `orivon`. |
+| `suffix` | `string` | Full suffix, e.g. `orivon.eth`. |
+
+**Throws:** `ERR_INVALID_ARGUMENT` for malformed names.
+
+## `normalizeAsset`
+
+```ts
+function normalizeAsset(asset: string): string;
+```
+
+Canonicalizes an asset symbol to its registry form:
+
+```ts
+normalizeAsset('eth');   // 'ETH'
+normalizeAsset('ORIVON'); // 'ORIVON'
+```
+
+## `validateDid`
+
+Accepts the platform DID scheme: `did:orivon:<method-specific-id>`.
+
+```ts
+validateDid('did:orivon:abc123'); // true
+validateDid('not-a-did');          // false
+```
+
+## `maskSecret`
+
+Redacts a secret, keeping the last four characters for correlation:
+
+```ts
+maskSecret('sk_live_9f2a'); // '••••••••••9f2a'
+```
+
+## Versioning behavior
+
+- All functions are available from API version `1.0`.
+- None are deprecated as of the current release. See
+  [Deprecations](/docs/api-reference/deprecations) for the full policy.
+
+<Note title="Pure by contract">
+  Utility functions never call gated APIs and never touch network or disk.
+  If you need cryptographic or storage helpers, use the
+  [Security API](/docs/api-reference/security-api) instead.
+</Note>
+
+**Related:** [Methods](/docs/api-reference/methods) · [Types](/docs/api-reference/types) · [Security API](/docs/api-reference/security-api)

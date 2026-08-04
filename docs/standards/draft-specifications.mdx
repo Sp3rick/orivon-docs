@@ -1,0 +1,141 @@
+---
+title: "Draft Specifications"
+description: "The fifteen Orivon specification drafts (OSP-001 to OSP-015): every document in draft, what it covers, and its implementation status."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["standards", "drafts"]
+keywords: "drafts, OSP-001, OSP-015, runtime, core, browser, modules, permissions, wallet, identity"
+---
+
+The draft phase is where every specification begins. A draft is a public
+proposal: written, versioned and reviewable, but **not** a promise. All fifteen
+specifications in the Orivon series are currently in draft. This page lists
+them with their status and points to the full document for each.
+
+<Callout type="warning" title="Everything here is a Draft">
+  Drafts describe direction and intent. Nothing on this page is normative or
+  binding until it is [Accepted](/docs/standards/accepted-specifications). Do
+  not build a production dependency on a draft without tracking its status.
+</Callout>
+
+## The draft series
+
+| Identifier | Title | Category | Status | Version |
+| --- | --- | --- | --- | --- |
+| [OSP-001](/docs/standards/osp-001-runtime-architecture) | Runtime Architecture | Runtime | Draft | 0.1.0 |
+| [OSP-002](/docs/standards/osp-002-core-architecture) | Core Architecture | Core | Draft | 0.1.0 |
+| [OSP-003](/docs/standards/osp-003-browser-architecture) | Browser Architecture | Browser | Draft | 0.1.0 |
+| [OSP-004](/docs/standards/osp-004-module-system) | Module System | Modules | Draft | 0.1.0 |
+| [OSP-005](/docs/standards/osp-005-package-manifest) | Package Manifest | Package Format | Draft | 0.1.0 |
+| [OSP-006](/docs/standards/osp-006-permission-model) | Permission Model | Permissions | Draft | 0.1.0 |
+| [OSP-007](/docs/standards/osp-007-wallet-api) | Wallet API | Wallet | Draft | 0.1.0 |
+| [OSP-008](/docs/standards/osp-008-identity-system) | Identity System | Identity | Draft | 0.1.0 |
+| [OSP-009](/docs/standards/osp-009-networking) | Networking | Networking | Draft | 0.1.0 |
+| [OSP-010](/docs/standards/osp-010-storage) | Storage | Storage | Draft | 0.1.0 |
+| [OSP-011](/docs/standards/osp-011-event-system) | Event System | Events | Draft | 0.1.0 |
+| [OSP-012](/docs/standards/osp-012-web3-score) | Web3 Score | SDK | Draft | 0.1.0 |
+| [OSP-013](/docs/standards/osp-013-security-model) | Security Model | Security | Draft | 0.1.0 |
+| [OSP-014](/docs/standards/osp-014-configuration) | Configuration | Configuration | Draft | 0.1.0 |
+| [OSP-015](/docs/standards/osp-015-sdk) | SDK | SDK | Draft | 0.1.0 |
+
+Every draft is versioned 0.x, which means the contract can still change between
+revisions. See [Versioning](/docs/standards/versioning).
+
+## What every draft page contains
+
+Each draft follows the [template](/docs/standards/specification-template) and
+includes:
+
+- **Status**: the lifecycle stage, always Draft for now.
+- **Summary**: what the specification defines in a paragraph.
+- **Purpose**: why the specification exists.
+- **Scope**: what is in and out of the document.
+- **Dependencies**: the specifications and systems it builds on.
+- **Related specifications**: documents it links to.
+- **Implementation status**: how much the reference implementation covers.
+- **Future work**: what the draft does not cover yet.
+
+## The drafts by system
+
+<CardGrid columns={3}>
+  <Card title="System" to="/docs/standards/osp-001-runtime-architecture">
+    OSP-001 Runtime, OSP-002 Core, OSP-003 Browser, OSP-004 Module System
+  </Card>
+  <Card title="Packaging" to="/docs/standards/osp-005-package-manifest">
+    OSP-005 Package Manifest, OSP-006 Permission Model
+  </Card>
+  <Card title="Identity & value" to="/docs/standards/osp-007-wallet-api">
+    OSP-007 Wallet API, OSP-008 Identity System
+  </Card>
+  <Card title="Network & data" to="/docs/standards/osp-009-networking">
+    OSP-009 Networking, OSP-010 Storage, OSP-011 Event System
+  </Card>
+  <Card title="Developer" to="/docs/standards/osp-012-web3-score">
+    OSP-012 Web3 Score, OSP-015 SDK
+  </Card>
+  <Card title="Trust" to="/docs/standards/osp-013-security-model">
+    OSP-013 Security Model, OSP-014 Configuration
+  </Card>
+</CardGrid>
+
+The grouping mirrors the ecosystem: system foundations first, then the surfaces
+developers and users touch. The full registry, with filtering, is on the
+[Specification Registry](/docs/standards/specification-registry) page.
+
+## Implementation status at a glance
+
+Implementation progress across the drafts, aligned with the
+[reference implementation](/docs/standards/conformance-testing):
+
+<CardGrid columns={3}>
+  <Card title="0.1.0 baseline">
+    All drafts describe the current reference design at version 0.1.0.
+  </Card>
+  <Card title="No conformance suites yet">
+    The testing framework is defined but has not shipped for any draft.
+  </Card>
+  <Card title="Moves with the code">
+    As the reference implementation changes, drafts are revised and renumbered.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Draft status policy">
+  A draft is updated in place as discussion resolves. When a draft is ready to
+  leave the draft phase, it moves through
+  [review](/docs/standards/specification-lifecycle) to Accepted with a stable
+  1.0.0 version. None have reached that point yet.
+</Callout>
+
+## How to read a draft
+
+Reading a draft productively:
+
+<Steps>
+  <Step title="Check the status">
+    Confirm the document is still in draft before relying on it.
+  </Step>
+  <Step title="Read the summary and purpose">
+    Decide whether the document is relevant before reading the detail.
+  </Step>
+  <Step title="Read the detailed specification">
+    The normative requirements, written in RFC keyword form.
+  </Step>
+  <Step title="Check the considerations">
+    Security, privacy, performance and compatibility are part of the contract.
+  </Step>
+</Steps>
+
+The [Writing Specifications](/docs/standards/writing-specifications) page
+explains how to interpret the normative language you will find.
+
+<Callout type="success" title="Contribute">
+  Drafts exist to be improved. Discussion happens against each document; see
+  [How contributors participate](/docs/standards/overview) to join in.
+</Callout>
+
+## Related pages
+
+- [Specification Registry](/docs/standards/specification-registry): filter across all documents.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): what happens after draft.
+- [Accepted Specifications](/docs/standards/accepted-specifications): the goal state.

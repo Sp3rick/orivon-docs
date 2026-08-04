@@ -1,0 +1,58 @@
+---
+title: "Template: Pull Request"
+description: "The pull request template for Orivon: the description structure and the required checklist for a merge-ready PR."
+readingTime: 3
+lastUpdated: "July 31, 2026"
+order: 15.1
+tags: ["contributors", "templates"]
+keywords: "pull request template, PR template, checklist"
+---
+
+Use this template when opening a pull request. Copy it into your PR
+description and fill in every section. See
+[Pull Requests](/docs/contributors/pull-requests) for the full process.
+
+```markdown
+### Summary
+What this change does, in one or two sentences.
+
+### Motivation
+Why the change is needed. Reference the issue it resolves.
+
+### Test plan
+What you ran and the results, including the relevant test commands.
+
+### Checklist
+- [ ] Change is small and focused on one thing.
+- [ ] Local checks pass (format, lint, type, tests).
+- [ ] New behavior has tests; fixes have regression tests.
+- [ ] User-visible changes update the relevant documentation.
+- [ ] No secrets or personal data are introduced.
+- [ ] No permission or sandbox regressions.
+- [ ] Commit messages follow the repository convention.
+
+### Tradeoffs and follow-ups
+Anything the reviewer should weigh, and any work that should follow.
+```
+
+<Callout type="info" title="Merge-ready from the start">
+  A PR that meets the checklist on the first push moves through review fast.
+  The reviewer is verifying the change, not fixing the process.
+</Callout>
+
+## Before opening
+
+<CheckList
+  items={[
+    'Branch from the current development branch.',
+    'Ran the checks locally until they pass.',
+    'Rebased on the latest development branch.',
+    'Linked the issue your PR resolves.',
+  ]}
+/>
+
+## Related pages
+
+- [Pull Requests](/docs/contributors/pull-requests): the process.
+- [Code Reviews](/docs/contributors/code-reviews): what reviewers check.
+- [Development Workflow](/docs/contributors/development-workflow): the full loop.

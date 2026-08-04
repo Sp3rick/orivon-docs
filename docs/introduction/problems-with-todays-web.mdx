@@ -1,0 +1,119 @@
+---
+title: "Problems With Today's Web"
+description: "A detailed look at the limitations of today's web and the traditional browser: centralization, privacy, fragmentation, and the missing Web3 layer. Includes comparison tables and diagrams."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["introduction", "analysis", "problems"]
+keywords: "web problems, centralization, privacy, fragmentation, traditional browser, comparison, limitations"
+---
+
+## The traditional browser, honestly assessed
+
+The traditional browser is a remarkable piece of technology: a universal, sandboxed
+runtime that runs the same code on billions of devices. But it was designed for a web that
+no longer matches how the internet actually works. Below is an honest assessment of where
+it falls short.
+
+## 1. It is a viewer, not an environment
+
+Browsers treat the web as documents to display. The modern web is applications, identity
+and value, but the browser still expects users to bolt those capabilities on with
+extensions, bookmarks and logins.
+
+## 2. Security is someone else's problem
+
+The average user cannot tell a legitimate dApp from a phishing page, a trusted extension
+from a keylogger, or a safe transaction from a drain. The traditional browser delegates
+security to plugins and user vigilance.
+
+## 3. User data is the product
+
+Default trackers, telemetry and ad ecosystems mean the browser's business model is often
+in tension with the user's interests. Users do not have meaningful, understandable control
+over their own data.
+
+## 4. Web3 is an afterthought
+
+Wallets live in extensions with inconsistent security models. Decentralized names don't
+resolve. dApps require manual network switching. Each chain reinvents onboarding. The
+result: Web3 is technically possible but practically painful.
+
+## 5. Fragmentation wins
+
+Because nothing is standardized, every ecosystem invents its own wallet, identity and
+storage. Users end up managing dozens of apps and accounts, the opposite of the coherent
+experience the web promised.
+
+## Traditional Browser vs Orivon Browser
+
+| Capability | Traditional Browser | Orivon Browser |
+| --- | --- | --- |
+| Runs Web apps | Yes, as pages | Yes, as first-class applications |
+| Native wallet | No, external extensions | Yes, built-in and sandboxed |
+| Decentralized names (DNS) | No native support | Native resolution |
+| dApp access | Manual, risky | Automatic, verified |
+| Web3 transactions | Redirected to sites/plugins | Browser-level, with consent UI |
+| Security for users | Plugin-dependent | Sandbox + Web3 Score |
+| Permission model | Vague, all-or-nothing | Granular, understandable |
+| Identity | Per-site logins | User-owned identity |
+| Data ownership | Platform-controlled | User-controlled |
+| Extensibility | Closed or ad-driven stores | Open module system |
+| Standards | Vendor-defined | Community-defined, open |
+
+## What that means in practice
+
+The differences above have concrete consequences for everyday users:
+
+<CheckList
+  items={[
+    'A wallet that works everywhere, with consistent security.',
+    'One identity that follows you across the decentralized web.',
+    'Applications that run and update like websites, with no installs.',
+    'A browser that shows its reasoning, not just its results.',
+    'Decentralized names that resolve like domains, natively.',
+    'Data and keys that stay in your control, by default.',
+  ]}
+/>
+
+And for the industry:
+
+- **Developers** get a stable platform and public specs instead of proprietary SDKs.
+- **Networks** reach users through the browser instead of through extensions.
+- **The web** gets a credible, open counterweight to centralization.
+
+## A diagram of the problem
+
+The traditional model concentrates everything through a few platforms, while Orivon
+connects users directly to the networks and applications they choose.
+
+<Diagram caption="Left: the intermediated web of today. Right: the direct, decentralized model Orivon enables.">
+  <Flow column>
+    <DiagramNode>You</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Platforms & intermediaries</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Applications, data, value</DiagramNode>
+  </Flow>
+</Diagram>
+
+<Diagram caption="Orivon removes the intermediaries. The browser connects you straight to applications and networks.">
+  <Flow column>
+    <DiagramNode>You</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Orivon Browser (verifies, sandboxes, connects)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Decentralized applications & networks</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Why this is fixable
+
+These problems are not laws of physics. They are consequences of design choices. Every
+one of them can be addressed by changing how the browser is built and what it standardizes.
+That is precisely what Orivon proposes.
+
+<Callout type="info" title="Related reading">
+  - [Why Orivon Exists](/docs/introduction/why-orivon-exists): the motivation in brief.
+  - [Vision](/docs/introduction/vision): the alternative model this points toward.
+</Callout>

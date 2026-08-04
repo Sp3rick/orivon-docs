@@ -1,0 +1,155 @@
+---
+title: "Continuous Integration"
+description: "The Orivon continuous integration pipeline: build pipeline, automated testing, quality checks, code coverage and deployment."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["contributors", "workflow"]
+keywords: "continuous integration, CI pipeline, automated testing, quality checks, code coverage, deployment"
+---
+
+Continuous integration is the safety net under every contribution. CI runs
+on every change, catches problems early, and gives reviewers a machine's
+verdict alongside their own. This page explains the pipeline.
+
+<Callout type="info" title="CI is the floor">
+  CI checks are a minimum bar, not a substitute for review. A change that
+  passes CI can still need rework; a change that fails CI is never reviewed
+  as ready.
+</Callout>
+
+## The pipeline
+
+<Diagram caption="The CI/CD pipeline from push to deploy.">
+  <Flow column>
+    <DiagramNode accent>Push or pull request</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Build and lint</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Automated tests</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Quality and coverage gates</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Publish and deploy</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Build pipeline
+
+Every change is built in a clean environment:
+
+| Step | What it does |
+| --- | --- |
+| Checkout | Fresh checkout of the change |
+| Install | Deterministic dependency install |
+| Build | Compile and package the project |
+| Cache | Shared caches for speed where safe |
+
+A clean build proves the change works outside a contributor's machine.
+
+## Automated testing
+
+CI runs the full test suite:
+
+```text
+Unit tests
+Integration tests
+End-to-end tests
+Conformance tests (for standards)
+```
+
+Tests run in parallel where possible and report failures with artifacts, so
+contributors can reproduce them locally.
+
+## Quality checks
+
+The quality gates run on every change:
+
+<CheckList
+  items={[
+    'Formatting is enforced.',
+    'Linting passes without warnings.',
+    'Type checks pass.',
+    'Dependencies are scanned for vulnerabilities.',
+    'Licensing is verified for new dependencies.',
+  ]}
+/>
+
+## Code coverage
+
+Coverage is measured and gated:
+
+| Metric | Purpose |
+| --- | --- |
+| Line coverage | Untested code is surfaced |
+| Branch coverage | Decision paths are exercised |
+| Change coverage | New code is tested |
+
+The gate prevents coverage regressions on changed code, while the
+[testing guidelines](/docs/contributors/testing-guidelines) keep the number
+meaningful.
+
+<Callout type="warning" title="Coverage gates are not the goal">
+  A high number with weak assertions is theater. The gate enforces a floor;
+  the review enforces quality. Both are required.
+</Callout>
+
+## Deployment pipeline
+
+When a change reaches a release branch and passes, deployment runs:
+
+<Steps>
+  <Step title="Publish artifacts">
+    Build signed, reproducible artifacts.
+  </Step>
+  <Step title="Publish packages">
+    Release the CLI, SDK and runtime to their registries.
+  </Step>
+  <Step title="Deploy docs">
+    Publish the documentation site.
+  </Step>
+  <Step title="Update standards">
+    Register accepted specifications.
+  </Step>
+</Steps>
+
+Deployment is gated and repeatable, so releasing is never a manual gamble.
+See [Release Process](/docs/contributors/release-process).
+
+## The contributor view
+
+As a contributor, CI answers your questions before a reviewer does:
+
+<CheckList
+  items={[
+    'Does my branch build? CI says yes or no.',
+    'Do my tests pass? CI runs them all.',
+    'Is my formatting clean? CI enforces it.',
+    'Did I break a dependency scan? CI checks it.',
+  ]}
+/>
+
+<Callout type="success" title="Best practice">
+  Run the same checks locally before you push. CI is fastest for everyone
+  when it confirms what you already know, not discovers what you missed.
+</Callout>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Rerunning flaky jobs blindly">
+    Investigate failures. A flaky suite is a real problem to report and fix.
+  </Card>
+  <Card title="Ignoring warnings">
+    CI failures are obvious; warnings accumulate silently. Keep them at zero.
+  </Card>
+  <Card title="Big PRs on long-lived branches">
+    CI catches conflicts late. Keep branches short and merged often.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Testing Guidelines](/docs/contributors/testing-guidelines): what CI runs.
+- [Release Process](/docs/contributors/release-process): what CI ships.
+- [Development Workflow](/docs/contributors/development-workflow): where CI fits.

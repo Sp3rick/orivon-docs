@@ -1,0 +1,154 @@
+---
+title: "Whitepapers & Research"
+description: "Orivon's engineering research library: long-form technical papers, design documents, and forward-looking research on the future of the web."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["research", "whitepapers", "overview"]
+keywords: "research library, whitepapers, technical papers, design documents, engineering research, orivon research, methodology"
+---
+
+The Whitepapers & Research section is Orivon's long-form technical publication
+archive. It collects the reasoning, trade-offs, and long-term vision behind
+the platform: everything from formal whitepapers to open engineering questions
+that are still being explored.
+
+This library is written for researchers, browser engineers, protocol
+designers, security researchers, academic readers, investors, and
+contributors who want to understand *why* Orivon is designed the way it is.
+
+<StatGrid>
+  <Stat value="39" label="Publications" />
+  <Stat value="10" label="Whitepapers" />
+  <Stat value="10" label="Architecture Papers" />
+  <Stat value="13" label="Research Areas" />
+</StatGrid>
+
+## Purpose of the research library
+
+Documentation answers *how to use the platform*. Research answers *why the
+platform is the way it is*. The purpose of this library is to:
+
+- Record the architectural decisions behind Orivon and the evidence that
+  motivated them.
+- Publish exploratory work early, so the ecosystem can participate in open
+  research questions.
+- Separate stable, production-grade specifications from concepts that are
+  still being evaluated.
+- Give external researchers a durable, citable archive of the platform's
+  technical foundation.
+
+<Note title="Not implementation documentation">
+  Research papers are not tutorials and not API references. They describe
+  principles, constraints, and trade-offs. For usage guidance see the
+  [Developer Documentation](/docs/developers/overview); for exact interfaces
+  see the [API Reference](/docs/api-reference/overview).
+</Note>
+
+## Documentation vs. research
+
+| Dimension | Documentation | Research |
+| --- | --- | --- |
+| Question | How do I use or build this? | Why is this the right design? |
+| Audience | Developers, operators | Engineers, researchers, investors |
+| Stability | Tracks shipped behavior | Includes proposals and open questions |
+| Lifecycle | Maintained with releases | Published as versions; superseded by newer papers |
+| Status vocabulary | Live, deprecated | Published, draft, experimental, proposal |
+| Evidence | Verified against implementation | Arguments, trade-offs, comparisons, references |
+
+The same subject can appear in both places. The [Technical Design](/docs/technical-design/architecture-overview)
+level describes the current architecture; the [Architecture Papers](/docs/research/browser-architecture)
+in this section analyse the decisions behind that architecture.
+
+## Research categories
+
+<CardGrid columns={3}>
+  <Card title="Whitepapers" to="/docs/research/orivon-whitepaper">
+    Formal papers introducing each major subsystem, from the browser to the
+    Web3 Score.
+  </Card>
+  <Card title="Design Documents" to="/docs/research/design-documents">
+    Structured records of architectural decisions: problem, alternatives,
+    decision, and trade-offs.
+  </Card>
+  <Card title="Architecture Papers" to="/docs/research/browser-architecture">
+    In-depth analyses of how the major subsystems are built and why.
+  </Card>
+  <Card title="Research Areas" to="/docs/research/security-research">
+    Active exploration across security, networking, storage, identity,
+    performance, cryptography, WASM, and more.
+  </Card>
+  <Card title="Future Technology" to="/docs/research/decentralized-computing">
+    Long-term concepts in decentralized computing, artificial intelligence,
+    and the future internet.
+  </Card>
+  <Card title="Experimental Features" to="/docs/research/experimental-features">
+    Early ideas explicitly labeled as experimental, concepts, or proposals —
+    never as production features.
+  </Card>
+</CardGrid>
+
+## Current publications
+
+The library currently publishes:
+
+| Category | Count | Example |
+| --- | --- | --- |
+| Whitepapers | 10 | [Orivon Whitepaper](/docs/research/orivon-whitepaper) |
+| Design documents | 1 (living) | [Design Documents](/docs/research/design-documents) |
+| Architecture papers | 10 | [Browser Architecture](/docs/research/browser-architecture) |
+| Research areas | 13 | [Security Research](/docs/research/security-research) |
+| Roadmap and references | 3 | [Research Roadmap](/docs/research/research-roadmap) |
+
+Browse the full catalog in the [Research Library](/docs/research/research-library).
+
+## Upcoming papers
+
+The following are in progress or planned. See the [Research Roadmap](/docs/research/research-roadmap)
+for dates and priorities.
+
+- **Formal Verification of the Module Sandbox** — mechanized proof of
+  capability confinement properties.
+- **P2P Networking Benchmark Report** — comparative latency and bandwidth
+  measurements against centralized alternatives.
+- **Privacy-Preserving Web3 Score** — differential-privacy design for
+  reputation signals.
+- **WASM Component Model Evaluation** — how the emerging component model maps
+  onto the module system.
+
+## Reading recommendations
+
+| Reader | Recommended starting point |
+| --- | --- |
+| Investors | [Orivon Whitepaper](/docs/research/orivon-whitepaper), [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper) |
+| Browser engineers | [Browser Whitepaper](/docs/research/browser-whitepaper), [Rendering Pipeline](/docs/research/rendering-pipeline) |
+| Protocol designers | [Networking Whitepaper](/docs/research/networking-whitepaper), [Communication Layer](/docs/research/communication-layer) |
+| Security researchers | [Security Whitepaper](/docs/research/security-whitepaper), [Threat Modeling](/docs/research/security-research) |
+| Runtime / systems engineers | [Runtime Whitepaper](/docs/research/runtime-whitepaper), [Performance Research](/docs/research/performance-research) |
+| Academic readers | [Identity Research](/docs/research/identity-research), [Cryptography Research](/docs/research/cryptography-research) |
+
+## Research methodology
+
+All publications follow a common methodology:
+
+1. **Problem framing.** Every paper begins with a precise statement of the
+   problem, including constraints and non-goals.
+2. **Evidence review.** Existing work — academic papers, standards, and
+   production systems — is surveyed in the [References](/docs/research/references).
+3. **Alternatives analysis.** Major options are compared systematically before
+   a decision is recorded.
+4. **Decision record.** Design documents capture the chosen direction, its
+   advantages, and its disadvantages in a durable form.
+5. **Status discipline.** Work is labeled `Published`, `Draft`, `Experimental`,
+   `Proposal`, or `Concept`. A label is never stronger than the evidence.
+6. **Open review.** Papers are versioned and published for community comment
+   before being treated as settled.
+
+<Warning title="Status labels are commitments">
+  An item labeled `Experimental` or `Proposal` is not production-ready. Do not
+  build production integrations on experimental material; build on the
+  [Standards](/docs/standards/overview) and [API Reference](/docs/api-reference/overview)
+  instead.
+</Warning>
+
+**Related:** [Research Library](/docs/research/research-library) · [Research Roadmap](/docs/research/research-roadmap) · [References](/docs/research/references)

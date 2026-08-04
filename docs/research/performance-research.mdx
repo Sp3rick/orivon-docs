@@ -1,0 +1,87 @@
+---
+title: "Performance Research"
+description: "Active performance research: optimization, caching, memory management, scheduling, rendering performance, and benchmarking."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 31
+tags: ["research", "performance-research"]
+keywords: "performance research, optimization, caching, memory management, scheduling, rendering performance, benchmarking"
+---
+
+*Orivon Research Group · Performance Engineering · Status: Active Research*
+
+This area tracks performance as a security and usability property: fast
+platforms are safer and more usable. It records optimization work, the
+benchmarking methodology, and open performance questions.
+
+## Performance principles
+
+1. **Latency is a feature.** Interactive operations have hard budgets.
+2. **Memory is a security budget.** Unbounded memory is a DoS vector.
+3. **Measure before optimizing.** Benchmarks are public and reproducible.
+4. **Progress bars are the last resort.** Reduce perceived cost, not only real
+   cost.
+
+## Optimization
+
+| Area | Technique | Status |
+| --- | --- | --- |
+| Module startup | Lazy instantiation, tiered compilation. | Shipped. |
+| Messaging | Zero-copy framing. | Shipped. |
+| Storage | WAL-batched commits, indexes. | Shipped. |
+| Rendering | Damage-based compositing. | Shipped. |
+| Network | Caching, multiplexed transports. | In progress. |
+
+## Caching
+
+| Layer | Strategy | Question |
+| --- | --- | --- |
+| DNS | Dual-path resolution cache. | Optimal TTL policy? |
+| Content | Content-addressed dedup. | Eviction under quota? |
+| Rendering | Texture and tile cache. | Memory budget tuning. |
+| Modules | Compiled-code cache. | Invalidation on update. |
+
+## Memory management
+
+| Concern | Direction |
+| --- | --- |
+| Renderer budgets | Per-process memory caps. |
+| Module instances | Region-based allocation. |
+| Texture memory | Distance-based eviction. |
+| Leak detection | Automated leak tracking in CI. |
+
+## Scheduling
+
+| Topic | Question |
+| --- | --- |
+| Background throttling | What throttling preserves correctness? |
+| Interactive priority | How to bound main-thread blocking? |
+| Energy | Scheduling that minimizes power draw. |
+
+## Rendering performance
+
+| Metric | Budget |
+| --- | --- |
+| Input latency | < 16 ms (60 fps touch-to-pixel). |
+| First contentful paint | < 1 s on reference hardware. |
+| Tab switch | < 100 ms warm. |
+| Compositor frame | < 8 ms p95. |
+
+## Benchmarking
+
+| Principle | Practice |
+| --- | --- |
+| Reproducible | Fixed harness, published configs. |
+| Comparative | Benchmarked against reference platforms. |
+| CI-gated | Regression gates on critical paths. |
+| Public | Results published for community review. |
+
+### Benchmark families
+
+- Module cold-start latency.
+- Host call overhead.
+- Storage throughput under quota.
+- Rendering frame latency on reference hardware.
+- P2P resolution and connection latency.
+
+**Related:** [Runtime Research](/docs/research/runtime-research) · [Rendering Pipeline](/docs/research/rendering-pipeline) · [WASM Research](/docs/research/wasm-research)

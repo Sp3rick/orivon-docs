@@ -1,0 +1,165 @@
+---
+title: "Branching Strategy"
+description: "How Orivon uses branches: main, development, feature branches, release branches and hotfix branches, with the lifecycle diagram."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["contributors", "workflow"]
+keywords: "branching strategy, main, development, feature branches, release branches, hotfix branches"
+---
+
+A clear branching strategy keeps main stable while development moves fast.
+Orivon uses a small set of branch types with well-defined roles, so every
+change knows where it lives and how it ships.
+
+## The branch model
+
+<Diagram caption="The branch lifecycle.">
+  <Flow column>
+    <DiagramNode dim>main: always releasable</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>development: integration line</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>feature branches: individual work</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>release branches: stabilization</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>hotfix branches: urgent fixes</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Main
+
+`main` is the releasable line:
+
+- Always in a state that can be released.
+- Only merges from release branches and urgent hotfixes.
+- Tagged at each release with the version number.
+
+Nobody commits to `main` directly. It is protected and reviewed.
+
+## Development
+
+`development` is the integration branch:
+
+| Property | Value |
+| --- | --- |
+| Where features integrate | Yes |
+| CI runs | On every push |
+| Protected | Yes |
+| Merges into main | Only via release branches |
+
+All feature branches are cut from `development`, and their PRs target it.
+This is the branch contributors branch from.
+
+## Feature branches
+
+Feature branches hold individual work:
+
+```text
+feature/permission-scopes
+fix/storage-race-condition
+docs/runtime-apis
+chore/update-deps
+```
+
+| Prefix | Meaning |
+| --- | --- |
+| `feature/` | A new capability |
+| `fix/` | A bug fix |
+| `docs/` | Documentation changes |
+| `chore/` | Maintenance and tooling |
+
+The rules:
+
+- Cut from the current `development`.
+- One logical change per branch.
+- Short lived; rebased as `development` moves.
+- Merged back to `development` via pull request.
+
+See [Development Workflow](/docs/contributors/development-workflow).
+
+## Release branches
+
+When a release approaches, a release branch is cut from `development`:
+
+```text
+release/v0.2.0
+```
+
+Release branches stabilize:
+
+<Steps>
+  <Step title="Cut">
+    Release branch from `development` at a candidate commit.
+  </Step>
+  <Step title="Stabilize">
+    Only bug fixes and polish land here; no new features.
+  </Step>
+  <Step title="Release candidates">
+    Tag and test candidates until the release is fit.
+  </Step>
+  <Step title="Merge to main">
+    Merge the finished release branch into `main` and tag the version.
+  </Step>
+  <Step title="Merge back">
+    Merge the fixes back into `development` so nothing is lost.
+  </Step>
+</Steps>
+
+The full timeline is in [Release Process](/docs/contributors/release-process).
+
+## Hotfix branches
+
+Urgent production fixes bypass the slow path:
+
+```text
+hotfix/v0.2.1
+```
+
+- Cut from `main` at the tagged release.
+- Contains only the critical fix and its tests.
+- Merges into `main`, then the fix is merged back into `development`.
+- Tagged as a patch release.
+
+<Callout type="warning" title="Hotfixes are rare">
+  If your fix can wait for the normal release cycle, it is not a hotfix.
+  Hotfixing main creates merge work; reserve it for genuinely urgent,
+  production impacting issues.
+</Callout>
+
+## The flow in practice
+
+The table shows where each kind of change starts and ends:
+
+| Change type | Start | Target | Ships via |
+| --- | --- | --- | --- |
+| Feature | `development` | `development` | PR |
+| Bug fix | `development` | `development` | PR |
+| Documentation | `development` | `development` | PR |
+| Release stabilization | `release/x` | `main` | Merge + tag |
+| Urgent production fix | `main` | `main` | Merge + patch tag |
+
+## Branch hygiene
+
+<CheckList
+  items={[
+    'Keep branches short lived; merge or close them.',
+    'Rebase on `development` before review, not after.',
+    'Delete branches after merge.',
+    'Never force-push to shared branches without coordination.',
+    'Name branches for what they change, not who changes them.',
+  ]}
+/>
+
+<Callout type="success" title="The goal">
+  The strategy exists so that `main` is always shippable and no work is ever
+  lost. If a workflow choice would break either property, choose the one that
+  preserves them.
+</Callout>
+
+## Related pages
+
+- [Development Workflow](/docs/contributors/development-workflow): the per-change process.
+- [Release Process](/docs/contributors/release-process): how releases happen.
+- [Pull Requests](/docs/contributors/pull-requests): getting changes merged.

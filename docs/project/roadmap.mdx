@@ -1,0 +1,184 @@
+---
+title: "Roadmap"
+description: "Orivon roadmap: short-term goals, mid-term goals, long-term vision, and future ecosystem expansion."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["project", "roadmap", "goals", "vision", "planning"]
+keywords: "orivon roadmap, short-term goals, mid-term goals, long-term vision, ecosystem expansion"
+---
+
+The Orivon roadmap communicates the project's direction across three
+horizons. It is a living document updated each release cycle by the TSC with
+community input. The roadmap reflects **intent**, not commitment — dates are
+targets, not promises.
+
+<Callout type="info" title="Roadmap vs. Release Lifecycle">
+  The [Release Lifecycle](/docs/project/release-lifecycle) defines *when* and
+  *how* releases ship. The **Roadmap** defines *what* we aim to build and
+  *why*. They are aligned but distinct.
+</Callout>
+
+## Roadmap principles
+
+| Principle | Practice |
+| --- | --- |
+| **Community-shaped** | Priorities discussed in open forums; anyone can propose work. |
+| **Evidence-based** | Decisions driven by user feedback, benchmarks, security research. |
+| **Transparent** | Roadmap public; progress reported in release notes and TSC minutes. |
+| **Flexible** | Scope adjusts based on learning; dates shift for quality. |
+| **Sustainable** | Workload balanced; contributor health prioritized over velocity. |
+
+## Short-term goals (Q3 2026 – Q2 2027)
+
+### Platform maturity (v1.3 – v1.5)
+| Goal | Target | Status | Owner |
+| --- | --- | --- | --- |
+| **Module hot reload** | v1.3 | Design | Runtime WG |
+| **Startup < 200ms (cold)** | v1.3 | In progress | Runtime WG |
+| **Capability inheritance model** | v1.4 | Proposal | Security WG |
+| **Cross-module zero-copy memory** | v1.5 | Research | Runtime WG |
+| **Privacy-preserving permission UI** | v1.3 | Design | Browser WG |
+| **Web3 Score in address bar** | v1.4 | Prototype | Browser WG |
+| **Extension API compat layer** | v1.5 | Proposal | Browser WG |
+| **Accessibility audit (WCAG 2.1 AA)** | v1.3 | In progress | Browser WG + A11y |
+
+### Developer experience (v1.3 – v1.5)
+| Goal | Target | Status | Owner |
+| --- | --- | --- | --- |
+| **Type-safe capability declarations** | v1.3 | In progress | SDK WG |
+| **CLI scaffolding improvements** | v1.3 | In progress | DX WG |
+| **Module debugger integration** | v1.4 | Design | DX WG |
+| **Migration tooling v1.x → v2.0** | v1.5 | Proposal | DX WG |
+| **IDE integration (LSP)** | v1.4 | Proposal | SDK WG |
+
+### Standards & governance (v1.3 – v1.5)
+| Goal | Target | Status | Owner |
+| --- | --- | --- | --- |
+| **Naming dispute resolution v2** | v1.3 | Proposal | TSC |
+| **Web3 Score algorithm v2** | v1.4 | In progress | Research WG |
+| **TSC election process** | v1.2 | ✅ Complete | TSC |
+| **Grants program launch** | v1.3 | In progress | Community WG |
+| **Working group charters ratified** | v1.3 | In progress | TSC |
+
+### Compliance & enterprise (v1.3 – v1.5)
+| Goal | Target | Status | Owner |
+| --- | --- | --- | --- |
+| **SOC 2 Type I readiness** | v1.4 | Planning | Infra + Security |
+| **ISO 27001 gap analysis** | v1.4 | Planning | Infra + Security |
+| **GDPR readiness assessment** | v1.5 | Planning | Legal + Privacy |
+| **Enterprise deployment guide** | v1.3 | Draft | Enterprise WG |
+| **Professional services framework** | v1.4 | Planning | Partnerships |
+
+## Mid-term goals (2027 – 2028)
+
+### Ecosystem scale
+- **Module marketplace** — Discoverable, reviewed, signed modules with ratings.
+- **Package registry v2** — Namespaces, scoped packages, provenance, SBOM.
+- **CI/CD templates** — GitHub Actions, GitLab CI, Azure Pipelines for Orivon projects.
+- **Enterprise support tier 1** — SLA-backed support for LTS releases.
+- **Regional community leads** — Stipended organizers in 25+ regions.
+
+### Identity & privacy
+- **DID method registration** — Multiple DID methods (web, key, ion, custom).
+- **Verifiable credential flows** — Issuance, presentation, verification in browser.
+- **Private compute** — TEE integration, secure enclaves for sensitive modules.
+- **Zero-knowledge proofs** — ZK-SNARK/STARK support for privacy-preserving apps.
+
+### Networking
+- **P2P transport** — libp2p integration, hole punching, relay mesh.
+- **Latency optimization** — QUIC tuning, connection pooling, predictive fetch.
+- **Decentralized DNS** — Full naming system deployment, dispute resolution v2.
+- **Content addressing** — IPFS/CID integration for module distribution.
+
+### AI integration
+- **Local inference** — WASM-NN, WebGPU compute for on-device ML.
+- **Agent protocols** — Standardized agent communication, capability delegation.
+- **Privacy-preserving ML** — Federated learning, differential privacy primitives.
+
+## Long-term vision (2028+)
+
+### User-owned web
+| Pillar | Description |
+| --- | --- |
+| **Sovereign identity** | Every user controls their DID, keys, and credentials — no platform intermediary. |
+| **Personal data vault** | Local-first encrypted storage; user decides what leaves their device. |
+| **Attention economy** | Users opt into value exchange; Web3 Score rewards contribution, not extraction. |
+| **Algorithmic choice** | Feed ranking, content filtering, search — user-selectable, auditable. |
+
+### Programmable value
+| Pillar | Description |
+| --- | --- |
+| **Module economy** | Developers publish modules; users/institutions sponsor; revenue flows to creators. |
+| **Reputation portability** | Web3 Score moves across apps; no walled-garden reputation. |
+| **Micro-grants** | Automated, community-governed funding for high-impact contributions. |
+| **DAO tooling** | Native governance modules for decentralized organizations. |
+
+### Decentralized infrastructure
+| Pillar | Description |
+| --- | --- |
+| **User-operated nodes** | Browser runs on a mesh of user devices; no central servers required. |
+| **Resilient naming** | Naming system survives single points of failure; censorship-resistant. |
+| **Distributed storage** | Data replicated across user nodes; privacy-preserving, incentive-aligned. |
+| **Edge compute** | Modules execute near users; latency minimized, bandwidth reduced. |
+
+### Open standards by default
+| Pillar | Description |
+| --- | --- |
+| **Standards track** | All platform protocols submitted to W3C/IETF/TC39. |
+| **Multiple implementations** | Reference + independent implementations for every standard. |
+| **Conformance suites** | Automated test suites ensuring interoperability. |
+| **Patent commitments** | Royalty-free licensing for all standard-essential patents. |
+
+## Future ecosystem expansion
+
+| Area | 2027 | 2028 | 2029+ |
+| --- | --- | --- | --- |
+| **Ecosystem projects** | 50 listed | 200 listed | 1000+ |
+| **Active maintainers** | 100+ | 300+ | 500+ |
+| **Regional communities** | 25 | 60 | 100+ |
+| **Standards published** | 25 | 40 | 60+ |
+| **Grants/year** | 12 | 30 | 60 |
+| **Enterprise deployments** | 25 | 100 | 500+ |
+| **LTS adoption** | 2 LTS lines | 3 LTS lines | Rolling LTS |
+
+## How the roadmap is set
+
+<Steps>
+  <Step title="Community input">
+    Forum discussions, working group backlogs, contributor surveys, user feedback.
+  </Step>
+  <Step title="Working group proposals">
+    Each WG proposes priorities for their domain with evidence and estimates.
+  </Step>
+  <Step title="TSC synthesis">
+    TSC integrates proposals, resolves conflicts, aligns with capacity and strategy.
+  </Step>
+  <Step title="Public review">
+    Draft roadmap published for 14-day community comment.
+  </Step>
+  <Step title="Ratification">
+    TSC ratifies final roadmap; published with release notes.
+  </Step>
+  <Step title="Quarterly review">
+    Progress assessed; adjustments made; communicated in newsletter.
+  </Step>
+</Steps>
+
+## Tracking progress
+
+| Artifact | Cadence | Location |
+| --- | --- | --- |
+| **Release notes** | Per release | [Release Archive](/docs/project/release-archive) |
+| **TSC minutes** | Bi-weekly | Governance repository |
+| **Working group updates** | Monthly | Forum + newsletter |
+| **Roadmap review** | Quarterly | Newsletter + blog |
+| **Transparency report** | Quarterly | [Transparency Reports](/docs/project/transparency) |
+
+<Callout type="success" title="The roadmap belongs to the community">
+  If something matters to you, the path to influence it is open: join a
+  working group, open a proposal, attend a TSC meeting, or contribute code.
+  The roadmap is a conversation, not a decree.
+</Callout>
+
+**Related:** [Release Lifecycle](/docs/project/release-lifecycle) · [Version Support Policy](/docs/project/version-support) · [Project Roadmap](/docs/community/project-roadmap) · [Community Roadmap](/docs/community/community-roadmap) · [Research Roadmap](/docs/research/research-roadmap)

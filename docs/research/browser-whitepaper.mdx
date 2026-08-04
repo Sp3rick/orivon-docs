@@ -1,0 +1,173 @@
+---
+title: "Browser Whitepaper"
+description: "The browser paper: process model, tabs, the integrated wallet and identity surface, and the permission-driven model of the Orivon browser."
+readingTime: 35
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["research", "whitepaper", "browser"]
+keywords: "browser whitepaper, process model, tabs, address bar, wallet, identity, permissions, browser architecture"
+---
+
+*Orivon Research Group · Browser Engineering · Version 1.0 · Published 2026-07-18 · Status: Published*
+
+## Abstract
+
+The browser is the user's primary interface to the internet, and the primary
+point of failure of user control. The Orivon browser keeps the familiar
+surface — tabs, address bar, bookmarks — and rebuilds the system beneath it:
+a strict process model, an integrated wallet and identity surface, and a
+permission-driven model in which the browser acts on the user's behalf only
+with explicit consent.
+
+This paper describes the browser's architecture and the design decisions that
+make it a *platform for user agency* rather than a *platform for advertising*.
+
+## Background
+
+Modern browsers evolved from document viewers into application runtimes, but
+their revenue model has not evolved with them. The dominant browser vendors are
+subsidized by advertising platforms, which creates structural conflicts: the
+browser's incentives are misaligned with the user's interests in privacy and
+control.
+
+Independent browsers have repeatedly demonstrated that a better model is
+possible, but they have been limited by the surrounding web: identity,
+payments, and data all belong to remote platforms. A browser cannot give users
+control of these things on its own — the platform around it must support
+self-sovereignty.
+
+## Problem Statement
+
+The problems the browser addresses are operational and architectural:
+
+1. **The browser cannot represent the user.** The web has no first-class user
+   identity; every site reinvents login, and none of the logins belong to the
+   user.
+2. **The browser cannot transact.** Payments require leaving the browser,
+   installing extensions, and trusting a gatekeeper.
+3. **The browser leaks.** Tracking is built into the economic model of the
+   web, and browsers have historically been complicit.
+4. **The browser is opaque.** Users cannot see what sites do with their data
+   or what the browser does with their browsing.
+
+## Motivation
+
+The Orivon browser exists to make web3 usable and to make the web user-owned
+again:
+
+- **One surface for everything.** Tabs, wallet, identity, and decentralized
+  apps in a single coherent interface, without extensions.
+- **Native trust tooling.** Wallet and identity are first-class browser
+  features with the security review that implies, not bolt-on extensions.
+- **Permission clarity.** The user understands exactly what each site or
+  module can do, because consent is explicit and revocable.
+
+## Architecture
+
+### Process model
+
+The browser follows a multi-process model with strict privilege separation:
+
+| Process | Responsibilities | Trust |
+| --- | --- | --- |
+| Browser process | UI, chrome, tab management | Full |
+| Network process | All network I/O | Network privilege only |
+| Renderer (per site) | HTML/CSS/JS rendering | Untrusted, sandboxed |
+| GPU process | Compositing | Minimal |
+| Runtime host | Module execution | Capability-gated |
+
+Every renderer is sandboxed. Cross-process communication happens only through
+the browser process, which enforces origin- and capability-based policies.
+
+### Tab model
+
+Tabs are the unit of user attention. The browser adds two properties:
+
+- **Named sessions** — a tab can be bound to a profile, isolating a set of
+  cookies, credentials, and grants.
+- **Site permissions** — each site's capability grants (camera, wallet, etc.)
+  are visible and revocable from the address bar.
+
+### Wallet and identity surface
+
+The browser integrates the wallet and identity layers from the
+[Identity Whitepaper](/docs/research/identity-whitepaper):
+
+- The address bar shows the active DID, not just the URL.
+- Signing requests surface as first-party browser UI, never as web content.
+- Credential requests are permission-gated and logged.
+
+### Permission-driven behavior
+
+Everything the browser does *for* a site (payments, identity disclosure,
+storage access) requires a grant. Grants are:
+
+| Property | Behavior |
+| --- | --- |
+| Explicit | Requested at first use, not silently. |
+| Scoped | Tied to a site or module and a capability. |
+| Revocable | Revocable at any time from the permission manager. |
+| Observable | Every grant is visible in a single user-facing panel. |
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Multi-process with network process | Network I/O isolated even from renderer compromise; matches Chromium-era security lessons. |
+| Native wallet, not extension | Extensions are user-installable trust; a native wallet is reviewable and consistent. |
+| Named sessions | Lets users separate identities without losing state or grants. |
+| Permission panel as first-class UI | Makes consent observable, which is a prerequisite for user agency. |
+| Origin-based defaults | New sites get minimal powers; capability growth requires explicit consent. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Native wallet vs. ecosystem wallets | Native | Ecosystem wallets must be added as modules; integration surface required. |
+| Strict sandbox vs. site convenience | Strict sandbox | Some legacy web features must run in compatibility modes. |
+| Consent friction vs. conversion | Consent | Higher friction for sites; deliberately so. |
+| Named sessions vs. single profile | Named sessions | Slightly more complex tab UI. |
+
+## Implementation Strategy
+
+1. Ship the standard browser surface with the process model above.
+2. Add the permission panel and origin-based defaults.
+3. Integrate wallet and identity as first-party features.
+4. Add named sessions and profile isolation.
+5. Expose browser capabilities to modules via the API layer.
+
+## Future Work
+
+- Progressive enhancement of legacy web features inside the sandbox.
+- Cross-device session portability without centralized accounts.
+- Deeper integration with the decentralized naming system in the address bar.
+- Accessibility and localization parity for all new surfaces.
+
+## References
+
+- Orivon, *Runtime Whitepaper*, 2026.
+- Orivon, *Identity Whitepaper*, 2026.
+- C. Reis and S. D. Gribble, "Isolating web programs in modern browser
+  architectures," *EuroSys 2009*.
+- The Chromium Projects, *Process Model and Site Isolation* design documents.
+- W3C, *Web Authentication API*.
+
+## Appendix A — Address bar behavior
+
+The address bar resolves three namespaces in order of authority:
+
+1. Exact user bookmarks and named sessions.
+2. Decentralized DNS names (see [Networking Whitepaper](/docs/research/networking-whitepaper)).
+3. Legacy DNS names.
+
+## Appendix B — Glossary of browser grants
+
+| Grant | Meaning |
+| --- | --- |
+| `browser.tabs` | Read and manage tabs. |
+| `browser.bookmarks` | Manage bookmarks. |
+| `browser.history` | Read history. |
+| `identity.session` | Present the user's session to a site. |
+| `wallet.sign` | Sign a transaction on the user's behalf. |
+
+**Related:** [Orivon Whitepaper](/docs/research/orivon-whitepaper) · [Rendering Pipeline](/docs/research/rendering-pipeline) · [Browser Research](/docs/research/browser-research)

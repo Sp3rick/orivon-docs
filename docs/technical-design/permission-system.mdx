@@ -1,0 +1,288 @@
+---
+title: "Permission System"
+description: "The internal design of the Orivon permission system: requests, grants, scopes, temporary and persistent permissions, revocation and runtime enforcement."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["technical-design", "permissions"]
+keywords: "permissions, grants, scopes, revocation, capabilities, enforcement, consent"
+---
+
+The permission system is how Orivon decides what applications and modules are
+allowed to do. It is a capability model with a small core: nothing is allowed
+by default, everything is granted explicitly, and every use is checked at the
+moment it happens. This page documents the model end to end.
+
+## The model at a glance
+
+Three ideas define the system:
+
+1. **Default deny.** A fresh execution context has no capabilities.
+2. **Explicit grant.** A capability exists only after a grant, which usually
+   involves user consent.
+3. **Per use enforcement.** Every privileged call is checked against the current
+   grant state, not cached from the moment of grant.
+
+<Diagram caption="From request to use: the permission lifecycle.">
+  <Flow column>
+    <DiagramNode>Component requests</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy service evaluates</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>User consent (when required)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Grant recorded</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Enforced on every use</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Permission requests
+
+A request is a structured declaration, not a free form question. An application
+or module asks for a specific capability with a specific scope. The policy
+service understands the request and can evaluate it without interpreting human
+language.
+
+```json
+{
+  "request_id": "req-7f3a",
+  "capability": "storage.write",
+  "scope": {
+    "target": "app:dev.orivon.notes",
+    "path": "/notes"
+  },
+  "reason": "Save your notes",
+  "duration": "persistent"
+}
+```
+
+The request declares exactly what is wanted, where, and for how long. The
+system never asks "may I access storage?" in general; it asks for a precise,
+bounded operation.
+
+## Grant flow
+
+A grant is the result of an evaluation. The flow has three outcomes:
+
+<Diagram caption="The three branches of a permission request.">
+  <Flow column>
+    <DiagramNode>Request arrives</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Policy service evaluates</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Auto-grant | Consent required | Auto-deny</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Outcome | When | Result |
+| --- | --- | --- |
+| **Auto-grant** | Policy already covers the request (e.g. a persistent grant exists) | Capability handed back immediately |
+| **Consent required** | No existing grant covers the request | The user decides on a consent surface |
+| **Auto-deny** | Policy forbids the request (e.g. a denied scope) | Request rejected with a clear error |
+
+Consent surfaces show the request, its scope and its reason in plain language,
+and record the user's choice. The choice is stored as a grant or a denial.
+
+## Permission scopes
+
+Scopes are what make permissions precise. A scope restricts a capability to a
+specific subject:
+
+<CardGrid columns={2}>
+  <Card title="Origin scopes">
+    Bound to a web origin, for web content permissions.
+  </Card>
+  <Card title="Application scopes">
+    Bound to a runtime application identity.
+  </Card>
+  <Card title="Module scopes">
+    Bound to a specific module id.
+  </Card>
+  <Card title="Profile scopes">
+    Bound to a profile or identity, used for identity-wide capabilities.
+  </Card>
+</CardGrid>
+
+A request can only ever ask for a capability within a scope the caller is
+allowed to reference. A web page cannot ask for a capability scoped to your
+profile, because pages have no profile scope.
+
+## Temporary and persistent permissions
+
+The `duration` field in a request selects how the grant is stored:
+
+<CardGrid columns={2}>
+  <Card title="Temporary (ephemeral)">
+    Valid for the current session or a short window, kept in memory only,
+    cleared when the context ends. Used for one off approvals such as "allow
+    camera for this call."
+  </Card>
+  <Card title="Persistent">
+    Stored in the permission store, replayed on future requests. Persistent
+    grants are always visible and always revocable.
+  </Card>
+</CardGrid>
+
+The distinction exists so that convenience does not silently become permanent.
+The default for most capabilities is temporary; persistence is an explicit
+choice.
+
+## Revocation
+
+Revocation is the system's guarantee that a grant can always be withdrawn:
+
+1. The user (or policy) revokes a grant in the permission settings.
+2. The policy service updates the permission store.
+3. The change is emitted as a `permission-revoked` event on the
+   [Communication Bus](/docs/technical-design/communication-bus).
+4. Every component drops cached capabilities and in-flight privileged work fails
+   with a capability error.
+
+Revocation does not require the grantee's cooperation. The enforcement point is
+in the system, so even a hostile module cannot keep a revoked capability.
+
+<Callout type="warning" title="Security">
+  A capability that outlives its grant is a bug. If any component caches a
+  capability beyond the grant's validity, that component is a security defect.
+  Cache keys and tokens, never capabilities.
+</Callout>
+
+## Runtime enforcement
+
+Enforcement happens at the boundary between a component and a capability, in
+three places:
+
+<Diagram caption="Every privileged call passes three checks.">
+  <Flow column>
+    <DiagramNode>Call made</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Sandbox broker (process bound)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy service (grant valid?)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Capability executed</DiagramNode>
+  </Flow>
+</Diagram>
+
+1. The **sandbox broker** verifies the caller's process and origin.
+2. The **policy service** verifies a valid, unrevoked grant exists.
+3. Only then is the capability executed.
+
+The checks happen on every call. There is no fast path that skips them.
+
+## Module isolation
+
+Modules and applications live in separate execution contexts, and their
+permissions are separate grants. A module cannot use an application's grants,
+and vice versa, because the caller identity on every call is the context's
+identity, not a shared process identity.
+
+This is the mechanism behind the isolation promised in
+[Module Architecture](/docs/technical-design/module-architecture): even two
+modules in the same process cannot share capabilities.
+
+## Security boundaries
+
+The permission system defines the security boundaries of the whole product:
+
+<CardGrid columns={2}>
+  <Card title="Component boundary">
+    Renderers and runtime hosts are denied by default and granted individually.
+  </Card>
+  <Card title="Service boundary">
+    Core services only accept calls that arrive authenticated and authorized.
+  </Card>
+  <Card title="Key boundary">
+    No component ever holds a capability to access keys; signing is a wallet
+    service operation.
+  </Card>
+  <Card title="Storage boundary">
+    Storage capabilities are scoped by identity and path, never global.
+  </Card>
+</CardGrid>
+
+## Developer APIs
+
+Permission checks are exposed through a small, typed API in the Core API. The
+patterns every developer uses:
+
+```rust
+// Check, ask, and use. Asking is the only path that can show consent.
+let grant = policy.check(caller, Capability::StorageWrite {
+    path: "/notes".into(),
+}).await?;
+
+let grant = match grant {
+    Grant::Granted(g) => g,
+    Grant::NeedsConsent => policy.ask(
+        caller, Capability::StorageWrite { path: "/notes".into() }
+    ).await?,
+    Grant::Denied(reason) => return Err(reason.into()),
+};
+
+storage.write(grant, "note.md", bytes).await?;
+```
+
+The API makes the three outcomes explicit, so developers handle consent and
+denial instead of assuming access.
+
+## Permission data model
+
+<CardGrid columns={2}>
+  <Card title="Grant">
+    A capability plus a scope, a duration and an expiry.
+  </Card>
+  <Card title="Denial">
+    A negative record that turns future identical requests into auto-denies.
+  </Card>
+  <Card title="Policy">
+    Rules that can auto-grant or auto-deny classes of requests.
+  </Card>
+  <Card title="Permission store">
+    The persistent, per identity record of grants and denials.
+  </Card>
+</CardGrid>
+
+The store is authoritative state owned by the PolicyService, persisted by the
+storage service and cached for read performance.
+
+## Security notes
+
+- Default deny is structural: an undeclared capability does not exist.
+- Revocation is immediate and enforced by the system, not by the grantee.
+- Scopes prevent capability escalation across origins, applications and
+  profiles.
+
+## Performance notes
+
+- Grant checks are reads against an in-memory index; the hot path is
+  allocation light.
+- Consent surfaces are the only slow path, and they only appear when policy
+  requires them.
+- The permission store is written asynchronously so grants do not block
+  execution.
+
+<Callout type="success" title="Best practice">
+  Prefer temporary grants unless a capability is clearly long lived. Persistent
+  grants should be rare, visible and individually revocable.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include expiry driven re-consent for sensitive
+  capabilities, delegation (a module granting a sub-capability to its
+  dependencies), and fine grained time based scopes. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Sandbox](/docs/technical-design/sandbox): the process level enforcement layer.
+- [Module Architecture](/docs/technical-design/module-architecture): how modules declare permissions.
+- [Core Architecture](/docs/technical-design/core-architecture): where the policy service lives.
+
+## Further reading
+
+- [Security Architecture](/docs/technical-design/security-architecture): the full trust model.
+- [API Layer](/docs/technical-design/api-layer): the typed permission APIs.
+- [Application Lifecycle](/docs/technical-design/application-lifecycle): when permissions are checked.

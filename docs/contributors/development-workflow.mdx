@@ -1,0 +1,188 @@
+---
+title: "Development Workflow"
+description: "The complete contribution workflow: forking, branching, making changes, testing, committing, opening pull requests, reviewing and merging."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["contributors", "workflow"]
+keywords: "development workflow, forking, branching, commits, pull requests, merging"
+---
+
+Every contribution to Orivon flows through the same workflow. Understanding
+the whole loop makes each step smoother, whether it is your first PR or your
+hundredth. This page covers the complete path from fork to merge.
+
+## The workflow at a glance
+
+<Diagram caption="The contribution workflow.">
+  <Flow column>
+    <DiagramNode accent>Fork the repository</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Create a branch</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Make focused changes</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Test locally</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Commit with a clear message</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Open a pull request</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Address review feedback</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Merge and ship</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Step 1: Fork
+
+Fork the repository to your GitHub account. This gives you a workspace you
+fully control:
+
+```sh
+git clone https://github.com/your-username/orivon-docs.git
+cd orivon-docs
+git remote add upstream https://github.com/OrivonBrowser/orivon-docs.git
+```
+
+Keep your fork in sync before starting work:
+
+```sh
+git fetch upstream
+git checkout main
+git merge upstream/main
+```
+
+## Step 2: Create a branch
+
+Never commit to `main`. Create a descriptive branch from the current
+development branch:
+
+```sh
+git checkout -b fix/cli-json-output
+```
+
+Use the naming conventions from [Branching Strategy](/docs/contributors/branching-strategy):
+`feature/`, `fix/`, `docs/`, `chore/`.
+
+## Step 3: Make focused changes
+
+Small, focused changes review faster and fail less often:
+
+<CheckList
+  items={[
+    'One logical change per branch and per commit.',
+    'Keep the change as small as the task allows.',
+    'Follow the coding or documentation standards.',
+    'Include or update tests for the change.',
+    'Write changes that stand alone and are easy to revert.',
+  ]}
+/>
+
+## Step 4: Test locally
+
+Run the checks before you push. The exact commands are in the repository
+README and in [Testing Guidelines](/docs/contributors/testing-guidelines):
+
+```sh
+npm run lint
+npm run test
+npm run build
+```
+
+Local checks catch most of what CI would flag, and make your PR review ready
+on the first push.
+
+## Step 5: Commit
+
+Commit with a clear message that follows the repository convention:
+
+```text
+fix(cli): include headers in json output
+
+The json output mode was dropping response headers. Include them so
+consumers can inspect metadata without re-requesting.
+
+Fixes #214
+```
+
+| Type | Use for |
+| --- | --- |
+| `feat` | A new feature |
+| `fix` | A bug fix |
+| `docs` | Documentation only |
+| `refactor` | Code change with no behavior change |
+| `test` | Adding or fixing tests |
+| `chore` | Tooling and maintenance |
+
+The message explains what and why, and references the issue when one exists.
+
+## Step 6: Open a pull request
+
+Push the branch and open a PR with the
+[pull request template](/docs/contributors/templates/pull-request):
+
+```sh
+git push origin fix/cli-json-output
+```
+
+A good PR description covers:
+
+- What the change does.
+- Why it is needed.
+- How it was tested.
+- Any tradeoffs or follow-ups.
+
+See [Pull Requests](/docs/contributors/pull-requests) for the checklist.
+
+## Step 7: Review
+
+The review is where the change gets better. Expect feedback and respond
+constructively:
+
+<CheckList
+  items={[
+    'Reply to every comment, even to say you will handle it.',
+    'Push follow up commits; keep the history readable.',
+    'Rebase on the latest development branch when asked.',
+    'Never force-push over reviewed history without coordination.',
+  ]}
+/>
+
+The reviewer's job is detailed in [Code Reviews](/docs/contributors/code-reviews).
+
+## Step 8: Merge
+
+When the review approves and checks pass, the PR is merged. Depending on the
+repository, merging is done by a maintainer or by the author after approval.
+After merge:
+
+- Delete the branch.
+- Pull the updated main.
+- Celebrate the shipped contribution.
+
+<Callout type="success" title="Merge requirements">
+  A PR merges when it is approved by a reviewer, passes CI, and is rebased on
+  the current development branch. The [pull request checklist](/docs/contributors/pull-requests)
+  is the contract for readiness.
+</Callout>
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Huge PRs">
+    Large changes are hard to review and often rework anyway. Split them.
+  </Card>
+  <Card title="Out-of-date branches">
+    Long-lived branches drift. Rebase early and often.
+  </Card>
+  <Card title="Unrelated changes">
+    A PR should be one thing. Unrelated edits hide problems in review.
+  </Card>
+</CardGrid>
+
+## Related pages
+
+- [Branching Strategy](/docs/contributors/branching-strategy): branch types and lifecycle.
+- [Pull Requests](/docs/contributors/pull-requests): the PR process.
+- [Code Reviews](/docs/contributors/code-reviews): the review process.

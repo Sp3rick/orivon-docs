@@ -1,0 +1,110 @@
+---
+title: "Security Model"
+description: "In-depth paper on the Orivon security model: threat assumptions, layered defense, invariants, and the boundaries of protection."
+readingTime: 28
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["research", "architecture-paper", "security-model"]
+keywords: "security model, threat model, trust assumptions, layered defense, invariants, attack surface"
+---
+
+*Orivon Research Group · Security Research · Version 1.0 · Published 2026-06-20 · Status: Published*
+
+## Overview
+
+The security model is the complete statement of how Orivon stays safe: what
+it trusts, what it defends against, how the layers combine, and what
+invariants must hold. This paper analyses the model in depth. The
+[Security Whitepaper](/docs/research/security-whitepaper) states the model;
+this paper is the engineering analysis.
+
+## Trust assumptions
+
+| Trusted | Untrusted |
+| --- | --- |
+| OS and hardware | Modules |
+| Core (minimal, reviewed) | Sites and renderers |
+| User (in control) | Storefronts (for code) |
+| Keychain and HSM | Third-party dependencies |
+
+## Attack surface enumeration
+
+| Surface | Defense |
+| --- | --- |
+| Site renderer | Sandbox + site isolation. |
+| Module code | WASM sandbox + capability gates. |
+| Module ↔ module | Message-only, capability-gated. |
+| Module → host | Capability enforcement in core. |
+| Distribution | Signature verification. |
+| Browser chrome | Fixed security UI rules. |
+| Network | TLS-like channels, no raw sockets in renderers. |
+
+## Layered defense
+
+```
+L1 Renderer sandbox          ── sites
+L2 Module sandbox            ── WASM instances
+L3 Capability enforcement    ── host interface
+L4 Permission system         ── consent, grants
+L5 Supply-chain defenses     ── signatures, verification
+L6 Audit and telemetry       ── accountability
+```
+
+The layers are independent: if one fails, the next still holds.
+
+## Security invariants
+
+1. **Memory isolation.** No module can read another module's or the host's
+   memory.
+2. **No ambient authority.** Every privileged operation requires a grant.
+3. **Consent before capability.** Sensitive operations are never implicit.
+4. **Single grant registry.** The registry is the only source of permission
+   truth.
+5. **Verifiable artifacts.** Installed modules match their published,
+   signed artifacts.
+6. **Contained renderer.** A compromised renderer cannot reach module
+   capabilities.
+
+## Failure analysis
+
+| Scenario | Outcome |
+| --- | --- |
+| Malicious module | Fails at capability gates; can only use granted powers. |
+| Compromised module key | Revocation + rotation; artifact trust is per-version. |
+| Malicious site | Renderer sandbox contains it; wallet UI is host-rendered. |
+| Compromised storefront | Signature verification catches tampering. |
+| Compromised renderer | Network process holds credentials; isolation contains it. |
+
+## Security engineering process
+
+| Practice | Description |
+| --- | --- |
+| Threat modeling | Updated with every architecture change. |
+| Code review | Mandatory for core and security surfaces. |
+| Fuzzing | Continuous fuzzing of parsers and host interfaces. |
+| Audits | Independent audits of core, sandbox, and toolchain. |
+| Disclosure | Public [Responsible Disclosure](/docs/contributors/responsible-disclosure) program. |
+
+## Boundaries of protection
+
+The model does **not** protect against:
+
+- Physical attackers with device access.
+- Malicious host operating systems.
+- Users who are tricked into approving a dangerous capability
+  (mitigated by UX, not preventable).
+- Key exfiltration before keychain hardening.
+
+<Warning title="Scope">
+  Security is a property of the whole stack. When evaluating the platform,
+  audit the invariant list above, not individual features.
+</Warning>
+
+## Open questions
+
+- Post-quantum transitions for keys and signatures.
+- Hardware-backed isolation as an additional layer.
+- Formal verification of the capability checker.
+- Economic incentives in the vulnerability reward program.
+
+**Related:** [Security Whitepaper](/docs/research/security-whitepaper) · [Security Research](/docs/research/security-research) · [Core Architecture](/docs/research/core-architecture)

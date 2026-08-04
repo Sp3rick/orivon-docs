@@ -1,0 +1,143 @@
+---
+title: "Wallet System"
+description: "How keys, accounts and payments work natively in the ecosystem: a wallet that is part of the browser, not an extension."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["ecosystem", "wallet", "payments"]
+keywords: "wallet, keys, accounts, payments, signing, transactions, security, recovery"
+---
+
+The Wallet System is how the ecosystem handles money, keys and signatures. It is
+not a plugin bolted onto the browser. It is a native capability, which means the
+wallet is always there, always consistent, and always protected by the same
+sandboxing as everything else. This page explains how it works.
+
+## What the wallet is
+
+The wallet is the user's place for identity and value. It holds the keys behind
+an [identity](/docs/ecosystem/identity), shows balances across networks, and
+signs the transactions and messages that applications request.
+
+<Diagram caption="The wallet mediates between the user and every network and application.">
+  <Flow column>
+    <DiagramNode accent>Wallet</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Networks (chains, storage, identity)</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode dim>Applications</DiagramNode>
+    <FlowArrow />
+    <DiagramNode accent>Wallet</DiagramNode>
+  </Flow>
+</Diagram>
+
+## What a wallet does
+
+The wallet's job is narrower than a banking app and broader than a browser
+password manager:
+
+<CardGrid columns={2}>
+  <Card title="Holds keys">
+    It securely stores the private keys behind the user's identity and accounts.
+  </Card>
+  <Card title="Shows balances">
+    It aggregates balances and activity across the networks the user connects to.
+  </Card>
+  <Card title="Signs requests">
+    It signs transactions, logins and data with explicit user consent.
+  </Card>
+  <Card title="Recovers access">
+    It provides recovery flows so users are not one lost device away from losing
+    everything.
+  </Card>
+</CardGrid>
+
+## Key management
+
+Keys are the user's root of trust, so the wallet treats them with care. The
+design follows a few rules:
+
+1. **Private keys never leave the wallet's protection.** Applications ask for
+   signatures, not for keys.
+2. **Protection in depth.** Keys sit behind the operating system's secure
+   storage, the wallet's own encryption, and the user's passphrase.
+3. **Separation.** The wallet can hold multiple accounts and profiles, each with
+   its own keys, so a compromised profile does not expose everything.
+4. **Verifiable.** The wallet shows exactly what is being signed, in clear
+   terms, before anything leaves the device.
+
+<Callout type="danger" title="Caution">
+  Whoever holds the keys controls the identity. That is the point of ownership,
+  but it is also the risk. Always keep a recovery copy in a safe place, and treat
+  any request to "export" or "back up" your key with suspicion. See the
+  [Security Model](/docs/ecosystem/security-model) for phishing guidance.
+</Callout>
+
+## Signing and consent
+
+Applications never touch the user's keys. They request signatures through the
+runtime API, and the wallet shows a clear consent screen. This is the same
+pattern as a hardware wallet, but built into the browser and available to every
+web application.
+
+The consent flow is explicit about three things:
+
+<CheckList
+  items={[
+    <><strong>What</strong> is being signed (a message, a transfer, a login).</>,
+    <><strong>Who</strong> is requesting it (the application identity).</>,
+    <><strong>What it costs</strong>, if anything (network fees, approvals, data shared).</>,
+  ]}
+/>
+
+## Identity and the wallet
+
+The wallet and identity are two sides of the same coin. The
+[Identity](/docs/ecosystem/identity) describes who you are; the wallet holds the
+keys that prove it. When you sign in to an application, the wallet approves a
+request that links your identity to that application. When you sign a
+transaction, the wallet proves you control the address that is sending value.
+
+## Payments and value
+
+Value in the ecosystem flows across networks. The wallet presents a consistent
+interface over them: send, request, approve and receive, regardless of which
+network is underneath. The [Core](/docs/ecosystem/core) value service provides
+the common model that makes this consistency possible.
+
+## Security best practices for users
+
+<CardGrid columns={2}>
+  <Card title="Use a passphrase">
+    The passphrase encrypts the wallet locally. A good passphrase protects a
+    stolen device.
+  </Card>
+  <Card title="Keep recovery separate">
+    Store the recovery copy somewhere the wallet itself cannot reach.
+  </Card>
+  <Card title="Check what you sign">
+    Slow down on any signature request that looks unusual, even inside the
+    wallet.
+  </Card>
+  <Card title="Verify application identity">
+    Check the Web3 Score and the application's name before approving.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Next">
+  The wallet protects identity, but what is identity exactly? Read
+  [Identity](/docs/ecosystem/identity) next.
+</Callout>
+
+## Related pages
+
+- [Identity](/docs/ecosystem/identity): the identity the wallet protects.
+- [Security Model](/docs/ecosystem/security-model): how keys and signing are kept safe.
+- [Web3 Score](/docs/ecosystem/web3-score): how to judge the applications that ask to sign.
+
+## Further reading
+
+- [Core](/docs/ecosystem/core): the value service behind the wallet.
+- [SDK](/docs/ecosystem/sdk): connecting applications to the wallet.

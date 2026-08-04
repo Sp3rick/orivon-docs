@@ -1,0 +1,158 @@
+---
+title: "Documentation Standards"
+description: "The Orivon documentation standards: writing style, formatting, markdown conventions, images, diagrams, examples and cross-linking."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 10
+tags: ["contributors", "standards"]
+keywords: "documentation standards, writing style, formatting, markdown conventions, diagrams, examples, cross-linking"
+---
+
+Documentation is how users meet the platform. These standards keep Orivon's
+documentation clear, consistent and trustworthy, whether it is a README, a
+guide, or this site. If you write or edit docs, this page is your contract.
+
+<Callout type="success" title="The test">
+  A page is good when a reader can answer five questions: What should I do?
+  Why is it important? How do I do it correctly? What mistakes should I avoid?
+  Where can I learn more? If a page does not answer all five, it is not done.
+</Callout>
+
+## Writing style
+
+Write for a reader who is busy and searching:
+
+| Rule | Example |
+| --- | --- |
+| Use plain language | "Start the server" not "instantiate the service" |
+| Prefer active voice | "The runtime loads the module" |
+| Lead with the point | Answer first, explain after |
+| Use present tense | "The CLI runs tests" |
+| Address the reader | "You can verify with `orivon test`" |
+
+Keep sentences and paragraphs short. Every paragraph should survive being
+read alone.
+
+## Formatting
+
+- Headings use sentence case: `## Setting up the environment`, not
+  `## Setting Up The Environment`.
+- Use one H1 per page; the frontmatter title provides it.
+- Nest headings without skipping levels.
+- Bold for emphasis, not for whole sentences.
+- Use lists for enumerations, tables for comparisons, paragraphs for prose.
+
+## Markdown conventions
+
+This documentation site is Markdown with MDX components:
+
+```mdx
+---
+title: "Page Title"
+description: "One or two sentence summary for search and previews."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["contributors", "standards"]
+keywords: "documentation, markdown, conventions"
+---
+```
+
+| Frontmatter field | Required | Purpose |
+| --- | --- | --- |
+| `title` | Yes | Page heading and search title |
+| `description` | Yes | Search preview and metadata |
+| `readingTime` | Yes | Estimated minutes |
+| `lastUpdated` | Yes | Last change date |
+| `order` | Yes | Position in the level |
+| `tags` | No | Content categories |
+| `keywords` | Yes | Search terms |
+
+## Code blocks
+
+Code is the proof in documentation:
+
+- Label code blocks with their language: ```` ```ts ````, ```` ```toml ````.
+- Show complete, runnable examples where possible.
+- Prefer realistic names over placeholder ones.
+- Keep lines within the block width; no scrolling for the reader.
+
+```ts
+const verified = await app.identity.verify(address);
+```
+
+Code that the reader cannot run should say so explicitly.
+
+## Callouts
+
+Use callouts for emphasis, sparingly and consistently:
+
+| Callout | Use for |
+| --- | --- |
+| Info | Supplementary context |
+| Success | Best practice or recommendation |
+| Warning | A mistake to avoid or a hazard |
+| Danger | A security or safety issue |
+
+<Callout type="warning" title="Use callouts rarely">
+  If every paragraph is a callout, none of them are. Reserve callouts for
+  content that genuinely stands apart from the prose.
+</Callout>
+
+## Images and diagrams
+
+- Prefer diagrams over prose for structure and flow.
+- Give every image and diagram an accessible caption.
+- Keep diagrams simple: one idea, few nodes.
+- Export at the site's required format and resolution.
+
+See [Diagram](/docs/contributors/documentation-contributions) for the
+diagram conventions and tooling.
+
+## Examples
+
+Examples make abstract guidance concrete:
+
+<CheckList
+  items={[
+    'Every example states its prerequisites.',
+    'Examples are tested or clearly marked as illustrative.',
+    'Show input and expected output for commands.',
+    'Prefer a complete example over a fragment when the page allows it.',
+    'Link the example to its source when one exists.',
+  ]}
+/>
+
+## Cross-linking
+
+Links are how readers navigate:
+
+- Link to related pages at the end of every page.
+- Use descriptive link text, never "here" or "this".
+- Reference the canonical page for a topic; do not duplicate content.
+- Verify links when the site's routes change.
+
+```mdx
+See [Permissions](/docs/developers/permissions) for the full model.
+```
+
+## Voice and tone
+
+The docs speak plainly and respectfully:
+
+- No jargon without explanation on first use.
+- No marketing language; the work should speak for itself.
+- Assume the reader is capable and busy.
+- Acknowledge uncertainty honestly instead of papering over it.
+
+<Callout type="success" title="Editing is a contribution">
+  Improving an existing page is one of the highest value contributions you
+  can make. Every reader after you benefits. See
+  [Documentation Contributions](/docs/contributors/documentation-contributions).
+</Callout>
+
+## Related pages
+
+- [Documentation Contributions](/docs/contributors/documentation-contributions): how to contribute docs.
+- [Coding Standards](/docs/contributors/coding-standards): the code conventions.
+- [Code Reviews](/docs/contributors/code-reviews): reviewing docs changes.

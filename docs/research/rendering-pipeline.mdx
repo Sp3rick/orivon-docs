@@ -1,0 +1,83 @@
+---
+title: "Rendering Pipeline"
+description: "In-depth paper on the Orivon rendering pipeline: parsing, layout, rasterization, compositing, and the Web3-aware extension points."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["research", "architecture-paper", "rendering-pipeline"]
+keywords: "rendering pipeline, parser, layout, rasterization, compositing, rendering engine, Web3, performance"
+---
+
+*Orivon Research Group · Browser Engineering · Version 1.0 · Published 2026-06-16 · Status: Published*
+
+## Overview
+
+The rendering pipeline turns web content into pixels: parsing, layout,
+rasterization, and compositing. Orivon builds on a proven engine architecture
+and extends it with Web3-aware surfaces. This paper analyses the pipeline and
+its extension points.
+
+## Pipeline stages
+
+```
+network → parsing → DOM/CSSOM → style → layout → paint → rasterize → composite
+                 │                                        │
+                 └── script (JS engine) ───────────────────┘
+```
+
+| Stage | Responsibility |
+| --- | --- |
+| Parsing | HTML → DOM, CSS → CSSOM. |
+| Style | Resolve computed styles. |
+| Layout | Compute geometry (boxes, text). |
+| Paint | Produce paint records. |
+| Rasterize | Paint records → textures. |
+| Composite | Textures → frame on the GPU. |
+
+## Rendering threads
+
+| Thread | Work | Blocking |
+| --- | --- | --- |
+| Main thread | DOM, layout, script | Input, scripts. |
+| Compositor thread | Compositing, input routing | Never DOM. |
+| Raster workers | Rasterization | Independent tiles. |
+| GPU | Textures, compositing | — |
+
+Input is routed on the compositor thread and never waits on the main thread
+when possible.
+
+## Performance model
+
+| Concern | Mitigation |
+| --- | --- |
+| Script cost | V8-tiered compilation; worker offload. |
+| Layout thrash | Style/layout invalidation tracking. |
+| Raster cost | Tile-based, incremental rasterization. |
+| Compositing | GPU compositing, damage-based updates. |
+| Memory | Textures evicted by distance; budgets per tab. |
+
+## Web3-aware extension points
+
+The pipeline stays standards-compliant and adds extension surfaces:
+
+| Surface | Purpose |
+| --- | --- |
+| Secure sign-in UI | Host-rendered, never web content. |
+| Wallet iframe | Privileged, capability-gated rendering. |
+| Decentralized resource rendering | Address bar and protocol integration. |
+| Module UI | Module windows rendered via the normal pipeline. |
+
+## Security considerations
+
+- Renderers are sandboxed and site-isolated.
+- No untrusted content is ever rendered in chrome UI.
+- Media and fonts are validated; parsing is fuzzed continuously.
+- The compositor never executes web content.
+
+## Open questions
+
+- Progressive WebAssembly-based rendering for module UIs.
+- Reducing compositor latency on low-power devices.
+- Sub-frame-level compositing for complex Web3 dashboards.
+
+**Related:** [Browser Architecture](/docs/research/browser-architecture) · [Performance Research](/docs/research/performance-research) · [Browser Whitepaper](/docs/research/browser-whitepaper)

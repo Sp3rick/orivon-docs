@@ -1,0 +1,199 @@
+---
+title: "Coding Standards"
+description: "The Orivon coding standards: naming conventions, formatting, architecture principles, comments, error handling, performance and security."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["contributors", "standards"]
+keywords: "coding standards, naming conventions, formatting, architecture principles, comments, error handling, performance, security"
+---
+
+Code is read far more often than it is written. Orivon's coding standards
+keep the codebase consistent, reviewable and safe, across every repository
+and every contributor. They are enforced by tooling where possible and by
+review culture where it is not.
+
+<Callout type="info" title="Tooling first">
+  Formatting and linting are enforced automatically by the configured tools.
+  Run the repository's checks before pushing; the CI runs the same checks.
+</Callout>
+
+## Naming conventions
+
+| Thing | Convention | Example |
+| --- | --- | --- |
+| Types | PascalCase | `PermissionRequest` |
+| Functions and variables | lowerCamelCase | `resolveIdentity` |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRIES` |
+| Files | kebab-case | `permission-service.ts` |
+| Tests | `*.test.ts` / `*.spec.ts` | `permission-service.test.ts` |
+| Public API | Stable, deliberate | `app.storage.put` |
+
+Names say what the value is, not what it is used for:
+
+```ts
+// good
+const activeConnections = new Set();
+
+// avoid
+const stuff = new Set();
+```
+
+## Formatting
+
+- Formatter enforced automatically; run it before committing.
+- Two spaces of indentation, no tabs.
+- Line length stays under the repository limit.
+- Semicolons and trailing commas follow the formatter defaults.
+- Imports are ordered and grouped by convention.
+
+Do not fight the formatter. If formatting differs from what you would write,
+the formatter wins.
+
+## Architecture principles
+
+The codebase follows the platform's architecture principles:
+
+<CheckList
+  items={[
+    'Capability based access: never bypass permissions.',
+    'Services are behind boundaries: no reaching across layers.',
+    'Small, focused modules with clear responsibilities.',
+    'Fail loudly: typed errors, not silent fallbacks.',
+    'Privacy by default: collect and store the minimum.',
+    'Idempotent where possible, replay safe where not.',
+  ]}
+/>
+
+The principles are defined in the
+[architecture overview](/docs/technical-design/architecture-overview) and
+enforced in review.
+
+## Comments
+
+Comments explain why, not what:
+
+```ts
+// good: explains the constraint the code must not violate
+// The seed must never be written to durable storage or logs.
+const seed = readSeed();
+
+// avoid: restates the code
+// read the seed from storage
+const seed = readSeed();
+```
+
+<Callout type="success" title="Best practice">
+  Prefer self documenting code, and add a comment only when it explains
+  something the code cannot: a design constraint, a historical decision, or a
+  subtle correctness requirement. When a comment becomes stale, it is worse
+  than no comment.
+</Callout>
+
+## Error handling
+
+Errors are typed and handled deliberately:
+
+```ts
+try {
+  await app.storage.put(blob);
+} catch (error) {
+  if (error.code === 'capacity_exceeded') {
+    return {status: 'full'};
+  }
+  throw error;
+}
+```
+
+| Rule | Why |
+| --- | --- |
+| Throw typed errors | Callers can react by code |
+| Never swallow errors silently | Evidence is lost |
+| Handle the cases you mean | Unhandled cases rethrow |
+| Log with context | Logs must be findable |
+
+See [Error Handling](/docs/technical-design/error-handling).
+
+## Performance
+
+Performance work follows the platform budgets:
+
+- Profile before optimizing; measure before and after.
+- Keep the hot path lean; move cost out of it.
+- Never block the main thread.
+- Cache deliberately, with invalidation.
+- Prefer identifiers over large payloads on the bus.
+
+See [Performance](/docs/developers/performance).
+
+## Security
+
+Security expectations are absolute:
+
+<CheckList
+  items={[
+    'No secrets in code, config, logs or content addressed storage.',
+    'Never bypass the permission or sandbox boundaries.',
+    'Verify identities where trust matters.',
+    'Validate input at every boundary.',
+    'Handle revocation and denial as first-class outcomes.',
+    'Report security issues through the disclosure process, not issues.',
+  ]}
+/>
+
+See [Security Policy](/docs/contributors/security-policy) and
+[Security Model](/docs/ecosystem/security-model).
+
+## Testing expectations
+
+Code changes ship with tests:
+
+| Change | Expected test |
+| --- | --- |
+| New logic | Unit tests for the behavior |
+| Service interaction | Integration tests with mocks |
+| Lifecycle behavior | End-to-end test where practical |
+| Bug fix | A regression test that would have caught it |
+
+See [Testing Guidelines](/docs/contributors/testing-guidelines).
+
+## Language specific conventions
+
+The repository is primarily TypeScript and Rust:
+
+<Accordion title="TypeScript">
+  Strict mode is enabled. Avoid `any`; model with types. Use `async/await`.
+  Prefer explicit returns over implicit ones at function ends.
+</Accordion>
+
+<Accordion title="Rust">
+  Follow `clippy` and `rustfmt` with the repository configuration. Prefer
+  small, focused types and explicit error types over panics.
+</Accordion>
+
+## The review gate
+
+The coding standards are enforced at review. A change that meets the bar:
+
+<CheckList
+  items={[
+    'Is formatted and lint clean.',
+    'Follows naming and architecture conventions.',
+    'Handles errors deliberately.',
+    'Includes appropriate tests.',
+    'Contains no security regressions.',
+    'Is small enough to review confidently.',
+  ]}
+/>
+
+<Callout type="info" title="When in doubt, ask">
+  Standards evolve through discussion. If a rule feels wrong for your change,
+  raise it in review or the community discussions. Standards are meant to
+  serve the work, and improving them is itself a contribution.
+</Callout>
+
+## Related pages
+
+- [Documentation Standards](/docs/contributors/documentation-standards): the docs conventions.
+- [Code Reviews](/docs/contributors/code-reviews): how standards are enforced.
+- [Best Practices](/docs/developers/best-practices): the developer-level guide.

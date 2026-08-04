@@ -1,0 +1,120 @@
+---
+title: "Browser Architecture"
+description: "In-depth paper on the Orivon browser: process model, tab and session management, chrome, and the integration surface for wallet and identity."
+readingTime: 30
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["research", "architecture-paper", "browser"]
+keywords: "browser architecture, process model, site isolation, network process, tabs, sessions, chrome, wallet integration"
+---
+
+*Orivon Research Group · Version 1.0 · Published 2026-06-30 · Status: Published*
+
+## Overview
+
+The Orivon browser is a multi-process web browser with strict privilege
+separation, an integrated wallet and identity surface, and a permission-driven
+model. This paper analyses the browser's internal architecture in depth:
+processes, tab and session management, the chrome (UI) layer, and the seams
+where platform subsystems attach.
+
+## Process model
+
+### Process inventory
+
+| Process | Count | Privileges | Failure impact |
+| --- | --- | --- | --- |
+| Browser (UI/chrome) | 1 | All platform APIs | Full browser restart. |
+| Network | 1 | Network I/O, credential storage access | All network operations pause. |
+| Renderer | per site | Rendering only, sandboxed | That site's tabs crash. |
+| GPU | 1 | Compositing | Rendering falls back to software. |
+| Runtime host | 1+ | Capability-gated host functions | Affected modules terminate. |
+| Utility (extensions) | per utility | Scoped | Scoped. |
+
+### Site isolation
+
+Each origin group runs in its own renderer. Cross-origin data is never placed
+in the same process, so a compromise of one origin cannot read another
+origin's memory. This is enforced at the process boundary, not by policy.
+
+### The network process
+
+All network I/O — including the decentralized transports — flows through the
+network process. Renderers never open raw sockets. The network process holds
+credential material and applies the permission policy, so a compromised
+renderer cannot directly exfiltrate credentials.
+
+## Tab and session model
+
+### Tab lifecycle
+
+```
+created → loading → interactive → (background/foreground) → closed
+```
+
+Tabs are bound to a session. A session isolates cookies, credentials, and
+grants, allowing the same user to operate multiple identities without
+cross-contamination.
+
+### Named sessions
+
+| Session property | Behavior |
+| --- | --- |
+| Identity binding | A session presents a specific DID. |
+| Storage partition | Each session has separate local storage. |
+| Grant scope | Grants are issued within a session context. |
+| Portability | Sessions can be exported/imported as encrypted bundles. |
+
+## Chrome (UI) layer
+
+### Components
+
+| Component | Responsibility |
+| --- | --- |
+| Address bar | URL + DID resolution, site permissions summary. |
+| Permission panel | Grant state, history, revocation. |
+| Wallet surface | Account list, signing approvals. |
+| Identity surface | DID, credentials, sessions. |
+| Tab strip | Tab management and session indicators. |
+
+### Security UI rules
+
+- Signing and credential approvals are rendered by the browser process, never
+  by web content or modules.
+- Permission state is always visible from the address bar.
+- UI spoofing is resisted by fixed layout rules for security surfaces.
+
+## Integration seams
+
+The browser attaches platform subsystems at defined seams:
+
+| Seam | Subsystem | Interface |
+| --- | --- | --- |
+| Wallet | Wallet service | Approval flows via browser UI. |
+| Identity | Identity service | DID/credential presentation UI. |
+| Modules | Runtime host | Module windows and permissions. |
+| Networking | Network process | Transport abstractions. |
+
+## Security considerations
+
+- Renderer compromise is contained by the process model.
+- Network credentials never enter renderers.
+- Module capabilities are enforced by the runtime, not by the UI.
+- The chrome is the only UI that can approve privileged operations.
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Process memory | Per-process budgets, renderer recycling. |
+| Startup latency | Lazy process spawning, preloaded UI. |
+| Tab switching | Background tabs are throttled. |
+| Rendering | GPU compositing; software fallback. |
+
+## Open questions
+
+- How to bound the memory cost of many isolated renderers?
+- How to expose decentralized resources in the address bar without clutter?
+- How to make session portability usable without a central account?
+
+**Related:** [Browser Whitepaper](/docs/research/browser-whitepaper) · [Rendering Pipeline](/docs/research/rendering-pipeline) · [Browser Research](/docs/research/browser-research)

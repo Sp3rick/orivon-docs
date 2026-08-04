@@ -1,0 +1,71 @@
+---
+title: "Changelog"
+description: "Versioned change history for the Orivon APIs: additions, changes, deprecations and removals."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 34
+tags: ["api-reference", "changelog"]
+keywords: "changelog, release notes, version history, api changes, breaking changes, additions, deprecations"
+---
+
+The changelog records changes to the public API surface. It follows the policy
+in [Versioning](/docs/api-reference/versioning); breaking changes are only
+released in major versions.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Current: 1.0.0 (July 31, 2026)
+
+The stable public API reference. This release establishes the baseline
+described across this reference.
+
+### Added
+
+- Full facade set: runtime, core, browser, module, application, wallet,
+  identity, storage, networking, dns, permissions, security.
+- Event registry with `domain:action` naming.
+- Error code registry and RFC 7807 problem details for HTTP endpoints.
+- CLI: `init`, `build`, `test`, `run`, `package`, `publish`, `manifest`,
+  `dns`, `key`.
+- Configuration, manifest and schema formats.
+
+### Changed
+
+- Nothing — first stable release.
+
+### Deprecated
+
+- Initial deprecations announced. See [Deprecations](/docs/api-reference/deprecations).
+
+## 0.9.0 (maintenance)
+
+- Renamed `orivon.platform` to root-level `platform`.
+- Introduced `Page<T>` pagination; collection methods now return pages.
+- Timeout configuration moved from per-call options to the runtime profile.
+
+## 0.8.0 (archived)
+
+- Initial public preview. Superseded by 0.9.0. No longer supported.
+
+## Version support
+
+| Version | Support | Notes |
+| --- | --- | --- |
+| `1.0` | Active | Current. |
+| `0.9` | Maintenance | Bug and security fixes only. |
+| `0.8` | EOL | Archived. |
+
+## Reading the changelog
+
+- **Added** — new, non-breaking surface.
+- **Changed** — behavior or signature updates that are not breaking under the
+  compatibility rules.
+- **Deprecated** — surface announced for removal in the next major version.
+- **Removed** — surface deleted; usually only in major releases.
+
+<Note title="Machine-readable">
+  A machine-readable version of this changelog is published at
+  `https://schemas.orivon.dev/changelog.json` and updated on every release.
+</Note>
+
+**Related:** [Versioning](/docs/api-reference/versioning) · [Deprecations](/docs/api-reference/deprecations) · [Overview](/docs/api-reference/overview)

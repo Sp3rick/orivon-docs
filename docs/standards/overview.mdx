@@ -1,0 +1,198 @@
+---
+title: "Standards & Specifications Overview"
+description: "How Orivon standardizes its ecosystem: what standards are, why they matter, how they evolve, and how you participate."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 1
+tags: ["standards", "overview"]
+keywords: "standards, specifications, OSP, registry, lifecycle, categories, roadmap"
+---
+
+Orivon is a protocol, a browser and a growing ecosystem. Protocols need
+specifications: written, versioned, reviewable documents that define how things
+work so that anyone can implement, audit and extend them. This section is the
+home of those documents, the Orivon Specifications (OSP) series.
+
+The goal is to feel like a mature engineering ecosystem: Ethereum has EIPs,
+Bitcoin has BIPs, the web has W3C and WHATWG documents, and the internet has
+IETF RFCs. Orivon has OSPs. This page explains what that means and how to find
+your way around.
+
+## What standards are
+
+A standard is a written contract between implementers. It says what a component
+MUST do, what it SHOULD do, and what it MAY do, in terms precise enough that two
+independent implementations agree without talking to each other.
+
+<StatGrid>
+  <Stat value="15" label="Draft specifications" />
+  <Stat value="14" label="Categories covered" />
+  <Stat value="0.1.0" label="Baseline version" />
+  <Stat value="OSP" label="Series identifier" />
+</StatGrid>
+
+Standards are not documentation of one implementation. They are the common
+ground that many implementations build on. The distinction is central to this
+section, and [Why Standards Matter](/docs/standards/why-standards-matter)
+explains it in depth.
+
+## Why Orivon uses open specifications
+
+Orivon commits to open specifications for practical, not philosophical,
+reasons:
+
+<CheckList
+  items={[
+    'Interoperability: any compliant implementation can talk to any other.',
+    'Auditability: security and privacy claims can be reviewed by anyone.',
+    'Third party development: teams can build modules, tools and services without private access.',
+    'Stability: a published version is a promise that implementers can rely on.',
+    'Community collaboration: decisions are made in the open, not in one company.',
+  ]}
+/>
+
+The [specification registry](/docs/standards/specification-registry) is the
+single place to look up what is defined today, and the
+[lifecycle](/docs/standards/specification-lifecycle) describes how a document
+moves from idea to accepted standard.
+
+## How standards evolve
+
+Standards change slowly and deliberately. Every document in this section moves
+through the same lifecycle:
+
+<Diagram caption="The specification lifecycle.">
+  <Flow column>
+    <DiagramNode accent>Idea</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Draft</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Discussion</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Review</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Accepted</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implemented</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Deprecated</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Archived</DiagramNode>
+  </Flow>
+</Diagram>
+
+A specification only becomes **Accepted** after review, and only becomes
+authoritative when the reference implementation ships it. Nothing in this
+section is treated as finished before that. The
+[Specification Lifecycle](/docs/standards/specification-lifecycle) page covers
+every stage in detail.
+
+## How contributors participate
+
+Anyone can contribute, and the process is documented end to end:
+
+<Steps>
+  <Step title="Propose">
+    Open a proposal describing the idea, its goals and its non-goals.
+  </Step>
+  <Step title="Draft">
+    Convert the proposal into an OSP document using the
+    [template](/docs/standards/specification-template).
+  </Step>
+  <Step title="Review">
+    Submit for public review. The draft is revised through discussion.
+  </Step>
+  <Step title="Accept">
+    Editors merge the accepted version into the
+    [registry](/docs/standards/specification-registry).
+  </Step>
+</Steps>
+
+The [Writing Specifications](/docs/standards/writing-specifications) page
+explains how to write the document itself, including the RFC terminology that
+every OSP uses.
+
+## Specification categories
+
+Specifications are organized into categories so related documents are easy to
+find:
+
+<CardGrid columns={2}>
+  <Card title="System">Runtime, Core, Browser, Modules, Process</Card>
+  <Card title="Interfaces">SDK, APIs, Events, Configuration, CLI</Card>
+  <Card title="Identity & value">Wallet, Identity, Cryptography</Card>
+  <Card title="Network & data">DNS, Networking, Storage</Card>
+  <Card title="Trust">Security, Permissions, Package Format</Card>
+  <Card title="Developer tools">Developer Tools, Conformance</Card>
+</CardGrid>
+
+The full category list, including User Experience, appears on the
+[Specification Registry](/docs/standards/specification-registry) page, which
+supports filtering by category, status and version.
+
+## Current specification status
+
+The standards program is young, and that is reflected in the status of every
+document:
+
+<CardGrid columns={3}>
+  <Card title="15 in draft" to="/docs/standards/draft-specifications">
+    All fifteen OSP-001 to OSP-015 documents are public drafts.
+  </Card>
+  <Card title="0 accepted" to="/docs/standards/accepted-specifications">
+    Acceptance requires review and a reference implementation. None have shipped yet.
+  </Card>
+  <Card title="0 deprecated" to="/docs/standards/deprecated-specifications">
+    The deprecation process is defined and documented, ready for future use.
+  </Card>
+</CardGrid>
+
+Every draft is clearly labeled **Draft** on its page. Nothing is presented as
+finished that is not. The [Compliance](/docs/standards/compliance) and
+[Conformance Testing](/docs/standards/conformance-testing) pages define what
+"done" will mean.
+
+<Callout type="warning" title="Status clarity">
+  An OSP in Draft is not a guarantee. Drafts describe intent and direction; only
+  an Accepted specification is a promise. Read the status before relying on any
+  document in this section.
+</Callout>
+
+## Future roadmap
+
+Standards work is continuous. The near term plan:
+
+<Timeline
+  phases={[
+    {
+      period: 'Now',
+      title: 'Stabilize the drafts',
+      status: 'current',
+      children:
+        'Review and tighten OSP-001 to OSP-015 against the reference implementation, updating versions as details settle.',
+    },
+    {
+      period: 'Next',
+      title: 'Accept the first specifications',
+      status: 'future',
+      children:
+        'Move the first documents from Draft to Accepted as the implementation catches up and conformance tests are written.',
+    },
+    {
+      period: 'Later',
+      title: 'Grow the registry',
+      status: 'future',
+      children:
+        'Add new OSPs for emerging areas, formalize the certification process, and ship the conformance test suite as a tool.',
+    },
+  ]}
+/>
+
+The detailed plan is on the [Roadmap](/docs/standards/roadmap) page.
+
+## Related pages
+
+- [Why Standards Matter](/docs/standards/why-standards-matter): the reasoning behind this section.
+- [Specification Lifecycle](/docs/standards/specification-lifecycle): how documents progress.
+- [Specification Registry](/docs/standards/specification-registry): search every specification.
+- [Draft Specifications](/docs/standards/draft-specifications): the fifteen current drafts.

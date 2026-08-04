@@ -1,0 +1,140 @@
+---
+title: "Identity API"
+description: "Reference for the Identity API: decentralized identifiers, credentials, sessions and verification."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 11
+tags: ["api-reference", "identity-api"]
+keywords: "identity api, did, decentralized identifier, credentials, session, verify credential, resolve did, sign out"
+---
+
+The Identity API manages the user's decentralized identity: DIDs,
+verifiable credentials, sessions and resolution/verification.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: IdentityFacade
+
+### `identity.getDid()`
+
+Returns the DID of the active identity profile.
+
+```ts
+const did = await app.identity.getDid();
+// did = "did:orivon:1:8f2a..."
+```
+
+**Returns:** `Promise<string>`
+
+**Throws:** `ERR_PERMISSION_DENIED` · `ERR_NO_IDENTITY` if no profile is active.
+
+### `identity.getDidDocument()`
+
+Returns the full DID document of the active identity.
+
+**Returns:** `Promise<DidDocument>`
+
+### `identity.resolveDid(did)`
+
+Resolves any DID into its document, via the decentralized registry.
+
+```ts
+const doc = await app.identity.resolveDid('did:orivon:1:8f2a');
+```
+
+**Returns:** `Promise<DidDocument>`
+
+**Throws:** `ERR_DID_NOT_FOUND` · `ERR_NETWORK_UNREACHABLE`
+
+### `identity.listCredentials()`
+
+Lists verifiable credentials issued to or by the active identity.
+
+**Returns:** `Promise<Credential[]>`
+
+### `identity.createCredential(claims, options?)`
+
+Creates a self-issued verifiable credential signed by the active identity.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `claims` | `Record<string, unknown>` | Claim fields. |
+| `options.type` | `string \| undefined` | Credential type. Default `"VerifiableCredential"`. |
+| `options.expiresAt` | `number \| undefined` | Epoch milliseconds expiry. |
+
+**Returns:** `Promise<Credential>`
+
+### `identity.issueCredential(recipientDid, claims, options?)`
+
+Issues a credential to another DID. Requires `identity.issue` permission.
+
+**Returns:** `Promise<Credential>`
+
+**Throws:** `ERR_PERMISSION_DENIED` · `ERR_INVALID_DID`
+
+### `identity.verifyCredential(credential)`
+
+Cryptographically verifies a credential: signature, issuer DID, expiry and
+revocation status.
+
+```ts
+const result = await app.identity.verifyCredential(credential);
+if (result.valid) {
+  // result.issuer, result.subject, result.claims
+}
+```
+
+**Returns:** `Promise<VerificationResult>` — `{valid, reasons: string[], issuer?, subject?, claims?}`.
+
+### `identity.getSession()`
+
+Returns the current session record.
+
+**Returns:** `Promise<Session>`
+
+**Throws:** `ERR_SESSION_EXPIRED` if no valid session exists.
+
+### `identity.signOut()`
+
+Invalidates the current session on this device.
+
+**Returns:** `Promise<void>`
+
+## Types
+
+### `DidDocument`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | The DID. |
+| `verificationMethod` | `VerificationMethod[]` | Public keys and algorithms. |
+| `authentication` | `string[]` | Key IDs usable for auth. |
+| `assertionMethod` | `string[]` | Key IDs usable for credentials. |
+| `service` | `ServiceEndpoint[] \| undefined` | Service endpoints. |
+
+### `Credential`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Credential identifier. |
+| `type` | `string[]` | Credential types. |
+| `issuer` | `string` | Issuer DID. |
+| `subject` | `string` | Subject DID. |
+| `claims` | `Record<string, unknown>` | Claim payload. |
+| `issuedAt` / `expiresAt` | `number \| undefined` | Validity window. |
+| `proof` | `Proof` | Signature, key id and algorithm. |
+
+### `Session`
+
+`{profileId, did, deviceId, issuedAt, expiresAt}`
+
+## Identity events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `identity:session-changed` | `Session \| null` | Session created, refreshed or ended. |
+| `identity:profile-switched` | `{did}` | Active profile changed. |
+| `identity:credential-issued` | `Credential` | A credential was issued. |
+| `identity:credential-revoked` | `{id}` | A credential was revoked. |
+
+**Related:** [Security API](/docs/api-reference/security-api) · [Authentication](/docs/api-reference/authentication) · [DNS API](/docs/api-reference/dns-api) · [Error Codes](/docs/api-reference/error-codes)

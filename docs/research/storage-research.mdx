@@ -1,0 +1,81 @@
+---
+title: "Storage Research"
+description: "Active storage research: distributed storage, local-first systems, encrypted storage, content addressing, caching, and future storage systems."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 26
+tags: ["research", "storage-research"]
+keywords: "storage research, distributed storage, local-first, encrypted storage, content addressing, caching, DSN, future storage"
+---
+
+*Orivon Research Group · Storage Research · Status: Active Research*
+
+This area investigates how local-first, encrypted storage scales into a
+distributed storage network without giving up ownership. The
+[Storage Layer](/docs/research/storage-layer) paper describes the current
+design; this page records open questions.
+
+## Distributed storage
+
+The long-term vision is a distributed storage network (DSN).
+
+| Research topic | Question |
+| --- | --- |
+| Storage incentives | What economics motivate durable storage providers? |
+| Erasure coding | What replication/coding parameters balance cost and durability? |
+| Retrieval | How fast can content be fetched at scale? |
+| Verification | How do clients verify stored data without re-downloading? |
+| Sybil resistance | How is storage capacity verified honestly? |
+
+## Local storage
+
+Local-first is the default posture (see [Storage Whitepaper](/docs/research/storage-whitepaper)).
+
+| Topic | Status |
+| --- | --- |
+| ACID engine | Stabilized. |
+| On-disk format | Versioned, documented. |
+| Conflict resolution | Last-writer-wins; CRDTs under research. |
+| Full-text search | Plaintext index; encrypted search open. |
+
+## Encrypted storage
+
+| Research topic | Question |
+| --- | --- |
+| Searchable encryption | Can collections be searched without decryption? |
+| Key recovery | Usable recovery without a central authority? |
+| Rotation at scale | Cheap re-wrapping across many entities? |
+| Outsourced computation | Can computation run on encrypted data (FHE path)? |
+
+## Content addressing
+
+Content addressing is the substrate for distribution (see
+[Storage Layer](/docs/research/storage-layer)).
+
+| Property | Research focus |
+| --- | --- |
+| Deduplication | Cross-user dedup without leaking content. |
+| Integrity | Verification protocols for remote replicas. |
+| Address stability | Migration when content changes. |
+
+## Caching
+
+| Concern | Direction |
+| --- | --- |
+| Cache policy | LRU vs. frequency-aware policies per workload. |
+| Multi-device | Shared cache across user devices. |
+| Content routing | Caching at the network layer. |
+
+## Future storage systems
+
+- **Durability tiers** — local / replicated / erasure-coded / cold archive.
+- **CRDT-native data model** — conflict-free collaborative data.
+- **Searchable encryption** — private query over collections.
+- **Verifiable storage proofs** — proof-of-retrievability for the DSN.
+
+<Note title="Research status">
+  Items on this page are hypotheses. The shipped contract is documented in the
+  [Storage API](/docs/api-reference/storage-api).
+</Note>
+
+**Related:** [Storage Whitepaper](/docs/research/storage-whitepaper) · [Storage Layer](/docs/research/storage-layer) · [Cryptography Research](/docs/research/cryptography-research)

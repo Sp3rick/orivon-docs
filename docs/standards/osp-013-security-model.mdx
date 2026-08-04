@@ -1,0 +1,109 @@
+---
+title: "OSP-013: Security Model"
+description: "Draft specification for the security model: goals, threat model, defense in depth, sandboxing and integrity guarantees."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["standards", "osp-013", "security"]
+keywords: "OSP-013, security model, threat model, defense in depth, sandbox, integrity"
+---
+
+<Callout type="warning" title="Draft">
+  This specification is a **Draft** (version 0.1.0). It is published for
+  discussion and is not normative. Only an [Accepted](/docs/standards/accepted-specifications)
+  specification binds implementations. See the
+  [Specification Lifecycle](/docs/standards/specification-lifecycle).
+</Callout>
+
+Security is the architecture, not a feature. This draft defines the security
+model: the goals, the threat model, and the guarantees every other
+specification builds on.
+
+## Status
+
+| Field | Value |
+| --- | --- |
+| Identifier | OSP-013 |
+| Title | Security Model |
+| Status | Draft |
+| Version | 0.1.0 |
+| Category | Security |
+| Created | July 31, 2026 |
+| Updated | July 31, 2026 |
+
+## Summary
+
+The security model defines four goals (protect identity and value, contain
+compromise, ensure integrity, keep secrets), the threat model, and the defense
+in depth layers that enforce them. The reference design is the
+[Security Architecture](/docs/technical-design/security-architecture) page.
+
+## Purpose
+
+A security model must be stated before it can be evaluated. This specification
+exists so that every security decision in the ecosystem can be checked against
+a written model instead of an implicit one.
+
+## Scope
+
+**In scope:**
+
+<CheckList
+  items={[
+    'The security goals and their priority.',
+    'The threat model and attacker classes.',
+    'Defense in depth and the sandbox layers.',
+    'Signing, verification and integrity.',
+    'Supply chain protection.',
+  ]}
+/>
+
+**Out of scope:**
+
+<CheckList
+  crossed={[0, 1]}
+  items={[
+    'Specific permission rules (covered by OSP-006).',
+    'Key management internals (covered by OSP-007).',
+    'Cryptographic algorithm selection (covered by the Cryptography category).',
+  ]}
+/>
+
+## Dependencies
+
+- [OSP-008 Identity System](/docs/standards/osp-008-identity-system): the root of trust.
+- [OSP-006 Permission Model](/docs/standards/osp-006-permission-model): the enforcement layer.
+- [OSP-001 Runtime Architecture](/docs/standards/osp-001-runtime-architecture): the sandboxed execution.
+
+## Related specifications
+
+- [OSP-004 Module System](/docs/standards/osp-004-module-system): supply chain security.
+- [OSP-010 Storage](/docs/standards/osp-010-storage): integrity of data.
+
+## Implementation status
+
+The reference implementation enforces the model through process isolation,
+sandboxing and the policy layer. The draft tracks the model at 0.1.0. No
+conformance suite has been published yet.
+
+## Future work
+
+- Formal verification of the policy core.
+- Memory safe components for high risk parsers.
+- Cooperative sandbox verification in CI.
+
+<Callout type="warning" title="Security review">
+  This specification is the most security critical document in the series and
+  receives the strictest review. Treat any proposed change to it as a security
+  review item.
+</Callout>
+
+<Callout type="info" title="Discussion">
+  This draft is open for review through the lifecycle process. See
+  [How contributors participate](/docs/standards/overview).
+</Callout>
+
+## Related pages
+
+- [Draft Specifications](/docs/standards/draft-specifications): the full draft series.
+- [Security Architecture](/docs/technical-design/security-architecture): the reference design.

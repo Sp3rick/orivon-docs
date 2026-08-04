@@ -1,0 +1,159 @@
+---
+title: "Tutorial: Building a Network Provider"
+description: "Relay peer traffic, manage connections, and publish routing metrics, step by step."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.4
+tags: ["developers", "tutorials"]
+keywords: "network provider tutorial, relay, connections, routing metrics"
+---
+
+This tutorial builds a network provider: a package that relays traffic
+between peers, manages connections, and reports routing health. It is the
+provider behind the [networking example](/docs/developers/examples/networking-example),
+built step by step.
+
+<Callout type="info" title="Prerequisites">
+  The [quick start](/docs/developers/quick-start), and the
+  [networking APIs](/docs/developers/networking-apis) page.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new network-provider --template module
+```
+
+## Step 2: Declare the manifest
+
+`orivon.toml`:
+
+```toml
+[package]
+name = "network-provider"
+version = "0.1.0"
+description = "Relays traffic between peers"
+
+[interface]
+methods = ["connect", "listen", "stats"]
+
+[permissions]
+network = ["connect", "listen", "advertise"]
+
+[config]
+metrics_interval = 60
+```
+
+## Step 3: Listen and relay
+
+```ts
+const sockets = new Map();
+let bytesRelayed = 0;
+
+export async function listen(input: {path: string}) {
+  const server = await app.network.listen(input.path);
+  server.on('connection', (socket) => {
+    sockets.set(socket.id, socket);
+    socket.on('data', (data) => {
+      bytesRelayed += data.byteLength;
+      relay(socket, data);
+    });
+    socket.on('close', () => sockets.delete(socket.id));
+  });
+  return {status: 'listening'};
+}
+
+function relay(from, data) {
+  for (const socket of sockets.values()) {
+    if (socket.id !== from.id) socket.write(data);
+  }
+}
+```
+
+Relaying forwards data to every other connected peer. Production providers
+route by address rather than broadcast, but the shape is the same.
+
+## Step 4: Connect to peers
+
+```ts
+export async function connect(input: {address: string}) {
+  const socket = await app.network.connect(input.address);
+  sockets.set(socket.id, socket);
+  return {id: socket.id};
+}
+```
+
+## Step 5: Publish metrics
+
+```ts
+export function activate() {
+  const interval = app.config.get('metrics_interval') ?? 60;
+  const timer = setInterval(emitMetrics, interval * 1000);
+  return () => clearInterval(timer);
+}
+
+function emitMetrics() {
+  app.events.emit('network.provider.metrics', {
+    provider: providerAddress(),
+    connections: sockets.size,
+    bytesRelayed,
+  });
+}
+```
+
+Metrics over [events](/docs/developers/events) let the network rank and route
+around providers.
+
+## Step 6: Stats on request
+
+```ts
+export async function stats() {
+  return {
+    connections: sockets.size,
+    bytesRelayed,
+  };
+}
+```
+
+## Step 7: Run it
+
+```sh
+orivon build
+orivon run --call network-provider listen '{"path":"/relay"}'
+orivon run --call network-provider stats '{}'
+```
+
+```json
+{"connections": 0, "bytesRelayed": 0}
+```
+
+## The traffic loop
+
+<Diagram caption="Traffic enters, relays, and leaves.">
+  <Flow column>
+    <DiagramNode accent>Peer connects</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Provider accepts</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Data relayed to peers</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Metrics published</DiagramNode>
+  </Flow>
+</Diagram>
+
+## What you built
+
+- A provider that listens, connects and relays.
+- Connection tracking with cleanup on close.
+- Metrics that keep the network informed.
+
+<Callout type="success" title="Extend it">
+  Route by address instead of broadcasting, and rate limit connections to
+  protect the provider.
+</Callout>
+
+## Related pages
+
+- [Networking APIs](/docs/developers/networking-apis): the full surface.
+- [Networking](/docs/ecosystem/networking): the ecosystem model.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

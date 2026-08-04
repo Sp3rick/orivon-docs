@@ -1,0 +1,177 @@
+---
+title: "Methods"
+description: "Reference for every method across the Orivon facades: signatures, parameters, return values and errors."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 21
+tags: ["api-reference", "methods"]
+keywords: "methods, method reference, api methods, signatures, parameters, returns, throws"
+---
+
+Every facade method in the platform follows the same conventions described on
+this page. This is the master index; each entry links to the defining API page
+for full detail.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Signature conventions
+
+- All methods return a `Promise` and reject on failure — none throw
+  synchronously.
+- Optional parameters are trailing and typed `T | undefined`.
+- Object parameters use closed interfaces (see [Interfaces](/docs/api-reference/interfaces)).
+- Failures reject with an `OrivonError` carrying a stable `code`
+  (see [Error Codes](/docs/api-reference/error-codes)).
+
+## Methods by facade
+
+### `core` — [Core API](/docs/api-reference/core-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `info()` | `Promise<CoreInfo>` | — |
+| `systemInfo()` | `Promise<SystemInfo>` | — |
+| `memory()` | `Promise<MemoryUsage>` | — |
+| `listModules()` | `Promise<ModuleInfo[]>` | — |
+| `loadModule(id)` | `Promise<ModuleInfo>` | `ERR_MODULE_NOT_FOUND` |
+| `unloadModule(id)` | `Promise<void>` | `ERR_MODULE_NOT_FOUND` |
+| `scheduleTask(spec)` | `Promise<TaskHandle>` | `ERR_INVALID_ARGUMENT` |
+| `cancelTask(handle)` | `Promise<void>` | `ERR_TASK_NOT_FOUND` |
+
+### `browser` — [Browser API](/docs/api-reference/browser-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `listTabs()` | `Promise<Tab[]>` | — |
+| `getTab(id)` | `Promise<Tab>` | `ERR_TAB_NOT_FOUND` |
+| `openTab(url)` | `Promise<Tab>` | `ERR_INVALID_URL` |
+| `closeTab(id)` | `Promise<void>` | `ERR_TAB_NOT_FOUND` |
+| `navigate(tabId, url)` | `Promise<void>` | `ERR_INVALID_URL` |
+| `openPopup(url, options?)` | `Promise<Tab>` | `ERR_INVALID_URL` |
+| `closePopup(tabId)` | `Promise<void>` | `ERR_TAB_NOT_FOUND` |
+| `listBookmarks()` | `Promise<Bookmark[]>` | — |
+| `addBookmark(url, title?)` | `Promise<Bookmark>` | `ERR_INVALID_URL` |
+| `removeBookmark(id)` | `Promise<void>` | `ERR_NOT_FOUND` |
+| `searchHistory(query, options?)` | `Promise<Page<HistoryEntry>>` | — |
+
+### `module` — [Module API](/docs/api-reference/module-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `load(path)` | `Promise<void>` | `ERR_MODULE_NOT_FOUND` |
+| `unload(id)` | `Promise<void>` | `ERR_MODULE_NOT_FOUND` |
+| `activate(id)` | `Promise<void>` | `ERR_MODULE_INACTIVE` |
+| `deactivate(id)` | `Promise<void>` | `ERR_MODULE_INACTIVE` |
+| `requestPermissions(descriptors)` | `Promise<GrantResult>` | — |
+| `send(id, envelope)` | `Promise<void>` | `ERR_MODULE_NOT_FOUND` |
+
+### `application` — [Application API](/docs/api-reference/application-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `launch(id, args?)` | `Promise<ApplicationRecord>` | `ERR_APP_NOT_FOUND` |
+| `getCurrent()` | `Promise<ApplicationRecord>` | — |
+| `getStartupArgs()` | `Promise<Record<string, string>>` | — |
+| `setState(state)` | `Promise<void>` | `ERR_INVALID_ARGUMENT` |
+| `createWindow(options?)` | `Promise<Window>` | `ERR_APP_NOT_FOUND` |
+| `listWindows()` | `Promise<Window[]>` | — |
+| `closeWindow(id)` | `Promise<void>` | `ERR_APP_NOT_FOUND` |
+| `quit(code?)` | `Promise<void>` | — |
+
+### `wallet` — [Wallet API](/docs/api-reference/wallet-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `listAccounts()` | `Promise<WalletAccount[]>` | — |
+| `getAccount(id)` | `Promise<WalletAccount>` | `ERR_ACCOUNT_NOT_FOUND` |
+| `createAccount(options?)` | `Promise<WalletAccount>` | `ERR_USER_DENIED` |
+| `importMnemonic(mnemonic, options?)` | `Promise<WalletAccount>` | `ERR_INVALID_MNEMONIC` |
+| `removeAccount(id)` | `Promise<void>` | `ERR_ACCOUNT_NOT_FOUND` |
+| `getBalance(accountId, asset?)` | `Promise<Balance>` | `ERR_ACCOUNT_NOT_FOUND` |
+| `sign(accountId, payload)` | `Promise<SignedPayload>` | `ERR_USER_DENIED` |
+| `verify(accountId, payload, signature)` | `Promise<boolean>` | `ERR_ACCOUNT_NOT_FOUND` |
+| `sendTransaction(options)` | `Promise<TxReceipt>` | `ERR_INSUFFICIENT_FUNDS` |
+| `listTransactions(options?)` | `Promise<Page<Transaction>>` | — |
+| `getTransactionStatus(txId)` | `Promise<TxStatus>` | `ERR_TX_NOT_FOUND` |
+
+### `identity` — [Identity API](/docs/api-reference/identity-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `createDid(options?)` | `Promise<DidDocument>` | `ERR_USER_DENIED` |
+| `resolveDid(did)` | `Promise<DidDocument>` | `ERR_DID_NOT_FOUND` |
+| `getCredentials()` | `Promise<Credential[]>` | — |
+| `issueCredential(options)` | `Promise<Credential>` | `ERR_PERMISSION_DENIED` |
+| `verifyCredential(credential)` | `Promise<VerificationResult>` | `ERR_INVALID_ARGUMENT` |
+| `createSession(did)` | `Promise<Session>` | `ERR_DID_NOT_FOUND` |
+| `getSession()` | `Promise<Session \| null>` | — |
+| `signOut()` | `Promise<void>` | — |
+
+### `storage` — [Storage API](/docs/api-reference/storage-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `get(key)` | `Promise<unknown \| undefined>` | — |
+| `set(key, value)` | `Promise<void>` | `ERR_QUOTA_EXCEEDED` |
+| `remove(key)` | `Promise<void>` | — |
+| `list(options?)` | `Promise<Page<{key, value}>>` | — |
+| `writeFile(name, data, options?)` | `Promise<FileHandle>` | `ERR_QUOTA_EXCEEDED` |
+| `readFile(name)` | `Promise<Uint8Array>` | `ERR_NOT_FOUND` |
+| `deleteFile(name)` | `Promise<void>` | `ERR_NOT_FOUND` |
+| `listFiles(options?)` | `Promise<Page<FileHandle>>` | — |
+| `collection(name)` | `Collection` | — |
+
+### `networking` — [Networking API](/docs/api-reference/networking-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `fetch(url, options?)` | `Promise<HttpResponse>` | `ERR_TIMEOUT` |
+| `connect(url, options?)` | `Promise<Connection>` | `ERR_DNS_NOT_FOUND` |
+| `resolveHost(name)` | `Promise<string[]>` | `ERR_DNS_NOT_FOUND` |
+| `onConnectivityChange(handler)` | `() => void` | — |
+
+### `dns` — [DNS API](/docs/api-reference/dns-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `resolve(name, options?)` | `Promise<DnsRecord[]>` | `ERR_DNS_NAME_UNAVAILABLE` |
+| `register(name, options?)` | `Promise<Registration>` | `ERR_DNS_NAME_UNAVAILABLE` |
+| `update(name, records)` | `Promise<Registration>` | `ERR_DNS_NAME_UNAVAILABLE` |
+| `release(name)` | `Promise<void>` | `ERR_DNS_NAME_UNAVAILABLE` |
+
+### `permissions` — [Permissions API](/docs/api-reference/permissions-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `check(descriptor)` | `Promise<PermissionState>` | — |
+| `checkAll(descriptors)` | `Promise<Record<string, PermissionState>>` | — |
+| `request(descriptors, options?)` | `Promise<GrantResult>` | — |
+| `revoke(descriptors)` | `Promise<void>` | — |
+| `listGrants()` | `Promise<Grant[]>` | — |
+| `onChanged(handler)` | `() => void` | — |
+
+### `security` — [Security API](/docs/api-reference/security-api)
+
+| Method | Returns | Throws |
+| --- | --- | --- |
+| `randomBytes(length)` | `Promise<Uint8Array>` | `ERR_INVALID_ARGUMENT` |
+| `digest(algorithm, data)` | `Promise<Uint8Array>` | `ERR_UNSUPPORTED_ALGORITHM` |
+| `deriveKey(password, salt, options?)` | `Promise<Uint8Array>` | `ERR_INVALID_ARGUMENT` |
+| `generateKeyPair(algorithm)` | `Promise<KeyPair>` | `ERR_UNSUPPORTED_ALGORITHM` |
+| `importKey(algorithm, keyData, options?)` | `Promise<KeyPair>` | `ERR_INVALID_ARGUMENT` |
+| `exportPublicKey(id)` | `Promise<Uint8Array>` | `ERR_KEY_NOT_FOUND` |
+| `deleteKey(id)` | `Promise<void>` | `ERR_KEY_NOT_FOUND` |
+| `sign(id, data)` | `Promise<Uint8Array>` | `ERR_USER_DENIED` |
+| `verify(algorithm, publicKey, signature, data)` | `Promise<boolean>` | `ERR_INVALID_ARGUMENT` |
+| `secretSet(name, value)` | `Promise<void>` | `ERR_KEYCHAIN_UNAVAILABLE` |
+| `secretGet(name)` | `Promise<Uint8Array \| undefined>` | `ERR_KEYCHAIN_UNAVAILABLE` |
+| `secretDelete(name)` | `Promise<void>` | `ERR_KEYCHAIN_UNAVAILABLE` |
+
+<Note title="Error surface">
+  The table lists the most common rejection per method. A method may also
+  reject with `ERR_PERMISSION_DENIED` (ungranted), `ERR_SESSION_EXPIRED`
+  (session invalid) or `ERR_TIMEOUT` (request expired) unless documented
+  otherwise on the defining page.
+</Note>
+
+**Related:** [Objects](/docs/api-reference/objects) · [Functions](/docs/api-reference/functions) · [Error Codes](/docs/api-reference/error-codes)

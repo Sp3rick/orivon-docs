@@ -1,0 +1,143 @@
+---
+title: "Permissions API"
+description: "Reference for the Permissions API: capability descriptors, grant state, requests and revocation."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 15
+tags: ["api-reference", "permissions-api"]
+keywords: "permissions api, permission descriptor, check permission, request permission, revoke, grants, permission state"
+---
+
+The Permissions API inspects, requests and revokes capability grants. Every
+sensitive API in the platform is gated by a permission; this facade is how a
+package learns and shapes its own authority.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: PermissionsFacade
+
+### `permissions.check(descriptor)`
+
+Returns the current state of one permission without prompting.
+
+```ts
+const state = await app.permissions.check({name: 'wallet.sign'});
+```
+
+**Returns:** `Promise<PermissionState>`
+
+### `permissions.checkAll(descriptors)`
+
+Checks many permissions in one call.
+
+**Returns:** `Promise<Record<string, PermissionState>>`
+
+### `permissions.request(descriptors, options?)`
+
+Requests grants. Prompts the user for any permission in the `Prompt` state.
+
+```ts
+const result = await app.permissions.request([
+  {name: 'storage.read', scope: 'cache'},
+  {name: 'networking.fetch'},
+]);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `descriptors` | `PermissionDescriptor[]` | Permissions to request. |
+| `options.reason` | `string \| undefined` | Human reason shown in the prompt. |
+
+**Returns:** `Promise<GrantResult>`
+
+### `permissions.revoke(descriptors)`
+
+Revokes grants held by the package. Future calls to gated APIs reject with
+`ERR_PERMISSION_DENIED`.
+
+**Returns:** `Promise<void>`
+
+### `permissions.listGrants()`
+
+Lists every grant currently held by the package.
+
+**Returns:** `Promise<Grant[]>`
+
+### `permissions.onChanged(handler)`
+
+Subscribes to grant changes.
+
+**Returns:** `() => void`
+
+## Permission descriptors
+
+A descriptor names a capability and, where relevant, a scope.
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | yes | Capability name, e.g. `wallet.sign`. |
+| `scope` | `string \| undefined` | no | Scopes the grant, e.g. `"cache"`. |
+| `resources` | `string[] \| undefined` | no | Specific resource targets. |
+
+The full capability registry is defined by the manifest schema. See
+[Manifest Format](/docs/api-reference/manifest-format) for the complete list
+of permission names per API.
+
+## Permission state
+
+| State | Meaning | Behavior on call |
+| --- | --- | --- |
+| `Granted` | Caller may proceed | Executes. |
+| `Prompt` | First use requires consent | Gated APIs may prompt implicitly; request first. |
+| `Denied` | Caller may not proceed | Rejects with `ERR_PERMISSION_DENIED`. |
+
+```ts
+if ((await app.permissions.check({name: 'storage.clear'})) !== PermissionState.Granted) {
+  await app.permissions.request([{name: 'storage.clear'}]);
+}
+```
+
+## Grant lifecycle
+
+```
+declared in manifest
+      │
+      ▼
+  installed ──► requested ──► granted ──► revoked
+                       │          │            │
+                       ▼          ▼            ▼
+                    denied   used by APIs   user changed setting
+```
+
+- Grants are declared in the manifest as the maximum the package may ask for.
+- A grant can be revoked at runtime by the user; `permissions.onChanged`
+  notifies the package.
+- Revocation of a required grant should be handled by disabling the affected
+  feature, not by crashing.
+
+## Types
+
+### `Grant`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `descriptor` | `PermissionDescriptor` | The granted capability. |
+| `state` | `PermissionState` | Current state. |
+| `grantedAt` | `number` | Epoch milliseconds. |
+
+### `GrantResult`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `granted` | `PermissionDescriptor[]` | Now granted. |
+| `denied` | `PermissionDescriptor[]` | Explicitly denied. |
+| `prompted` | `PermissionDescriptor[]` | Left for later consent. |
+
+## Permissions events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `permissions:changed` | `Grant[]` | Any grant changed. |
+| `permissions:denied` | `PermissionDescriptor[]` | A request was denied. |
+
+**Related:** [Manifest Format](/docs/api-reference/manifest-format) · [Authentication](/docs/api-reference/authentication) · [Security API](/docs/api-reference/security-api) · [Error Codes](/docs/api-reference/error-codes)

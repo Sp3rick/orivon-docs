@@ -1,0 +1,175 @@
+---
+title: "Getting Started"
+description: "What you need before you build on Orivon: prerequisites, required knowledge, operating systems, software, recommended tools and the development workflow."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["developers", "getting-started"]
+keywords: "getting started, prerequisites, knowledge, tools, workflow, setup"
+---
+
+Before you write your first line of Orivon code, it helps to know what you are
+stepping into. This page covers what you need, what you should know, and the
+workflow you will follow. If you want to skip straight to running code, the
+[Quick Start](/docs/developers/quick-start) gets you there in minutes.
+
+## Prerequisites
+
+You need a machine that can run the Orivon CLI. The full requirements are on
+the [System Requirements](/docs/developers/system-requirements) page, but in
+short:
+
+<CheckList
+  items={[
+    'A supported operating system: Windows, macOS or Linux.',
+    'A terminal that can run shell commands.',
+    'Git, for fetching packages and publishing.',
+    'For Rust targets, a Rust toolchain.',
+  ]}
+/>
+
+The SDK ships with no required runtime for the basic workflows, because
+Orivon modules compile to WebAssembly. Some API guides show Rust, so a Rust
+toolchain is recommended even when not strictly required.
+
+## Required knowledge
+
+You do not need to know Orivon before starting. You should be comfortable with:
+
+<CardGrid columns={2}>
+  <Card title="Basic web concepts">
+    Packages, manifests, dependencies, build steps. If you have used npm, crates
+    or Go modules, you already understand the model.
+  </Card>
+  <Card title="A programming language">
+    TypeScript or JavaScript for the SDK, or Rust for performance critical
+    modules. Examples are provided in both.
+  </Card>
+  <Card title="Command line basics">
+    Running commands, reading output, and understanding environment variables.
+  </Card>
+</CardGrid>
+
+You do **not** need deep knowledge of WebAssembly, cryptography or blockchain
+protocols to build on Orivon. Those subjects are useful later, and the
+[ecosystem](/docs/ecosystem) documentation explains them when you need them.
+
+## Supported operating systems
+
+| OS | Support | Notes |
+| --- | --- | --- |
+| **Windows** | Supported | Windows 10 and newer |
+| **macOS** | Supported | Intel and Apple silicon |
+| **Linux** | Supported | x86-64 and arm64 |
+
+All platforms share the same CLI and the same project format, so a project you
+create on one platform works on the others.
+
+## Required software
+
+| Software | Needed for |
+| --- | --- |
+| **Orivon CLI** | Scaffolding, building, testing, running and publishing |
+| **Orivon SDK** | The APIs your code calls |
+| **Git** | Package publishing and source control |
+| **Node.js** (recommended) | SDK tooling and JavaScript examples |
+| **Rust** (recommended) | Rust examples and WASM modules |
+
+The [Installation](/docs/developers/installation) page walks through each one.
+
+## Recommended tools
+
+Beyond the requirements, these tools make development comfortable:
+
+<CardGrid columns={3}>
+  <Card title="Editor">
+    VS Code, Zed or any editor with TypeScript and TOML support.
+  </Card>
+  <Card title="Terminal">
+    A modern terminal with a shell that supports colored output.
+  </Card>
+  <Card title="Git tooling">
+    A git GUI or terminal aliases, whichever you already use.
+  </Card>
+</CardGrid>
+
+The [Development Environment](/docs/developers/development-environment) page
+covers editors, extensions and workspace organization in detail.
+
+## The development workflow
+
+Every Orivon project follows the same loop:
+
+<Diagram caption="The development loop.">
+  <Flow column>
+    <DiagramNode accent>Create</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Write code</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Build</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Test</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Run</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Publish</DiagramNode>
+  </Flow>
+</Diagram>
+
+| Step | Command | What happens |
+| --- | --- | --- |
+| **Create** | `orivon new my-app` | Scaffolds a project from a template |
+| **Write** | edit source files | You implement your module or application |
+| **Build** | `orivon build` | Compiles to the package format |
+| **Test** | `orivon test` | Runs your unit and integration tests |
+| **Run** | `orivon run` | Runs the project in a local runtime |
+| **Publish** | `orivon publish` | Publishes the package to the registry |
+
+Every command is documented in the [CLI reference](/docs/developers/cli).
+
+<Callout type="success" title="Best practice">
+  Build early and often. The CLI is fast by design, so run `orivon build` and
+  `orivon test` frequently instead of writing a large batch of code and hoping
+  it compiles.
+</Callout>
+
+## What you will build
+
+The two artifacts of Orivon development:
+
+- **Modules** extend the runtime with new capabilities. They are the building
+  blocks of the ecosystem. See
+  [Building Your First Module](/docs/developers/building-your-first-module).
+- **Applications** run inside the browser, combining modules and APIs into a
+  product. See
+  [Building Your First Application](/docs/developers/building-your-first-application).
+
+Both share the same project model, the same manifest and the same CLI, which is
+why [Quick Start](/docs/developers/quick-start) treats them together.
+
+## Next steps
+
+<Steps>
+  <Step title="Set up">
+    Follow [Installation](/docs/developers/installation) and
+    [Development Environment](/docs/developers/development-environment).
+  </Step>
+  <Step title="Run">
+    Complete the [Quick Start](/docs/developers/quick-start).
+  </Step>
+  <Step title="Build">
+    Follow [Your First Module](/docs/developers/building-your-first-module).
+  </Step>
+</Steps>
+
+<Callout type="info" title="Stuck?">
+  The [Troubleshooting](/docs/developers/troubleshooting) page covers the most
+  common setup problems, and the [FAQ](/docs/developers/faq) answers frequent
+  questions.
+</Callout>
+
+## Related pages
+
+- [System Requirements](/docs/developers/system-requirements): the machine you need.
+- [Installation](/docs/developers/installation): how to install everything.
+- [Quick Start](/docs/developers/quick-start): your first project.

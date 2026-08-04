@@ -1,0 +1,113 @@
+---
+title: "Networking Layer"
+description: "In-depth paper on the Orivon networking layer: dual-stack transport, decentralized DNS, peer-to-peer, and the network process."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 23
+tags: ["research", "architecture-paper", "networking-layer"]
+keywords: "networking layer, dual stack, HTTP, P2P, decentralized DNS, network process, DHT, NAT traversal"
+---
+
+*Orivon Research Group · Networking Research · Version 1.0 · Published 2026-06-12 · Status: Published*
+
+## Overview
+
+The networking layer connects users to both the open web and decentralized
+infrastructure. It is dual-stack — HTTP(S) for compatibility and a P2P
+transport for decentralization — with a decentralized DNS overlay for naming.
+All I/O flows through the network process. This paper analyses the networking
+layer in depth.
+
+## The network process
+
+All transport lives in the network process (see
+[Browser Architecture](/docs/research/browser-architecture)):
+
+| Responsibility | Detail |
+| --- | --- |
+| HTTP(S) | Open-web access. |
+| P2P transport | Peer connections. |
+| DNS resolution | Legacy + decentralized. |
+| Credential holding | TLS material, session keys. |
+| Policy enforcement | Permission checks at the boundary. |
+
+Renderers never open raw sockets; they talk to the network process over IPC.
+
+## Dual-stack transport
+
+| Path | Use | Characteristics |
+| --- | --- | --- |
+| HTTP(S) | Legacy web, APIs | Mature, ubiquitous. |
+| WebTransport | Streaming, low-latency | HTTP/3-based, browser-native. |
+| P2P (libp2p-style) | Decentralized apps | Direct peer addressing. |
+
+The API surface is uniform: callers request a resource, and the layer selects
+the transport (see [Networking API](/docs/api-reference/networking-api)).
+
+## Decentralized DNS
+
+### Resolution order
+
+1. Decentralized DNS (preferred).
+2. Legacy DNS (fallback).
+
+### Properties
+
+| Property | Design |
+| --- | --- |
+| Ownership | Names registered on-chain; registrant controls records. |
+| Records | A, AAAA, TXT, CNAME, extensible. |
+| Resolution | Overlay over DHT with legacy fallback. |
+| Censorship resistance | No single revocable authority. |
+
+## Peer-to-peer transport
+
+### Stack
+
+```
+application streams
+   │
+multiplexer
+   │
+secure channel (end-to-end encrypted)
+   │
+transport (TCP/QUIC, or relay)
+```
+
+### Peer discovery
+
+| Mechanism | Use |
+| --- | --- |
+| DHT | Peer and content discovery. |
+| Relay | NAT traversal fallback. |
+| Direct addressing | Well-known peers. |
+
+### NAT traversal
+
+Direct connection is attempted first (STUN-like); when it fails, relayed
+connection is used. Reachability never blocks functionality.
+
+## Security considerations
+
+- All traffic is encrypted; P2P channels are end-to-end encrypted.
+- The network process mediates all I/O; renderers cannot bypass policy.
+- Decentralized DNS records are signed and verified.
+- Peer reputation guides selection to resist eclipse attacks (research).
+
+## Performance considerations
+
+| Concern | Mitigation |
+| --- | --- |
+| Resolution latency | Caching, parallel legacy/decentralized resolution. |
+| DHT lookup latency | Routing table optimization. |
+| Relay overhead | Prefer direct; relays only as fallback. |
+| Bandwidth | Stream multiplexing, compression. |
+
+## Open questions
+
+- WebTransport-native P2P for browser peers.
+- AS-aware routing for latency optimization.
+- Formal analysis of DNS-overlay security.
+- Reputation-aware peer selection at scale.
+
+**Related:** [Networking Whitepaper](/docs/research/networking-whitepaper) · [Networking Research](/docs/research/networking-research) · [Communication Layer](/docs/research/communication-layer)

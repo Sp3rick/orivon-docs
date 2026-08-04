@@ -1,0 +1,83 @@
+---
+title: "Web3 Score Research"
+description: "Active research on the Web3 Score: purpose, scoring methodology, evaluation criteria, transparency, extensibility, and open challenges."
+readingTime: 24
+lastUpdated: "July 31, 2026"
+order: 28
+tags: ["research", "web3-score-research"]
+keywords: "web3 score research, reputation, scoring methodology, evaluation criteria, transparency, extensibility, challenges"
+---
+
+*Orivon Research Group · Status: Active Research*
+
+This area tracks the research behind the [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper):
+how the score is defined, calibrated, kept transparent, and extended — and the
+unsolved problems in decentralized reputation.
+
+## Purpose
+
+The score's purpose is a verifiable trust signal for decentralized ecosystems:
+
+| Stakeholder | Value |
+| --- | --- |
+| Users | Signal trustworthiness without sharing private data. |
+| Applications | Verifiable onboarding, credit, and access signals. |
+| Ecosystem | A shared reputation substrate no platform controls. |
+
+The boundaries — what the score is *not* — are stated in the whitepaper's
+Appendix A.
+
+## Scoring methodology
+
+### Pipeline
+
+```
+signals → collection → normalization → weighting → aggregation → score
+```
+
+| Step | Open question |
+| --- | --- |
+| Collection | Which on-chain signals are most predictive? |
+| Normalization | How to compare across chains and assets? |
+| Weighting | How to calibrate family weights against outcomes? |
+| Aggregation | What combination rule is robust to gaming? |
+
+## Evaluation criteria
+
+| Criterion | Question |
+| --- | --- |
+| Predictive validity | Does the score predict the target outcome? |
+| Robustness | How much can an adversary shift the score? |
+| Stability | Does the score fluctuate without real change? |
+| Interpretability | Can users understand their score? |
+| Fairness | Does the score disadvantage legitimate users? |
+
+## Transparency
+
+| Guarantee | Mechanism | Status |
+| --- | --- | --- |
+| Determinism | Same inputs → same score | Shipped. |
+| Auditability | Inputs and model published | Shipped. |
+| Versioning | Model versions published | Shipped. |
+| Explainability | Per-family decomposition | Shipped. |
+
+## Extensibility
+
+| Extension | Question |
+| --- | --- |
+| New signal families | How to add without breaking comparability? |
+| New chains | Cross-chain normalization and weighting. |
+| Model updates | Backward-compatible calibration. |
+| External reputation | Importing other systems' signals. |
+
+## Research challenges
+
+| Challenge | Direction |
+| --- | --- |
+| Sybil resistance | Identity verification + behavior analysis. |
+| Gaming | Economic modeling of attack incentives. |
+| Privacy | Zero-knowledge "threshold" proofs. |
+| Fairness | Bias audits of the model. |
+| Adoption | Making opt-in reputation useful before scale. |
+
+**Related:** [Web3 Score Whitepaper](/docs/research/web3-score-whitepaper) · [Identity Research](/docs/research/identity-research) · [Cryptography Research](/docs/research/cryptography-research)

@@ -1,0 +1,78 @@
+---
+title: "Schemas"
+description: "Reference for the JSON Schema definitions used across the Orivon APIs: location, usage and validation behavior."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 26
+tags: ["api-reference", "schemas"]
+keywords: "schemas, json schema, schema reference, draft 2020-12, validation, schema registry, $ref"
+---
+
+Structured data exchanged with the platform is validated against JSON Schema
+(draft 2020-12). Schemas are versioned and published for offline validation.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Schema registry
+
+| Schema | Path | Validates |
+| --- | --- | --- |
+| `orivon-config` | `/schemas/orivon-config.schema.json` | Configuration file. |
+| `manifest` | `/schemas/manifest.schema.json` | Manifest document. |
+| `permissions` | `/schemas/permissions.schema.json` | Permission descriptors. |
+| `message` | `/schemas/message.schema.json` | `MessageEnvelope` payloads. |
+| `credential` | `/schemas/credential.schema.json` | Verifiable credentials. |
+| `storage-doc` | `/schemas/storage-doc.schema.json` | Collection documents. |
+| `dns-records` | `/schemas/dns-records.schema.json` | DNS record sets. |
+
+All schemas are published under the platform registry domain and referenced by
+`$id`:
+
+```json
+{
+  "$id": "https://schemas.orivon.dev/schemas/manifest.schema.json"
+}
+```
+
+## Using a schema
+
+```ts
+import { validate } from '@orivon/sdk/schema';
+
+const result = validate('manifest', document);
+if (!result.valid) {
+  console.error(result.errors); // JsonSchemaError[]
+}
+```
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `validate(schemaName, data)` | `{valid: boolean, errors: JsonSchemaError[]}` | Validate data. |
+| `getSchema(schemaName)` | `Record<string, Json>` | Fetch the raw schema. |
+| `dereference(schemaName)` | `Record<string, Json>` | Resolve all `$ref` pointers. |
+
+## Shared vocabulary
+
+Every schema in the registry shares these keywords:
+
+| Keyword | Purpose |
+| --- | --- |
+| `$id` | Stable schema identifier. |
+| `$schema` | Always `https://json-schema.org/draft/2020-12/schema`. |
+| `additionalProperties` | `false` by default (closed objects). |
+| `$ref` | Cross-schema references resolved from the registry. |
+
+## Validation behavior
+
+- Runtime validation failures reject the calling method with
+  `ERR_INVALID_ARGUMENT` and an `errors` detail array.
+- `additionalProperties: false` means unknown fields fail validation.
+- `format` keywords (`uri`, `date-time`, `uuid`) are enforced.
+
+<Note title="Versioning">
+  Schemas are immutable once published. Breaking changes ship under a new
+  schema name (for example `manifest-v2`); the old schema stays valid for the
+  supported range. See [Versioning](/docs/api-reference/versioning).
+</Note>
+
+**Related:** [Manifest Format](/docs/api-reference/manifest-format) · [Configuration](/docs/api-reference/configuration) · [Error Codes](/docs/api-reference/error-codes)

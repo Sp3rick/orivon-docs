@@ -1,0 +1,151 @@
+---
+title: "Tutorial: Building a Wallet"
+description: "Create, secure, restore and use an Orivon wallet, from an empty directory to signing your first transaction."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.1
+tags: ["developers", "tutorials"]
+keywords: "wallet tutorial, build a wallet, wallet creation, signing"
+---
+
+This tutorial builds a wallet from an empty directory to a signing first
+transaction. You will create the wallet, secure it, restore it, and use it
+through the wallet APIs.
+
+<Callout type="info" title="Prerequisites">
+  A working [development environment](/docs/developers/development-environment)
+  and the [quick start](/docs/developers/quick-start) done once.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new wallet-app --template module
+```
+
+The scaffold creates the structure from
+[Project Structure](/docs/developers/project-structure).
+
+## Step 2: Declare the wallet permissions
+
+`orivon.toml`:
+
+```toml
+[package]
+name = "wallet-app"
+version = "0.1.0"
+description = "A wallet application"
+
+[interface]
+methods = ["signMessage", "sendPayment", "restore", "status"]
+
+[permissions]
+wallet = ["create", "sign", "send"]
+```
+
+The wallet permissions cover creating, signing and sending. See
+[Permissions](/docs/developers/permissions) and
+[Wallet APIs](/docs/developers/wallet-apis).
+
+## Step 3: Create the wallet
+
+```ts
+export async function createWallet(input: {passphrase: string}) {
+  const wallet = await app.wallet.create({
+    passphrase: input.passphrase,
+  });
+  await app.storage.put('wallet:seed', wallet.encryptedSeed);
+  return {address: wallet.address, backup: wallet.backupWords};
+}
+```
+
+The wallet returns an encrypted seed. Store the encrypted seed; the backup
+words are the user's responsibility and your code should never keep them.
+
+<Callout type="warning" title="Backup words leave your code">
+  Return the backup words once and only once. Your module must not store,
+  log or send them anywhere. They are the keys to everything.
+</Callout>
+
+## Step 4: Restore the wallet
+
+```ts
+export async function restore(input: {backupWords: string[], passphrase: string}) {
+  const wallet = await app.wallet.restore({
+    backupWords: input.backupWords,
+    passphrase: input.passphrase,
+  });
+  await app.storage.put('wallet:seed', wallet.encryptedSeed);
+  return {address: wallet.address};
+}
+```
+
+Restoring rebuilds the wallet from the backup words, re encrypts the seed and
+stores it.
+
+## Step 5: Sign a message
+
+```ts
+export async function signMessage(input: {message: string}) {
+  const seed = await app.storage.get('wallet:seed');
+  const wallet = await app.wallet.unlock(seed);
+  return {signature: await wallet.sign(input.message)};
+}
+```
+
+Signing requires unlocking the stored seed with the passphrase. The user
+confirms each signature in the wallet.
+
+## Step 6: Send a payment
+
+```ts
+export async function sendPayment(input: {to: string; value: string}) {
+  try {
+    const tx = await app.wallet.send({to: input.to, value: input.value, data: '0x'});
+    return {status: 'sent', tx: tx.hash};
+  } catch (error) {
+    if (error.code === 'user_canceled') return {status: 'canceled'};
+    throw error;
+  }
+}
+```
+
+## Step 7: Status
+
+```ts
+export async function status() {
+  const seed = await app.storage.get('wallet:seed');
+  if (!seed) return {created: false};
+  const wallet = await app.wallet.unlock(seed);
+  return {created: true, address: wallet.address, balance: await wallet.balance()};
+}
+```
+
+## Step 8: Run it
+
+```sh
+orivon build
+orivon run --call wallet-app createWallet '{"passphrase":"hunter2-but-longer"}'
+orivon run --call wallet-app status '{}'
+```
+
+```json
+{"created": true, "address": "0x...", "balance": "0"}
+```
+
+## What you built
+
+- A wallet that creates, restores, signs and sends.
+- Secure handling: encrypted seed stored, backup words never persisted.
+- Graceful handling of user cancellation.
+
+<Callout type="success" title="Extend it">
+  Add a check of the verified flag on addresses before sending, and request
+  only the permissions each operation needs.
+</Callout>
+
+## Related pages
+
+- [Wallet APIs](/docs/developers/wallet-apis): the full surface.
+- [Example: Wallet Integration](/docs/developers/examples/wallet-integration): the module form.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

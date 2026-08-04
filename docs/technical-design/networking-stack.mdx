@@ -1,0 +1,238 @@
+---
+title: "Networking Stack"
+description: "The internal design of the Orivon networking stack: HTTP and HTTPS, P2P transports, protocol handling, the request lifecycle and connection pooling."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["technical-design", "networking"]
+keywords: "networking, HTTP, HTTPS, P2P, transports, request lifecycle, connection pooling, protocol"
+---
+
+The networking stack is the component that moves bytes between the browser and
+the world. It runs in the network service process, isolated from everything
+privileged, and it is the only component allowed to own sockets. This page
+documents the stack, its protocols and the request lifecycle.
+
+## The network service
+
+All network access flows through the network service. No other process owns
+sockets, which means:
+
+- Sandboxed contexts cannot open connections directly (see
+  [Sandbox](/docs/technical-design/sandbox)).
+- Policy is enforced before any traffic, not after.
+- A network compromise is contained to the network service process.
+
+<Diagram caption="Every connection is mediated by the network service.">
+  <Flow column>
+    <DiagramNode dim>Renderer / runtime host</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Network service</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>HTTP(S)</DiagramNode>
+    <DiagramNode>P2P</DiagramNode>
+    <DiagramNode>Custom transports</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Protocol stack
+
+The stack speaks several protocols, layered on top of a shared transport
+foundation:
+
+| Layer | Protocols | Purpose |
+| --- | --- | --- |
+| **Transport** | TCP, TLS, QUIC | Reliable, encrypted byte transport |
+| **Web** | HTTP/1.1, HTTP/2, HTTP/3 | The classic web platform |
+| **P2P** | Content addressed protocols | Decentralized fetch and messaging |
+| **Chain** | RPC/WebSocket clients | Interacting with blockchain networks |
+
+Every protocol runs inside the same service, sharing connection management and
+policy enforcement.
+
+## HTTP and HTTPS
+
+HTTP is the backbone of the classic web, and the stack implements it
+thoroughly:
+
+- **HTTP/2 and HTTP/3** with connection multiplexing and 0-RTT where
+  appropriate.
+- **TLS everywhere** with modern cipher suites and certificate validation.
+- **Cache-aware fetching** integrated with the storage engine's cache layer.
+
+The HTTPS policy is strict: the browser never silently downgrades TLS, and
+mixed content is blocked by default, matching the [Security Architecture](/docs/technical-design/security-architecture).
+
+## P2P transport
+
+The P2P transport serves the decentralized side of the ecosystem. It provides:
+
+<CardGrid columns={2}>
+  <Card title="Content addressing">
+    Fetch by content address, so integrity comes from the address, not the
+    peer. See [Storage Engine](/docs/technical-design/storage-engine).
+  </Card>
+  <Card title="Peer discovery">
+    Find peers through discovery services and direct addressing, without
+    central directories.
+  </Card>
+  <Card title="NAT traversal">
+    Direct and relayed connections for peers behind firewalls and NAT.
+  </Card>
+  <Card title="Encryption">
+    Authenticated encryption between peers; relays only forward ciphertext.
+  </Card>
+</CardGrid>
+
+The P2P transport is what makes the [Ecosystem Networking](/docs/ecosystem/networking)
+promises real at the protocol level.
+
+## Blockchain protocols
+
+The stack talks to blockchain networks through a provider abstraction:
+
+- **RPC and WebSocket** clients for reading state and submitting transactions.
+- **Network adapters** that map the wallet service's uniform account model onto
+  each chain's specifics.
+- **Signing is never in the network service.** The stack transports transaction
+  bytes; signing happens in the wallet service. See
+  [Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+<Callout type="warning" title="Security">
+  The network service handles transaction payloads but never keys. A network
+  compromise can observe or corrupt traffic in theory, but it cannot sign
+  anything, which is why the boundary between the network service and the
+  wallet service is strict.
+</Callout>
+
+## Custom transports
+
+The protocol list is not closed. Custom transports plug into the stack through
+a transport interface:
+
+- A transport declares its scheme and how it connects.
+- A transport is subject to the same policy, rate limits and logging as every
+  other protocol.
+- A transport never escapes the network service; it runs inside the same
+  sandbox.
+
+This is the mechanism the ecosystem uses to add new network types without
+forking the browser.
+
+## The request lifecycle
+
+Every request, regardless of protocol, follows the same lifecycle:
+
+<Steps>
+  <Step title="Policy check">
+    The network service verifies the caller's right to make this request, based
+    on its grants and the target.
+  </Step>
+  <Step title="Resolve">
+    The target is resolved through the naming stack. See
+    [DNS Architecture](/docs/technical-design/dns-architecture).
+  </Step>
+  <Step title="Connect">
+    A connection is obtained from the pool, or established.
+  </Step>
+  <Step title="Send">
+    The request is written; TLS or P2P encryption is applied at the transport
+    layer.
+  </Step>
+  <Step title="Respond">
+    The response is streamed back to the caller. Large bodies are written to
+    storage by reference, never held whole in memory.
+  </Step>
+</Steps>
+
+<Diagram caption="The unified request lifecycle across all protocols.">
+  <Flow column>
+    <DiagramNode>Policy check</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Resolve (naming)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Connect (pool)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Send and receive</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Stream to caller / storage</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Connection pooling
+
+Connections are expensive, so the stack pools them:
+
+- Pools are per origin and per protocol, shared across callers.
+- Idle connections are reused; stale connections are detected and replaced.
+- Pool size is bounded to prevent a single caller from exhausting resources.
+- Pool state is visible in the [Logging](/docs/technical-design/logging) and
+  metrics pipeline.
+
+Pooling is what makes page loads fast without per-call connection setup.
+
+## DNS and naming
+
+Name resolution is a separate concern from connection management. The network
+service delegates resolution to the naming stack and receives an address to
+connect to. The resolution pipeline is documented in
+[DNS Architecture](/docs/technical-design/dns-architecture).
+
+## Future protocol support
+
+The stack is built to accept new protocols through the transport interface:
+
+<CardGrid columns={2}>
+  <Card title="New P2P protocols">
+    Additional decentralized transports can plug in behind the same interface.
+  </Card>
+  <Card title="Relay networks">
+    Better NAT traversal and relay selection for mobile and restricted
+    networks.
+  </Card>
+  <Card title="Protocol negotiation">
+    Capability negotiation so old and new peers interoperate.
+  </Card>
+</CardGrid>
+
+None of these require changes to the request lifecycle, because the lifecycle is
+protocol agnostic by design.
+
+## Security notes
+
+- The network service is sandboxed and never holds keys.
+- All traffic is encrypted at the transport layer; plaintext HTTP is only
+  reached through explicit, visible policy.
+- Resolution and connection both enforce policy, so a malicious target is
+  blocked before bytes flow.
+
+## Performance notes
+
+- Connection pooling removes per-request handshake cost.
+- HTTP/2 and HTTP/3 multiplexing keeps many requests efficient on one
+  connection.
+- Response streaming keeps memory flat regardless of body size.
+
+<Callout type="success" title="Best practice">
+  When adding a custom transport, keep it inside the network service and route
+  it through the standard lifecycle. A transport that bypasses policy is a
+  policy bypass, regardless of intent.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes QUIC based P2P for lower latency, protocol tunneling
+  for restricted networks, and per-site connection budgets. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [DNS Architecture](/docs/technical-design/dns-architecture): how targets are resolved.
+- [Sandbox](/docs/technical-design/sandbox): why sockets stay in one service.
+- [Storage Engine](/docs/technical-design/storage-engine): where responses are cached.
+
+## Further reading
+
+- [Identity Layer](/docs/technical-design/identity-layer): how connections are authenticated.
+- [Logging](/docs/technical-design/logging): network observability.
+- [Performance](/docs/technical-design/performance): the networking performance budget.

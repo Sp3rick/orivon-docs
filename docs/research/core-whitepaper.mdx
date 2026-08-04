@@ -1,0 +1,157 @@
+---
+title: "Core Whitepaper"
+description: "The core paper: the minimal trusted foundation of Orivon — platform services, module lifecycle, and host interfaces."
+readingTime: 25
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["research", "whitepaper", "core"]
+keywords: "core whitepaper, trusted foundation, platform services, module lifecycle, host interface, minimal core, trust boundary"
+---
+
+*Orivon Research Group · Version 1.0 · Published 2026-07-24 · Status: Published*
+
+## Abstract
+
+The core is the small trusted foundation of the Orivon platform: the component
+that the browser, the runtime, and every module depend on. It owns platform
+services, module lifecycle, and host interfaces. This paper defines the core's
+responsibility boundary and argues that *minimalism of the core is a security
+property*: every line of code inside the trust boundary is attack surface that
+no sandbox can protect.
+
+## Background
+
+Every software platform has a trust boundary — the set of code that must be
+correct for everything else to be safe. Operating systems, browsers, and
+virtual machines all manage this boundary carefully. The size of the trust
+boundary is directly proportional to the risk: larger boundaries mean more
+code that must be reviewed, more bugs, and more ways to be exploited.
+
+The Orivon core follows the established practice of keeping the trust boundary
+small, but it applies the discipline more aggressively by refusing to grow
+with features. Features are pushed outward into modules, which run in the
+sandbox.
+
+## Problem Statement
+
+The core must resolve three problems:
+
+1. **Trust.** Some operations (starting processes, touching the filesystem,
+   managing network interfaces) cannot be sandboxed and must live inside the
+   trust boundary. The core must own exactly these operations and nothing
+   more.
+2. **Lifecycle.** Modules are loaded, activated, deactivated, and unloaded.
+   This lifecycle must be reliable and observable, or the platform becomes
+   unstable.
+3. **Coherence.** The browser, the runtime, and modules need a shared set of
+   services (storage, identity, networking) with a single implementation, or
+   the platform fragments.
+
+## Motivation
+
+The core exists to be the *single source of truth* for the platform's shared
+services and lifecycle, while remaining small enough to be trusted. If
+functionality that does not need trust lives in the core, it needlessly grows
+the attack surface. If functionality that *does* need trust lives outside the
+core, it creates privileged code that the sandbox cannot contain.
+
+## Architecture
+
+### Core responsibilities
+
+| Responsibility | Description |
+| --- | --- |
+| Platform services | Identity, wallet, storage, networking, DNS service hosts. |
+| Module lifecycle | Load, activate, deactivate, unload, failure handling. |
+| Grant registry | The single record of capability grants. |
+| Host interfaces | The ABI surface exposed to the runtime and modules. |
+| System integration | Processes, filesystem, network interfaces, native keychain. |
+| Telemetry | Logging, metrics, and audit records. |
+
+### Non-responsibilities
+
+| Not owned by core | Where it lives |
+| --- | --- |
+| Module business logic | Modules in the sandbox. |
+| Rendering | Browser renderer. |
+| Policy decisions | Permission system (see [Permission System](/docs/research/permission-system)). |
+| Protocol implementations | Service layer, still inside core's supervision but behind interfaces. |
+
+### Trust boundary
+
+```
+   modules ──(sandbox)──► runtime host
+                                │
+                                ▼
+   ┌─────────────────────────────────────────┐
+   │              CORE (trusted)             │
+   │  services · lifecycle · grants · host   │
+   └─────────────────────────────────────────┘
+                                │
+                                ▼
+                     OS + hardware
+```
+
+Anything inside the box is trusted and must be minimal, reviewed, and
+formally specified. Anything outside is assumed hostile and sandboxed.
+
+## Design Decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Single core, no per-module privileges | One trust boundary is auditable; many are not. |
+| Services behind interfaces | Core does not expose implementation details; modules see capabilities. |
+| Grant registry in core | Grants are the security state; they belong in the trust boundary. |
+| Feature velocity outward | New features are born as modules; only proven, trust-requiring code migrates inward. |
+
+## Trade-offs
+
+| Trade-off | Chosen side | Cost |
+| --- | --- | --- |
+| Minimal core vs. convenience | Minimal core | Features must cross a high review bar to enter the core. |
+| Single implementation vs. per-feature services | Single implementation | Service layer must be general enough for all callers. |
+| Centralized lifecycle vs. distributed | Centralized | A single point of control; mitigated by supervision and recovery. |
+
+## Implementation Strategy
+
+1. Define the core ABI and the grant registry first.
+2. Implement lifecycle as a finite state machine with explicit failure modes.
+3. Add platform services behind interfaces.
+4. Measure and publish the core's code surface as a metric.
+5. Gate every core addition on a security review and a justification of why it
+   cannot live in a module.
+
+## Future Work
+
+- Formal specification of the core ABI.
+- Rust-based core with memory-safety guarantees (see
+  [Cryptography Research](/docs/research/cryptography-research) for the
+  toolchain angle).
+- Remote attestation of the core for enterprise deployments.
+
+## References
+
+- Orivon, *Runtime Whitepaper*, 2026.
+- Orivon, *Module System Whitepaper*, 2026.
+- Orivon, *Security Whitepaper*, 2026.
+- J. H. Saltzer and M. D. Schroeder, "The protection of information in
+  computer systems," *Proc. IEEE*, 1975.
+- D. Gollmann, *Computer Security*, 3rd ed., Wiley, 2011.
+
+## Appendix A — Core surface metric
+
+The core publishes a CI-gated metric: the number of lines of code inside the
+trust boundary. The budget is reviewed each release and is capped per platform
+area. Growth is only allowed with a recorded design-document justification.
+
+## Appendix B — Lifecycle states
+
+```
+unloaded → loading → loaded → activating → active
+                                └──► failed
+```
+
+Transitions are idempotent and observed by the `module:*` events documented in
+the [API Reference](/docs/api-reference/events).
+
+**Related:** [Orivon Whitepaper](/docs/research/orivon-whitepaper) · [Runtime Whitepaper](/docs/research/runtime-whitepaper) · [Core Architecture](/docs/research/core-architecture)

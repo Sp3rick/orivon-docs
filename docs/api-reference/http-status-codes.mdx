@@ -1,0 +1,97 @@
+---
+title: "HTTP Status Codes"
+description: "Reference for HTTP status codes returned by Orivon endpoints and how they map to error codes."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 29
+tags: ["api-reference", "http-status-codes"]
+keywords: "http status codes, status code reference, 200, 400, 401, 403, 404, 409, 429, 500, api errors, response codes"
+---
+
+Public endpoints and the [Networking API](/docs/api-reference/networking-api)
+return standard HTTP status codes. This page documents the codes produced by
+the platform and their mapping to `OrivonError` codes.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Success codes
+
+| Code | Meaning | Notes |
+| --- | --- | --- |
+| `200 OK` | Success | Standard success. |
+| `201 Created` | Resource created | Registration, issue. |
+| `202 Accepted` | Accepted async | Task scheduled. |
+| `204 No Content` | Success, no body | Delete, revoke. |
+
+## Client error codes
+
+| Code | Meaning | Maps to |
+| --- | --- | --- |
+| `400 Bad Request` | Malformed request. | `ERR_INVALID_ARGUMENT` |
+| `401 Unauthorized` | Missing or invalid token. | `ERR_TOKEN_INVALID` |
+| `403 Forbidden` | Token lacks the capability. | `ERR_PERMISSION_DENIED` |
+| `404 Not Found` | Resource absent. | `ERR_NOT_FOUND` |
+| `405 Method Not Allowed` | Wrong method for the path. | `ERR_INVALID_ARGUMENT` |
+| `409 Conflict` | Name or resource in use. | `ERR_DNS_NAME_UNAVAILABLE` |
+| `410 Gone` | Resource removed. | `ERR_NOT_FOUND` |
+| `413 Payload Too Large` | Body over limit. | `ERR_INVALID_ARGUMENT` |
+| `415 Unsupported Media Type` | Wrong content type. | `ERR_INVALID_ARGUMENT` |
+| `422 Unprocessable Entity` | Validation failed. | `ERR_INVALID_ARGUMENT` |
+| `429 Too Many Requests` | Rate limited. | `ERR_TIMEOUT` (retryable) |
+
+## Server error codes
+
+| Code | Meaning | Maps to |
+| --- | --- | --- |
+| `500 Internal Server Error` | Unhandled server failure. | none (retryable) |
+| `502 Bad Gateway` | Upstream failure. | `ERR_CONNECTION_CLOSED` |
+| `503 Service Unavailable` | Temporary unavailability. | `ERR_TIMEOUT` (retryable) |
+| `504 Gateway Timeout` | Upstream timeout. | `ERR_TIMEOUT` |
+
+## Error response body
+
+Errors use the RFC 7807 problem details envelope:
+
+```json
+{
+  "type": "https://schemas.orivon.dev/problems/rate-limited",
+  "title": "Too Many Requests",
+  "status": 429,
+  "code": "ERR_RATE_LIMITED",
+  "detail": "Retry after 2026-07-31T12:00:00Z",
+  "retryAfter": 30
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `type` | `string` | Problem type URI. |
+| `title` | `string` | Short title. |
+| `status` | `number` | HTTP status. |
+| `code` | `string \| undefined` | Platform error code when mapped. |
+| `detail` | `string` | Human-readable detail. |
+| `retryAfter` | `number \| undefined` | Seconds; present on 429. |
+
+## Retry semantics
+
+| Code | Retryable | Retry-After |
+| --- | --- | --- |
+| `408` | yes | honored |
+| `429` | yes | honored |
+| `500`, `502`, `503`, `504` | yes | backoff |
+| `4xx` others | no | — |
+
+## In the Networking API
+
+```ts
+const res = await app.networking.fetch('https://api.example.com/v1/status');
+
+if (!res.ok) {
+  const problem = res.json() as ProblemDetails;
+  if (res.status === 429 && problem.retryAfter) {
+    await sleep(problem.retryAfter * 1000);
+  }
+}
+```
+
+**Related:** [Error Codes](/docs/api-reference/error-codes) · [Networking API](/docs/api-reference/networking-api) · [Conventions](/docs/api-reference/conventions)

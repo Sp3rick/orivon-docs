@@ -1,0 +1,133 @@
+---
+title: "Tutorial: Creating a DNS Provider"
+description: "Build a name resolver on the Orivon network, publish your provider, and answer lookups, step by step."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 30.2
+tags: ["developers", "tutorials"]
+keywords: "dns provider tutorial, name resolution, naming system, provider"
+---
+
+This tutorial builds a DNS provider: a package that resolves names to
+addresses on the Orivon network. You will implement lookups, publish the
+provider, and serve resolutions.
+
+<Callout type="info" title="Prerequisites">
+  The [quick start](/docs/developers/quick-start), and a basic feel for the
+  [identity](/docs/developers/identity-apis) and
+  [storage](/docs/developers/storage-apis) APIs.
+</Callout>
+
+## Step 1: Create the project
+
+```sh
+orivon new dns-provider --template module
+```
+
+## Step 2: Declare the manifest
+
+`orivon.toml`:
+
+```toml
+[package]
+name = "dns-provider"
+version = "0.1.0"
+description = "Resolves names on the Orivon network"
+
+[interface]
+methods = ["resolve", "register"]
+
+[permissions]
+identity = ["read", "resolve"]
+storage = ["read", "write"]
+network = ["listen", "advertise"]
+
+[hooks]
+onRegister = "register"
+```
+
+The provider resolves names, registers names, and advertises itself. See
+[DNS APIs](/docs/developers/dns-apis) and
+[Module Manifest](/docs/developers/module-manifest).
+
+## Step 3: Implement resolution
+
+```ts
+export async function resolve(input: {name: string}) {
+  const stored = await app.storage.get(`name:${input.name}`);
+  if (!stored) return {found: false};
+
+  const record = JSON.parse(stored);
+  const identity = await app.identity.resolve(record.owner);
+  const verified = await app.identity.verify(identity.address);
+
+  return {found: true, address: record.target, owner: record.owner, verified};
+}
+```
+
+Resolution looks up the record, then checks the owner's identity.
+
+## Step 4: Implement registration
+
+```ts
+export async function register(input: {name: string, target: string}) {
+  const owner = await app.identity.resolve('me');
+  await app.storage.put(`name:${input.name}`, JSON.stringify({
+    target: input.target,
+    owner: owner.address,
+  }));
+  return {name: input.name, registered: true};
+}
+```
+
+## Step 5: Publish the provider
+
+```ts
+export function activate() {
+  app.network.advertise('dns:provider', '/dns');
+  app.log.info('dns provider online');
+}
+```
+
+## Step 6: The lookup flow
+
+<Diagram caption="A name resolves through your provider.">
+  <Flow column>
+    <DiagramNode accent>User asks for alice.orivon</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Provider looks up the record</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Owner identity verified</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Address returned to the user</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Step 7: Run it
+
+```sh
+orivon build
+orivon run --call dns-provider register '{"name":"alice","target":"0xalice"}'
+orivon run --call dns-provider resolve '{"name":"alice"}'
+```
+
+```json
+{"found": true, "address": "0xalice", "owner": "0x...", "verified": true}
+```
+
+## What you built
+
+- A provider that registers and resolves names.
+- Verification of the owner identity on every resolution.
+- Advertised so the network can route lookups to it.
+
+<Callout type="success" title="Extend it">
+  Add expiration and renewal to records, and publish resolution metrics over
+  [events](/docs/developers/events) so the network can rank providers.
+</Callout>
+
+## Related pages
+
+- [DNS APIs](/docs/developers/dns-apis): the full surface.
+- [Naming System](/docs/ecosystem/naming-system): the ecosystem model.
+- [Tutorials](/docs/developers/tutorials): the tutorial index.

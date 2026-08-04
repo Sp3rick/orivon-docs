@@ -1,0 +1,65 @@
+---
+title: "Template: Bug Report"
+description: "The bug report template for Orivon issues: a structured form that captures the reproduction, environment and expectations."
+readingTime: 3
+lastUpdated: "July 31, 2026"
+order: 12.1
+tags: ["contributors", "templates"]
+keywords: "bug report template, issue template, reproduction"
+---
+
+Use this template when filing a bug report. Copy it into your issue and fill
+in every section. See [Bug Reports](/docs/contributors/bug-reports) for the
+guidance on writing each part well.
+
+```markdown
+### Summary
+One sentence describing the bug.
+
+### Environment
+- OS:
+- Runtime version:
+- SDK version:
+- Browser version (if relevant):
+
+### Steps to reproduce
+1.
+2.
+3.
+
+### Expected behavior
+What you expected to happen.
+
+### Actual behavior
+What actually happened, including the full error output.
+
+### Minimal reproduction
+Attach the smallest module or project that reproduces the bug, or describe
+it precisely enough to rebuild.
+
+### Additional context
+Anything else that helps: frequency, workarounds, related issues.
+```
+
+<Callout type="info" title="A reproduction beats everything">
+  The reproduction is the most valuable part of the report. If you can write
+  a failing test, include it; it is the exact reproduction and becomes the
+  regression test.
+</Callout>
+
+## What to check before filing
+
+<CheckList
+  items={[
+    'Searched existing issues, including closed ones.',
+    'Checked the latest version for an existing fix.',
+    'Redacted secrets and personal data.',
+    'Kept the reproduction as small as possible.',
+  ]}
+/>
+
+## Related pages
+
+- [Bug Reports](/docs/contributors/bug-reports): the process.
+- [Issue Guidelines](/docs/contributors/issue-guidelines): when to file.
+- [Responsible Disclosure](/docs/contributors/responsible-disclosure): security issues use a different path.

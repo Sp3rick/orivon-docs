@@ -1,0 +1,151 @@
+---
+title: "Example: Configuration Example"
+description: "A package with deep configuration and environment handling, showing config layers, validation, secrets and environment."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 29.8
+tags: ["developers", "examples"]
+keywords: "configuration example, config layers, environment, validation"
+---
+
+Configuration is where packages get their behavior without code changes.
+This example shows a package with layered config, validation, environment
+handling, and the rules around secrets.
+
+## Project structure
+
+```text
+configured-package/
+  orivon.toml
+  config.toml
+  src/
+    index.ts
+```
+
+## The manifest
+
+```toml
+[package]
+name = "configured-package"
+version = "0.1.0"
+description = "A package that is deeply configurable"
+
+[interface]
+methods = ["status"]
+
+[config]
+defaults = "config.toml"
+```
+
+The manifest points at a defaults file. See
+[Configuration](/docs/developers/configuration).
+
+## The defaults file
+
+`config.toml` provides the baseline:
+
+```toml
+[service]
+host = "default.example"
+port = 8080
+
+[cache]
+enabled = true
+ttl_seconds = 300
+
+[limits]
+max_results = 50
+```
+
+## Layered configuration
+
+The runtime merges layers, later over earlier:
+
+<Diagram caption="Config layers merge from defaults to environment.">
+  <Flow column>
+    <DiagramNode accent>Manifest defaults</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Package config</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>User overrides</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Environment variables</DiagramNode>
+  </Flow>
+</Diagram>
+
+The package reads the merged result:
+
+```ts
+export async function status() {
+  return {
+    host: app.config.get('service.host'),
+    cacheEnabled: app.config.get('cache.enabled'),
+    maxResults: app.config.get('limits.max_results'),
+  };
+}
+```
+
+## Environment handling
+
+Environment variables override config for deployment:
+
+```sh
+ORIVON_CONFIG_HOST=edge.example ORIVON_CONFIG_CACHE_ENABLED=false orivon run
+```
+
+Reading environment through config keeps code the same everywhere. See
+[Configuration](/docs/developers/configuration) for the variable format.
+
+## Validation
+
+A good package validates what it reads:
+
+```ts
+export function activate(config) {
+  const port = app.config.get('service.port');
+  if (typeof port !== 'number' || port < 0 || port > 65535) {
+    throw new Error(`invalid service.port: ${port}`);
+  }
+  return () => {};
+}
+```
+
+Fail fast on bad config, with a message that names the key and the value.
+
+<Callout type="warning" title="Secrets stay out of config">
+  Config is meant to be read and shared. Never put secrets in config, in
+  defaults files, or in environment exports that leave the machine. Secrets
+  belong in the user's wallet. See
+  [Best Practices](/docs/developers/best-practices).
+</Callout>
+
+## Reacting to changes
+
+Configuration can change at runtime:
+
+```ts
+app.config.on('change', ({key, value}) => {
+  if (key === 'cache.ttl_seconds') {
+    cache.configure({ttl: value});
+  }
+});
+```
+
+## What this example teaches
+
+- Config is layered: defaults, package, user, environment.
+- Read config at the boundaries of your code, not scattered through it.
+- Validate config early and name the failure.
+- Secrets do not belong in config.
+
+<Callout type="info" title="Next">
+  The [configuration guide](/docs/developers/configuration) is the full
+  reference for the config model. The
+  [cookbook](/docs/developers/cookbook) has more config recipes.
+</Callout>
+
+## Related pages
+
+- [Configuration](/docs/developers/configuration): the full reference.
+- [Module Manifest](/docs/developers/module-manifest): the manifest config.
+- [Examples](/docs/developers/examples): the example index.

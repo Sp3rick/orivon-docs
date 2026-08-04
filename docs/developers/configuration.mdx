@@ -1,0 +1,185 @@
+---
+title: "Configuration"
+description: "How configuration works for developers: configuration files, environment variables, runtime configuration, module configuration and validation."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 23
+tags: ["developers", "configuration"]
+keywords: "configuration, config files, environment variables, runtime config, module config, validation"
+---
+
+Configuration is how your package adapts without being rewritten. This page
+explains the configuration model: where values come from, how precedence
+works, and how to design configuration your users will thank you for.
+
+## The configuration model
+
+Configuration is organized by scope, from most to least general:
+
+<Diagram caption="Configuration precedence, from defaults to overrides.">
+  <Flow column>
+    <DiagramNode dim>Build defaults</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>System config</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Profile config</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Runtime overrides</DiagramNode>
+  </Flow>
+</Diagram>
+
+Each scope is more specific than the one above it, and more specific wins. The
+architecture is documented in [Configuration](/docs/technical-design/configuration).
+
+## Configuration files
+
+Static configuration lives in files. Your package ships defaults in
+`config/defaults.toml`:
+
+```toml
+max_results = 10
+greeting = "hello"
+retry_limit = 3
+```
+
+The defaults define behavior when the user changes nothing. They are validated
+against the schema your package declares.
+
+## Declaring a schema
+
+Your package declares its configuration schema so values can be validated:
+
+```toml
+[config.schema]
+max_results = { type = "integer", min = 1, max = 100, default = 10 }
+greeting = { type = "string", default = "hello" }
+retry_limit = { type = "integer", default = 3 }
+```
+
+Every value has a type, a range and a default. See
+[Module Manifest](/docs/developers/module-manifest) for the schema section.
+
+## Reading configuration
+
+Read configuration through the runtime:
+
+```ts
+const maxResults = await app.config.get('max_results');
+```
+
+Configuration is scoped to your package: you can read your own config, never
+another package's or the profile's global config. This isolation is a privacy
+property; see [Security](/docs/developers/best-practices).
+
+## Environment variables
+
+Environment variables are operational configuration, not user configuration:
+
+| Variable | Purpose |
+| --- | --- |
+| `ORIVON_LOG` | Log level |
+| `ORIVON_REGISTRY` | Registry URL |
+| `ORIVON_HOME` | Config and cache directory |
+
+Environment variables can override configuration files but cannot override
+values a user has set through the UI or runtime. The precedence is enforced by
+the config service.
+
+<Callout type="warning" title="Secrets are not configuration">
+  Do not put secrets in configuration files, defaults or environment variables
+  that are committed. Secrets belong in the wallet's secure storage or a secret
+  manager. Configuration is for tuning, not credentials.
+</Callout>
+
+## Runtime configuration
+
+Values can change at runtime, and your code should react:
+
+```ts
+app.config.onChange('theme', (value) => {
+  applyTheme(value);
+});
+```
+
+Reacting to changes keeps your package correct when the user updates a
+setting without restarting. Configuration changes that touch permissions
+trigger re-consent. See [Permissions](/docs/developers/permissions).
+
+## Module configuration
+
+Each module's configuration is isolated:
+
+<CheckList
+  items={[
+    'A module reads only its own namespace.',
+    'Module config is validated against the module schema.',
+    'Config changes never leak across modules.',
+    'Modules cannot read the profile global config.',
+  ]}
+/>
+
+If your module needs settings, declare them in its own schema and document
+them. See [Module Manifest](/docs/developers/module-manifest).
+
+## Validation
+
+Validation is the rule that makes configuration safe:
+
+<Steps>
+  <Step title="Declare">
+    Every value has a schema entry with a type, range and default.
+  </Step>
+  <Step title="Validate">
+    Loaded values are checked against the schema before use.
+  </Step>
+  <Step title="Reject">
+    Invalid values are rejected with a typed error, never silently coerced.
+  </Step>
+  <Step title="Log">
+    Rejected values are logged so mistakes are findable.
+  </Step>
+</Steps>
+
+A schema with no default is a bug: defaults are how the system behaves with no
+input. See [Configuration](/docs/technical-design/configuration).
+
+## Designing good configuration
+
+<Callout type="success" title="Best practice">
+  Design configuration that requires no knowledge: sensible defaults for every
+  value, a schema that catches mistakes, and names that read like prose.
+  Configuration is a user interface, and it deserves the same care.
+</Callout>
+
+| Principle | Why |
+| --- | --- |
+| Defaults always | The package must work with zero configuration |
+| Validate everything | Invalid values fail loudly at load time |
+| Scope to the module | Configuration is a privacy surface |
+| React to changes | Users should not need a restart |
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="No defaults">
+    A required value with no default makes the package fail mysteriously.
+  </Card>
+  <Card title="Silent coercion">
+    Coercing invalid values hides configuration mistakes. Reject them.
+  </Card>
+  <Card title="Reading global config">
+    Reading outside your scope is a denial and a privacy violation.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  Configuration is specified in the
+  [Configuration draft](/docs/standards/osp-014-configuration) and defined by
+  [Configuration](/docs/technical-design/configuration).
+</Callout>
+
+## Related pages
+
+- [Module Manifest](/docs/developers/module-manifest): declaring the schema.
+- [Development Environment](/docs/developers/development-environment): environment variables.
+- [Configuration Example](/docs/developers/examples/configuration-example): a complete example.

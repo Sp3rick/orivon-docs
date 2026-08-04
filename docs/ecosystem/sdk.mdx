@@ -1,0 +1,177 @@
+---
+title: "SDK"
+description: "The developer toolkit for building applications, modules and services on the Orivon ecosystem, with a quick start and a worked example."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 6
+tags: ["ecosystem", "sdk", "developers"]
+keywords: "sdk, developer, toolkit, quick start, module, application, api, javascript"
+---
+
+The Orivon SDK is the developer toolkit for the ecosystem. It lets you build
+applications that use native identity, payments, storage and naming, and it lets
+you build the modules that extend the ecosystem. This page explains what the SDK
+contains and gets you started with a worked example.
+
+## What the SDK includes
+
+The SDK is a set of libraries, tools and documentation that together cover the
+whole developer journey:
+
+<CardGrid columns={2}>
+  <Card title="Client library">
+    A JavaScript library that exposes the runtime's capabilities through a
+    simple, typed API.
+  </Card>
+  <Card title="CLI">
+    Commands for scaffolding, building, signing and publishing applications and
+    modules.
+  </Card>
+  <Card title="Wallet helpers">
+    Sign in, sign transactions and manage accounts without reimplementing
+    cryptography.
+  </Card>
+  <Card title="Storage and naming clients">
+    Read and write user owned data and resolve human readable names.
+  </Card>
+  <Card title="Sandbox tooling">
+    Local runtimes to test exactly how your application will behave, including
+    permissions.
+  </Card>
+  <Card title="Documentation">
+    Reference material and examples for every interface, plus this site.
+  </Card>
+</CardGrid>
+
+## Who the SDK is for
+
+<CardGrid columns={2}>
+  <Card title="Web developers">
+    You already know JavaScript. The SDK wraps new capabilities in familiar
+    patterns.
+  </Card>
+  <Card title="Module authors">
+    Build extensions once and distribute them across every implementation.
+  </Card>
+  <Card title="Service providers">
+    Offer storage, payments or identity infrastructure that plugs into the
+    ecosystem.
+  </Card>
+  <Card title="Learners">
+    The quick start below takes minutes, and the ecosystem is designed to be
+    approachable.
+  </Card>
+</CardGrid>
+
+## Quick start
+
+Install the client library in your project:
+
+```js
+npm install @orivon/sdk
+```
+
+Then create a client and sign in with a wallet. Signing in returns an identity
+you can use across the application:
+
+```js
+import {Orivon} from '@orivon/sdk';
+
+const orivon = new Orivon();
+await orivon.connect(); // shows the wallet sign in flow
+
+const identity = orivon.identity;
+console.log(identity.name);   // "alice.orivon"
+console.log(identity.address); // the resolved decentralized address
+```
+
+Reading and writing user owned storage is async but otherwise plain:
+
+```js
+const data = await orivon.storage.get('profile.json');
+console.log(data);
+```
+
+<Callout type="note" title="Note">
+  The package names and API shapes in these examples are illustrative. The SDK
+  is under active development, and the final API will be documented in the SDK
+  reference.
+</Callout>
+
+## A worked example: a signed note app
+
+Let us build something small that shows the SDK's value: a note that is signed
+by its author and stored on user owned storage.
+
+<Steps>
+  <Step title="Connect and get identity">
+    The app calls connect, and the user approves with their wallet. The app now
+    knows who is writing.
+  </Step>
+  <Step title="Write a signed note">
+    The app stores the note under the user's identity and signs it. The
+    signature is part of the stored object.
+  </Step>
+  <Step title="Publish the note">
+    Publishing means making the note's address available. Anyone with the
+    address can read it and verify the signature.
+  </Step>
+  <Step title="Let others resolve it">
+    Readers resolve the author's name, fetch the note from storage, and verify
+    the signature. No server, no account.
+  </Step>
+</Steps>
+
+The point of the example: identity, storage and verification are all native
+capabilities. The developer never touches keys, hashes or node infrastructure
+directly.
+
+## Building a module
+
+Modules use the same SDK, plus a manifest that declares identity, permissions
+and entry points:
+
+```js
+export function activate({orivon, permissions}) {
+  const data = await orivon.storage.get('latest');
+  return {render, dispose};
+}
+```
+
+The module declares the permissions it needs, and the user sees and approves
+them at install time. That is the same trust model described in
+[Modules](/docs/ecosystem/modules).
+
+## Testing and debugging
+
+<CheckList
+  items={[
+    'Run applications against a local sandbox runtime for fast iteration.',
+    'Inspect permissions in the browser module dashboard.',
+    'Simulate identities and wallets in tests without touching real keys.',
+    'Check the Web3 Score inputs your application exposes before shipping.',
+  ]}
+/>
+
+## The developer roadmap
+
+The SDK grows with the ecosystem. Today it targets the capabilities the
+[browser](/docs/ecosystem/browser) and [runtime](/docs/ecosystem/runtime)
+already expose. As planned products like the [Developer Hub](/docs/ecosystem/future-products)
+ship, the SDK gains the tooling that goes with them.
+
+<Callout type="success" title="Next">
+  Most applications you build will touch money. Read the
+  [Wallet System](/docs/ecosystem/wallet-system) before you do.
+</Callout>
+
+## Related pages
+
+- [Modules](/docs/ecosystem/modules): how extensions are built and distributed.
+- [Wallet System](/docs/ecosystem/wallet-system): signing in and signing transactions.
+- [Storage](/docs/ecosystem/storage): the data layer the SDK writes to.
+
+## Further reading
+
+- [Future Products](/docs/ecosystem/future-products): planned developer tooling.
+- [Glossary](/docs/introduction/glossary): terms used across the SDK documentation.

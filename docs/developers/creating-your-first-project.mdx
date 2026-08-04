@@ -1,0 +1,156 @@
+---
+title: "Creating Your First Project"
+description: "Create, configure and understand your first Orivon project from scratch: choosing a template, the scaffold, and what every generated file does."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["developers", "first-project"]
+keywords: "first project, scaffold, template, orivon new, orivon init"
+---
+
+The [Quick Start](/docs/developers/quick-start) gets a project running fast.
+This page goes deeper: it explains how to choose a template, what the
+scaffold actually produces, and how to shape a project for real work.
+
+## Choosing a template
+
+`orivon new` scaffolds from a template. The template determines the entry
+point and the defaults:
+
+| Template | Produces | Use when |
+| --- | --- | --- |
+| `app` | An application entry point | Building an application |
+| `module` | A module entry point | Building a reusable module |
+| `provider` | A provider skeleton | Implementing a provider (DNS, storage, network) |
+
+```sh
+orivon new my-app
+orivon new my-module --module
+orivon new my-dns --template provider
+```
+
+The template choice is not permanent; you can evolve a project from one to
+another by changing its manifest. See [Module Manifest](/docs/developers/module-manifest).
+
+## The scaffold
+
+Whatever the template, `orivon new` produces the same skeleton:
+
+```text
+my-app/
+  orivon.toml
+  src/
+    main.ts
+  tests/
+    main.test.ts
+  config/
+    defaults.toml
+  assets/
+  .gitignore
+  README.md
+```
+
+The [Project Structure](/docs/developers/project-structure) page documents
+every file. What matters here is the flow:
+
+<Diagram caption="The scaffold wires the manifest to the source to the tests.">
+  <Flow column>
+    <DiagramNode accent>orivon.toml (declares)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>src/main.ts (implements)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>tests/main.test.ts (verifies)</DiagramNode>
+  </Flow>
+</Diagram>
+
+The manifest declares what the project is; the source implements it; the tests
+verify it. Everything else supports those three.
+
+## Configuring the project
+
+Open `orivon.toml`. A configured project declares its capabilities
+explicitly:
+
+```toml
+[package]
+name = "my-app"
+version = "0.1.0"
+authors = ["alice.orivon"]
+description = "An example application"
+
+[permissions]
+allow = ["identity.read", "storage.write"]
+
+[dependencies]
+"core-utils" = "0.1.0"
+```
+
+Notice the permissions: they start empty and grow only when the project
+actually needs them. Adding a permission before it is needed is the most
+common security mistake in Orivon development. See
+[Permissions](/docs/developers/permissions).
+
+## Building on the scaffold
+
+Once the scaffold runs, customize it deliberately:
+
+<Steps>
+  <Step title="Rename correctly">
+    Change the `name` in the manifest, not just the directory. The manifest
+    name is the package identity.
+  </Step>
+  <Step title="Set the version">
+    Start at `0.1.0`. Do not ship anything as `1.0.0` until it is stable.
+  </Step>
+  <Step title="Add dependencies on demand">
+    Add dependencies only when a feature needs them. See `orivon add` in the
+    [CLI reference](/docs/developers/cli).
+  </Step>
+  <Step title="Write one test first">
+    Replace the scaffold test with a test that matches your first real
+    behavior.
+  </Step>
+</Steps>
+
+## Initializing in place
+
+If you already have a directory and want to make it a project, use `init`
+instead of `new`:
+
+```sh
+mkdir my-app && cd my-app
+orivon init
+```
+
+`init` writes a manifest and skeleton without creating a subdirectory.
+
+<Callout type="success" title="Best practice">
+  Treat the scaffold as a starting point, not a template to preserve. The
+  generated files are minimal by design; real projects grow them, and the
+  manifest is where that growth is declared.
+</Callout>
+
+## Verifying the project
+
+After any configuration change, verify the project still works:
+
+```sh
+orivon build
+orivon test
+orivon run
+```
+
+A project that passes all three is healthy. Add these three commands to your
+muscle memory; they are the heartbeat of Orivon development.
+
+<Callout type="warning" title="Common mistakes">
+  Do not rename a project by editing files blindly. Rename it in the manifest
+  first, then in the directory, then rebuild. The manifest name is the source
+  of truth and stale names cause confusing publish errors.
+</Callout>
+
+## Related pages
+
+- [Building Your First Module](/docs/developers/building-your-first-module): the module path.
+- [Building Your First Application](/docs/developers/building-your-first-application): the application path.
+- [Module Manifest](/docs/developers/module-manifest): every manifest field.

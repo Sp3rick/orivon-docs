@@ -1,0 +1,120 @@
+---
+title: "Example: Identity Example"
+description: "Resolving, verifying and storing identities: the identity services, DDoc based identity, and putting it together."
+readingTime: 7
+lastUpdated: "July 31, 2026"
+order: 29.5
+tags: ["developers", "examples"]
+keywords: "identity example, identity resolution, verification, ddoc"
+---
+
+Identity is the foundation of Orivon: every account, name and document is
+tied to a DDoc based identity. This example shows how a module resolves,
+verifies and stores identities.
+
+## Project structure
+
+```text
+identity-example/
+  orivon.toml
+  src/
+    index.ts
+```
+
+## The manifest
+
+```toml
+[package]
+name = "identity-example"
+version = "0.1.0"
+description = "Resolves and verifies identities"
+
+[interface]
+methods = ["resolve", "verify", "lookup"]
+
+[permissions]
+identity = ["read", "resolve"]
+```
+
+The module can read and resolve identities. See
+[Identity APIs](/docs/developers/identity-apis).
+
+## The implementation
+
+```ts
+export async function resolve(input: {name: string}) {
+  const identity = await app.identity.resolve(input.name);
+  return {address: identity.address, metadata: identity.metadata};
+}
+
+export async function verify(input: {address: string}) {
+  const verified = await app.identity.verify(input.address);
+  return {verified};
+}
+
+export async function lookup(input: {address: string}) {
+  const stored = await app.storage.get(`identity:${input.address}`);
+  return stored ? JSON.parse(stored) : {address: input.address, metadata: {}};
+}
+```
+
+## The flow
+
+<Diagram caption="From name to verified identity.">
+  <Flow column>
+    <DiagramNode accent>resolve(name)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Naming system maps name to address</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>verify(address)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Trusted identity with metadata</DiagramNode>
+  </Flow>
+</Diagram>
+
+Resolution maps a name to an address. Verification checks that the identity
+is real. Together they let your module trust what it is talking to.
+
+## Storing identities locally
+
+Identity resolution and verification can be repeated, so cache the result:
+
+```ts
+const cache = new Map();
+
+export async function resolveCached(input: {name: string}) {
+  if (cache.has(input.name)) return cache.get(input.name);
+  const result = await resolve(input);
+  cache.set(input.name, result);
+  return result;
+}
+```
+
+Caching cut resolution latency dramatically. Invalidate the cache when you
+have reason to, and always re verify when the stakes are high. See
+[Performance](/docs/developers/performance).
+
+<Callout type="warning" title="Verify where it matters">
+  Resolution tells you who an address points to; verification tells you the
+  identity is real. For privileged operations, verify, do not just resolve.
+  See [Best Practices](/docs/developers/best-practices).
+</Callout>
+
+## What this example teaches
+
+- Identity is DDoc based and resolves through the naming system.
+- Verification is separate from resolution and matters for trust.
+- Caching resolution results makes identity work cheap.
+
+<Callout type="info" title="Next">
+  The [DNS tutorial](/docs/developers/tutorials/creating-a-dns-provider) builds
+  the resolution side as a service. The
+  [wallet integration](/docs/developers/examples/wallet-integration) pairs
+  identity with signing.
+</Callout>
+
+## Related pages
+
+- [Identity APIs](/docs/developers/identity-apis): the full surface.
+- [Identity](/docs/ecosystem/identity): the ecosystem model.
+- [Examples](/docs/developers/examples): the example index.

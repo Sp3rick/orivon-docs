@@ -1,0 +1,151 @@
+---
+title: "Events"
+description: "Reference for every event emitted by the Orivon APIs: name, payload, trigger, lifecycle and how to subscribe."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 17
+tags: ["api-reference", "events"]
+keywords: "events, event reference, event name, payload, subscribe, on, once, emit, event lifecycle"
+---
+
+Events are the asynchronous notification mechanism of the platform. A package
+subscribes with `app.on(event, listener)` (see [Runtime API](/docs/api-reference/runtime-api))
+and receives a structured payload every time the event fires.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Conventions
+
+- Event names are namespaced strings: `domain:action`, lowercase, for example
+  `wallet:balance-changed`.
+- All event payloads are JSON-serializable.
+- Events are delivered in order per domain; there is no cross-domain ordering
+  guarantee.
+- Listeners run sequentially; an `async` listener does not block later
+  listeners but its rejection is reported via `module:error`.
+- Events never carry secrets. Token material is not present in any payload.
+
+## Subscribing
+
+```ts
+const off = app.on('wallet:balance-changed', (event) => {
+  console.log(event.accountId, event.asset, event.amount);
+});
+
+// one-shot subscription
+app.once('ready', () => app.log.info('started'));
+```
+
+Unsubscribing with the returned function is the only supported way to remove a
+listener reliably across releases.
+
+## Event registry
+
+### Runtime and lifecycle
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `ready` | `{}` | `activate()` resolved. |
+| `activated` | `{startReason}` | Package became active. |
+| `deactivated` | `{reason}` | Package was deactivated. |
+| `message` | `MessageEnvelope` | Inbound message delivered. |
+| `module:error` | `{id, error}` | Uncaught error reported. |
+
+### Core and modules
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `module:loaded` | `ModuleInfo` | Module loaded. |
+| `module:unloaded` | `{id}` | Module unloaded. |
+| `module:activated` | `ModuleInfo` | Module became active. |
+| `module:deactivated` | `{id, reason}` | Module left active state. |
+| `module:state-changed` | `ModuleInfo` | Lifecycle state changed. |
+| `core:low-memory` | `MemoryUsage` | Memory pressure threshold crossed. |
+
+### Browser
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `tab:created` | `Tab` | Tab created. |
+| `tab:updated` | `Tab` | Tab URL/title changed. |
+| `tab:closed` | `{id}` | Tab closed. |
+| `tab:activated` | `{id}` | Tab gained focus. |
+| `history:changed` | `HistoryEntry` | History entry added. |
+
+### Application
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `app:launched` | `ApplicationRecord` | Application started. |
+| `app:state-changed` | `{id, state}` | Application state changed. |
+| `app:window-created` | `Window` | Window created. |
+| `app:window-closed` | `{id}` | Window closed. |
+| `app:quit` | `{id, code}` | Application exited. |
+
+### Wallet
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `wallet:account-added` | `WalletAccount` | Account created or imported. |
+| `wallet:account-removed` | `{id}` | Account removed. |
+| `wallet:balance-changed` | `{accountId, asset, amount}` | Balance changed. |
+| `wallet:transaction-created` | `Transaction` | Transaction submitted. |
+| `wallet:transaction-settled` | `Transaction` | Transaction settled. |
+
+### Identity
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `identity:session-changed` | `Session \| null` | Session created, refreshed or ended. |
+| `identity:profile-switched` | `{did}` | Active profile changed. |
+| `identity:credential-issued` | `Credential` | Credential issued. |
+| `identity:credential-revoked` | `{id}` | Credential revoked. |
+
+### Storage
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `storage:changed` | `{key}` | Key written or removed. |
+| `storage:file-changed` | `{name}` | File written or removed. |
+| `storage:quota-exceeded` | `{scope, used, limit}` | Quota exceeded. |
+
+### Networking
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `networking:connection-opened` | `{url, id}` | Connection opened. |
+| `networking:connection-closed` | `{id, code}` | Connection closed. |
+| `networking:state-changed` | `{online, type}` | Connectivity changed. |
+
+### DNS
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `dns:name-registered` | `Registration` | Name registered. |
+| `dns:name-updated` | `Registration` | Records changed. |
+| `dns:name-released` | `{name}` | Name released. |
+| `dns:name-expiring` | `Registration` | Near expiry. |
+
+### Permissions
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `permissions:changed` | `Grant[]` | Any grant changed. |
+| `permissions:denied` | `PermissionDescriptor[]` | Request denied. |
+
+## Lifecycle
+
+Events follow the lifecycle of the emitting object:
+
+1. The emitting facade is constructed and its grants are installed.
+2. Events are emitted only while the package is active.
+3. After `deactivate()` resolves, no further events are emitted and all
+   listeners are removed.
+
+<Note title="Subscription timing">
+  Subscribing before `activate()` is valid and recommended for setup that must
+  not miss early events, such as `ready`. Events emitted during `activate()`
+  are delivered after the subscribe calls made before it.
+</Note>
+
+**Related:** [Runtime API](/docs/api-reference/runtime-api) · [Objects](/docs/api-reference/objects) · [Methods](/docs/api-reference/methods)

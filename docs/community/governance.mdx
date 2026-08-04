@@ -1,0 +1,164 @@
+---
+title: "Governance"
+description: "The project-level governance model: structure, responsibilities, leadership, decision-making, voting, transparency, and conflict resolution."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 4
+tags: ["community", "governance", "leadership", "voting"]
+keywords: "orivon governance, maintainers, technical steering committee, working groups, decision making, voting, transparency"
+---
+
+Governance is how the project makes decisions and distributes power. This page
+describes the *project-level* governance model: who holds responsibility for
+what, how decisions are made, and how the process stays accountable.
+
+<Note title="Project governance vs. ecosystem governance">
+  This page is about how the Orivon *project* is run. The wider *ecosystem* —
+  standards, naming disputes, content rules, and the Orivon Foundation — is
+  governed separately. See [Ecosystem Governance](/docs/ecosystem/governance)
+  for that model. The two models share values and overlap at the standards
+  layer, but they are distinct.
+</Note>
+
+## Governance model
+
+Orivon uses a **meritocratic, layered model** inspired by the Apache
+Software Foundation. Power is derived from demonstrated contribution rather
+than from employment, appointment, or money.
+
+The layers, from widest to most focused:
+
+| Body | Scope | Appointed by |
+| --- | --- | --- |
+| [Community](/docs/community/community) | Discussion, proposals, review | Self-selected |
+| [Working Groups](/docs/community/working-groups) | Cross-cutting technical topics | Community members |
+| [Maintainers](/docs/community/maintainers) | Individual repositories and areas | Committers, TSC |
+| [Technical Steering Committee](/docs/community/technical-steering-committee) | Technical direction and standards | Maintainers, community |
+
+<Callout type="info" title="Why Apache-style?">
+  Apache-style governance is a proven way to run an open source project at
+  scale: it is transparent, it distributes power, and it lets contributors
+  advance based on demonstrated work rather than corporate sponsorship. It
+  matches Orivon's mission of returning control of the ecosystem to its
+  community.
+</Callout>
+
+## Responsibilities
+
+Each body has a clear scope of responsibility:
+
+- **Community** proposes, discusses, and reviews. It is the source of all
+  legitimate authority.
+- **Working groups** coordinate cross-cutting work (security, docs, research,
+  and more) and make recommendations to the TSC.
+- **Maintainers** are accountable for the quality and health of specific
+  repositories: reviewing pull requests, managing releases, and guiding
+  contributors.
+- **The TSC** is accountable for overall technical direction, the release
+  process, and standards decisions.
+
+<Warning title="No single point of control">
+  No individual — and no single company or organization — has unilateral
+  authority over the project. Significant decisions require the TSC, and the
+  most significant decisions require community review.
+</Warning>
+
+## Leadership
+
+Leadership roles are earned through contribution:
+
+| Role | Responsibility | Path |
+| --- | --- | --- |
+| Contributor | Proposes and reviews work | Any community member |
+| Working group member | Active, consistent participation in a group | Invitation or application |
+| Maintainer | Owns a repository's health | Appointment after demonstrated contributions |
+| TSC member | Sets technical direction | Nomination and election |
+
+None of these roles is permanent. Leadership is a service role, and it is
+revocable through the same transparent processes that grant it. See
+[Maintainers](/docs/community/maintainers) and
+[Technical Steering Committee](/docs/community/technical-steering-committee).
+
+## Decision-making
+
+Decisions fall into three tiers, each with a different process:
+
+| Tier | Examples | Process |
+| --- | --- | --- |
+| **Operational** | Merging a bugfix PR, triaging an issue | Maintainer discretion |
+| **Project** | Adding a feature, changing release policy | [Decision proposal](/docs/community/decision-making) |
+| **Foundational** | Changing governance, licensing, standards | Decision proposal + community review |
+
+Every decision leaves a public record: an issue, a pull request, or a decision
+document. Nothing of consequence happens silently. The full process — lazy
+consensus, voting thresholds, and appeals — is on the
+[Decision Making](/docs/community/decision-making) page.
+
+## Voting
+
+Voting is used for significant decisions: TSC elections, governance changes,
+and (for the ecosystem) standards ratification.
+
+Principles:
+
+- **Eligibility is tied to contribution**, not to affiliation or payment.
+- **Votes are recorded and public.** Vote counts and identities are published.
+- **Abstentions are respected.** Members may abstain without penalty.
+- **Thresholds are documented** for each decision type and applied consistently.
+
+See [Voting in Decision Making](/docs/community/decision-making#voting).
+
+## Transparency
+
+The governance model depends on trust, and trust depends on transparency. The
+project commits to:
+
+<CheckList
+  items={[
+    'Public meeting minutes for the TSC and working groups.',
+    'Public decision records with rationale and alternatives.',
+    'Public maintainer appointments and role changes.',
+    'Public release notes, budgets, and program updates.',
+    'A public appeal process for contested decisions.',
+  ]}
+/>
+
+## Conflict resolution
+
+Disagreement is normal and healthy. The project's approach:
+
+<Steps>
+  <Step title="Discuss">
+    Disagreements are first discussed in the open. Most conflicts resolve
+    through evidence and debate.
+  </Step>
+  <Step title="Escalate">
+    If no consensus emerges, the issue escalates to the relevant working group
+    or maintainers.
+  </Step>
+  <Step title="TSC review">
+    Stalemates reach the Technical Steering Committee, which makes a recorded
+    decision.
+  </Step>
+  <Step title="Appeal">
+    Anyone may appeal a TSC decision through the formal appeals process in
+    [Decision Making](/docs/community/decision-making).
+  </Step>
+</Steps>
+
+For disputes inside the wider ecosystem (naming, content, namespace policy),
+see [Ecosystem Governance](/docs/ecosystem/governance).
+
+## Amending governance
+
+Governance is not immutable, but it changes deliberately. Amendments follow
+the **foundational** decision tier: a formal proposal, a comment period, a
+recorded vote, and a review window before adoption.
+
+<Callout type="success" title="Governance belongs to the community">
+  Governance is a living document. If you believe the model can be fairer or
+  more effective, the [proposal process](/docs/community/decision-making) is
+  open to you.
+</Callout>
+
+**Related:** [Decision Making](/docs/community/decision-making) · [Maintainers](/docs/community/maintainers) · [Technical Steering Committee](/docs/community/technical-steering-committee)

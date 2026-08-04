@@ -1,0 +1,131 @@
+---
+title: "DNS API"
+description: "Reference for the DNS API: resolution, name registration, record management and ownership."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["api-reference", "dns-api"]
+keywords: "dns api, resolve name, lookup records, register name, update records, release name, dns records, ownership"
+---
+
+The DNS API interacts with the decentralized naming system: resolving names to
+records, registering names, managing records and listing ownership. Names
+resolve to resource records; identity and naming concepts are documented in
+the [Ecosystem](/docs/ecosystem/naming-system) level.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: DnsFacade
+
+### `dns.resolve(name)`
+
+Resolves a decentralized name to its record set.
+
+```ts
+const records = await app.dns.resolve('docs.orivon');
+// [{type: 'DDOC', value: 'did:orivon:1:8f2a...'}, ...]
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Name to resolve, e.g. `"docs.orivon"`. |
+
+**Returns:** `Promise<DnsRecord[]>`
+
+**Throws:** `ERR_DNS_NOT_FOUND` · `ERR_NETWORK_UNREACHABLE` · `ERR_INVALID_NAME`
+
+### `dns.lookup(name, type)`
+
+Resolves a name and filters records by type.
+
+**Returns:** `Promise<DnsRecord[]>`
+
+**Throws:** `ERR_DNS_NOT_FOUND` · `ERR_DNS_RECORD_NOT_FOUND` when the type is absent.
+
+### `dns.register(name, records, options?)`
+
+Registers an unowned name under the active identity, binding the record set.
+
+```ts
+await app.dns.register('alice.orivon', [
+  {type: 'DDOC', value: 'did:orivon:1:8f2a'},
+  {type: 'A', value: '192.0.2.10', ttl: 3600},
+]);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Full name to register. |
+| `records` | `DnsRecord[]` | Initial record set. |
+| `options.ttl` | `number \| undefined` | Default TTL in seconds. Default `3600`. |
+
+**Returns:** `Promise<Registration>` — includes `name`, `owner`, `expiresAt`.
+
+**Throws:** `ERR_DNS_NAME_UNAVAILABLE` · `ERR_PERMISSION_DENIED` · `ERR_INVALID_RECORD`
+
+### `dns.update(name, records)`
+
+Replaces the record set for a name the caller owns.
+
+**Returns:** `Promise<Registration>`
+
+**Throws:** `ERR_DNS_NOT_REGISTERED` · `ERR_DNS_NAME_UNAVAILABLE`
+
+### `dns.release(name)`
+
+Releases ownership of a name. Requires `dns.release` permission and user
+consent.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_DNS_NOT_REGISTERED` · `ERR_USER_DENIED`
+
+### `dns.listOwned()`
+
+Lists names owned by the active identity.
+
+**Returns:** `Promise<Registration[]>`
+
+## Types
+
+### `DnsRecord`
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `type` | `DnsRecordType` | yes | Record type (table below). |
+| `value` | `string` | yes | Record payload. |
+| `ttl` | `number` | no | Seconds to cache. Default `3600`. |
+
+### `DnsRecordType`
+
+| Type | Purpose |
+| --- | --- |
+| `A` | IPv4 address. |
+| `AAAA` | IPv6 address. |
+| `DDOC` | Pointer to a DID document. |
+| `TXT` | Arbitrary text. |
+| `CNAME` | Canonical name alias. |
+| `SVC` | Service endpoint (scheme, host, port). |
+
+### `Registration`
+
+`{name, owner: string, records: DnsRecord[], registeredAt, expiresAt}`
+
+## Validation rules
+
+- Names are lowercase, may contain `a-z0-9` and hyphens between labels, and
+  labels are at most 63 characters.
+- `A` values must be valid IPv4; `AAAA` valid IPv6; `DDOC` values must start
+  with `did:`.
+- A record set may not exceed 16 records or 8 KB total.
+
+## DNS events
+
+| Event | Payload | Trigger |
+| --- | --- | --- |
+| `dns:name-registered` | `Registration` | A name was registered. |
+| `dns:name-updated` | `Registration` | Records changed. |
+| `dns:name-released` | `{name}` | A name was released. |
+| `dns:name-expiring` | `Registration` | A registration is near expiry. |
+
+**Related:** [Identity API](/docs/api-reference/identity-api) · [Networking API](/docs/api-reference/networking-api) · [Error Codes](/docs/api-reference/error-codes)

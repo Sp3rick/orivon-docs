@@ -1,0 +1,155 @@
+---
+title: "Modules"
+description: "The extension mechanism of the ecosystem: how anyone can add capability without forking the browser, through sandboxed modules built on public interfaces."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 5
+tags: ["ecosystem", "modules", "extensibility"]
+keywords: "modules, extensions, interfaces, sandbox, distribution, capability, marketplace"
+---
+
+Modules are how the ecosystem grows. They are small, focused pieces of
+capability that attach to the [Core](/docs/ecosystem/core) through public
+interfaces. Anyone can build one, and no one has to fork the browser to do it.
+This page explains what modules are, how they work, and how they stay safe.
+
+## What a module is
+
+A module is a self-contained extension with a narrow job. It is not a full
+application and it is not a modified browser. It is capability that plugs into
+the ecosystem and can be installed, updated and removed independently.
+
+Examples of what a module might do:
+
+<CardGrid columns={2}>
+  <Card title="Payment helpers">
+    Send and request payments across networks using the wallet interfaces.
+  </Card>
+  <Card title="Storage providers">
+    Offer user owned storage with a clean quota and billing flow.
+  </Card>
+  <Card title="Identity tools">
+    Add credential management, recovery flows or profile portability.
+  </Card>
+  <Card title="Developer utilities">
+    Inspect network requests, profile performance or debug decentralized
+    applications.
+  </Card>
+  <Card title="Accessibility features">
+    Reading aids, translation and display tools that work across every site.
+  </Card>
+  <Card title="Privacy dashboards">
+    Show exactly which permissions applications have and revoke them in one
+    click.
+  </Card>
+</CardGrid>
+
+## Why modules, not forks
+
+A browser ecosystem has two classic ways to grow: forks and extensions. Forks
+fragment the ecosystem; extensions that are built by one company become a
+gateway the company controls.
+
+Modules take a third path. They attach to the **core**, not to a particular
+browser, through **public interfaces** defined by the standards. The result:
+
+1. **Compatible.** A module works across any browser that implements the
+   standards.
+2. **Independent.** A module is built and distributed by its author, not
+   approved by a platform.
+3. **Replaceable.** A better module can replace an old one without breaking
+   applications.
+
+<Diagram caption="Modules attach to the core through public interfaces, so any browser can host them.">
+  <Flow>
+    <DiagramNode dim>Module A</DiagramNode>
+    <FlowArrow />
+    <DiagramNode accent>Core interfaces</DiagramNode>
+    <FlowArrow />
+    <DiagramNode dim>Module B</DiagramNode>
+  </Flow>
+  <div style={{height: 14}} />
+  <Flow>
+    <DiagramNode>Browser</DiagramNode>
+    <DiagramNode>Runtime</DiagramNode>
+    <DiagramNode>Any implementation</DiagramNode>
+  </Flow>
+</Diagram>
+
+## How modules stay safe
+
+Capability without safety is how ecosystems get broken. Modules run inside the
+same sandboxing model as applications, with extra rules:
+
+<CheckList
+  items={[
+    'Each module runs isolated from other modules and from applications.',
+    'Modules only receive the permissions they declare, and those permissions are visible to the user.',
+    "Modules cannot read each other's state or the host system.",
+    'Permissions are revocable, and revocation is immediate.',
+  ]}
+/>
+
+This is part of the broader [Security Model](/docs/ecosystem/security-model).
+Trust signals like the [Web3 Score](/docs/ecosystem/web3-score) also apply to
+modules, so users can see how a module behaves before installing it.
+
+## How modules are distributed
+
+Modules are distributed like anything else in the ecosystem: as addressable
+content. A module has an identity, a published version, and a signature from its
+author. That means distribution can happen through any channel, including
+decentralized storage, without a central app store.
+
+The ecosystem plans a dedicated **Module Marketplace** where developers can
+publish and users can discover modules. It is a planned product, not a live one.
+See [Future Products](/docs/ecosystem/future-products) for the current status.
+
+<Callout type="info" title="Did you know?">
+  Because a module is content addressed and signed, the marketplace is a way to
+  find modules, not the only way to get them. Users and organizations can
+  publish their own curated lists.
+</Callout>
+
+## Who builds modules
+
+<CardGrid columns={2}>
+  <Card title="Independent developers">
+    Build a focused tool and distribute it without asking permission.
+  </Card>
+  <Card title="Teams and startups">
+    Ship a service like storage or payments that plugs into every browser.
+  </Card>
+  <Card title="Enterprises">
+    Manage fleet devices with internal modules without a public store.
+  </Card>
+  <Card title="You">
+    The SDK makes module development a beginner friendly process. See
+    [SDK](/docs/ecosystem/sdk).
+  </Card>
+</CardGrid>
+
+## Lifecycle of a module
+
+A module follows a short lifecycle that keeps the ecosystem trustworthy:
+
+1. **Develop.** Build against the public interfaces using the SDK.
+2. **Publish.** Sign and distribute the module as addressable content.
+3. **Install.** Users install it in one step; permissions are shown up front.
+4. **Update.** New versions are signed by the same author and applied safely.
+5. **Revoke.** The user can remove or disable a module at any time.
+
+<Callout type="success" title="Next">
+  Ready to build one? The [SDK](/docs/ecosystem/sdk) shows how to get started.
+</Callout>
+
+## Related pages
+
+- [SDK](/docs/ecosystem/sdk): the toolkit for building modules.
+- [Core](/docs/ecosystem/core): the interfaces modules attach to.
+- [Security Model](/docs/ecosystem/security-model): how modules are sandboxed.
+
+## Further reading
+
+- [Future Products](/docs/ecosystem/future-products): the planned Module Marketplace.
+- [Web3 Score](/docs/ecosystem/web3-score): trust signals for modules and sites.

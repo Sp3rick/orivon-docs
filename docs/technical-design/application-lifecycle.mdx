@@ -1,0 +1,264 @@
+---
+title: "Application Lifecycle"
+description: "The internal design of the application lifecycle: install, register, initialize, start, suspend, resume, update, shutdown and uninstall."
+readingTime: 13
+lastUpdated: "July 31, 2026"
+order: 9
+tags: ["technical-design", "lifecycle"]
+keywords: "lifecycle, install, register, initialize, start, suspend, resume, update, shutdown, uninstall, recovery"
+---
+
+Applications and modules in Orivon do not just run; they move through a defined
+lifecycle owned by the core. The lifecycle is what makes suspend, resume and
+update safe, and what keeps a failing application from harming the system. This
+page documents every state and transition.
+
+## The lifecycle states
+
+The lifecycle has nine states. The core owns the state machine; the runtime and
+renderer only observe and act on it.
+
+<Diagram caption="The complete application lifecycle.">
+  <Flow column>
+    <DiagramNode>Installed</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Registered</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Initialized</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Running</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Shutting down</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Uninstalled</DiagramNode>
+  </Flow>
+</Diagram>
+
+The running state contains two sub-states: active and suspended.
+
+| State | Meaning |
+| --- | --- |
+| **Installed** | Package present and verified; not yet registered |
+| **Registered** | Recorded in the registry with its manifest and permissions |
+| **Initialized** | Persistent state loaded; not yet executing |
+| **Running** | Executing; may be active or suspended |
+| **Shutting down** | Draining work and persisting state |
+| **Uninstalled** | Removed from the registry; data retention applied |
+
+## Install
+
+Installing is acquiring a verified package. It does not register or run
+anything:
+
+<Steps>
+  <Step title="Obtain">
+    The installer resolves a package address and fetches the bytes.
+  </Step>
+  <Step title="Verify">
+    The content hash and author signature are checked.
+  </Step>
+  <Step title="Stage">
+    The package is staged in the storage service, still inactive.
+  </Step>
+</Steps>
+
+Install ends in the **Installed** state. Nothing has been executed and nothing
+is known to the registry.
+
+## Register
+
+Registration is the first state the core owns:
+
+1. The manifest is validated against the schema.
+2. The requested permissions are evaluated by the policy service.
+3. If needed, the user consents to the permission set.
+4. The application is recorded in the registry.
+
+The key property: **consent happens before the application is registered**, so
+permission decisions are never made in the heat of execution.
+
+## Initialize
+
+Initialization loads the application's persistent state:
+
+- The registry provides the application identity and version.
+- The storage service provides the application's data namespace.
+- The session manager provides the active identity context.
+
+Initialization is deterministic and does not execute application code yet. It
+prepares the environment so that a later start is safe.
+
+## Start
+
+Starting is the transition into the Running state:
+
+<Diagram caption="The start sequence from a core perspective.">
+  <Flow column>
+    <DiagramNode>Core: start requested</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Policy: grants valid?</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Runtime: create context</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Runtime: activate hook</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Core: mark running</DiagramNode>
+  </Flow>
+</Diagram>
+
+Start is refused if any grant is invalid. An application cannot start with a
+revoked permission.
+
+## Suspend and resume
+
+Suspend is how Orivon reclaims resources without losing an application.
+Suspension is enforced by the core, not requested politely:
+
+<CardGrid columns={2}>
+  <Card title="Suspend">
+    The application is told to suspend, its context is frozen, and its live
+    memory is reclaimed. Persistent state survives.
+  </Card>
+  <Card title="Resume">
+    The application is restored from persistent state into a fresh context. The
+    resume is transparent to the user.
+  </Card>
+</CardGrid>
+
+Applications can be suspended when a tab is discarded, when the system is under
+memory pressure, or when the user backgrounds them. Resume restores exactly the
+state that was persisted at suspend time.
+
+<Callout type="info" title="Developer note">
+  Suspension is not termination. An application must treat suspend as
+  reversible: persist anything needed to resume, and assume a later resume may
+  happen in a fresh context.
+</Callout>
+
+## Update
+
+An update is a state-preserving transition from one version to another:
+
+1. The new version is verified and staged.
+2. The permission diff is computed and re-consent requested if needed.
+3. The running application is suspended.
+4. The new version is started in a fresh context.
+5. The registry is updated to the new version.
+
+If any step fails, the application remains on the old version. Updates are
+atomic and never lose user data, because user data lives in the storage
+service, not in the application context. See
+[Module Architecture](/docs/technical-design/module-architecture) for the
+update rules.
+
+## Shutdown
+
+Shutdown is the clean transition out of Running:
+
+1. **Drain.** In-flight work is cancelled or completed.
+2. **Persist.** The application writes its session state.
+3. **Deactivate.** The runtime calls the deactivate hook.
+4. **Release.** The context is dropped and grants are released.
+
+Shutdown returns the application to **Installed** (it remains known to the
+user) or leads into uninstall.
+
+## Uninstall
+
+Uninstall is the terminal transition:
+
+<Steps>
+  <Step title="Confirm">
+    The user confirms removal.
+  </Step>
+  <Step title="Shutdown">
+    The application is shut down if it was running.
+  </Step>
+  <Step title="Unregister">
+    The registry entry is removed.
+  </Step>
+  <Step title="Purge">
+    The application's data namespace is handled per policy: deleted, archived,
+    or exported to the user.
+  </Step>
+</Steps>
+
+Data handling is a user decision, not an application decision. The application
+cannot prevent or fake its own uninstall.
+
+## Error handling in the lifecycle
+
+Every transition can fail, and the failure is handled by the core, not by the
+application:
+
+| Transition | Failure | Handling |
+| --- | --- | --- |
+| **Start** | A grant is invalid | Start refused; error reported |
+| **Run** | The application crashes | Application moved to a failed state; other applications unaffected |
+| **Suspend** | Persistence fails | Suspension retried; on repeated failure the application is left running |
+| **Update** | Verification fails | Update aborted; old version stays |
+
+The core's [Error Handling](/docs/technical-design/error-handling) pipeline
+records every lifecycle failure with enough context to diagnose it.
+
+## Recovery
+
+Recovery is about returning to a good state after a failure:
+
+<CardGrid columns={2}>
+  <Card title="Application crash">
+    The core restarts the application from its last persisted state, up to a
+    bounded number of attempts.
+  </Card>
+  <Card title="Process crash">
+    The runtime host is replaced by the browser process and the application
+    resumes.
+  </Card>
+  <Card title="Browser restart">
+    The session snapshot restores the tab set; applications resume from
+    persistent state.
+  </Card>
+</CardGrid>
+
+Recovery never depends on the failed application cooperating, because recovery
+is driven by the core using state that lives outside the application.
+
+## Security notes
+
+- Consent precedes registration, so execution never races with permission
+  decisions.
+- A suspended application holds no live capabilities; capabilities are
+  re-validated on resume.
+- Uninstall is enforced by the core; an application cannot prevent its own
+  removal.
+
+## Performance notes
+
+- Suspension reclaims memory; the lifecycle makes tab discarding cheap.
+- Resume is a fresh start, which is faster than keeping idle state alive.
+- Lifecycle transitions are serialized per application, never blocking other
+  applications.
+
+<Callout type="success" title="Best practice">
+  When building an application, persist state on suspend, not on shutdown.
+  Shutdown may be a crash, but suspend is always called.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned improvements include checkpointing (resuming without a full restart),
+  graceful degradation for background applications under pressure, and
+  lifecycle visibility for users. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Module Architecture](/docs/technical-design/module-architecture): the same lifecycle for modules.
+- [Runtime Architecture](/docs/technical-design/runtime-architecture): the executor that acts on the lifecycle.
+- [Permission System](/docs/technical-design/permission-system): grants re-validated at each transition.
+
+## Further reading
+
+- [Error Handling](/docs/technical-design/error-handling): how lifecycle failures are handled.
+- [Browser Architecture](/docs/technical-design/browser-architecture): the tab lifecycle that hosts applications.
+- [Performance](/docs/technical-design/performance): how suspension feeds memory policy.

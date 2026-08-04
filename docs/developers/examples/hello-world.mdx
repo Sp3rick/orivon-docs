@@ -1,0 +1,90 @@
+---
+title: "Example: Hello World"
+description: "The minimal Orivon module: a manifest, one method, and the request cycle, explained line by line."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 29.1
+tags: ["developers", "examples"]
+keywords: "hello world example, minimal module, first module"
+---
+
+The Hello World example is the smallest possible Orivon module. It teaches
+the shape every package shares: a manifest describing the package, and a
+method the runtime can call.
+
+## Project structure
+
+```text
+hello-world/
+  orivon.toml
+  src/
+    index.ts
+```
+
+## The manifest
+
+`orivon.toml` describes the package:
+
+```toml
+[package]
+name = "hello-world"
+version = "0.1.0"
+description = "The hello world module"
+
+[interface]
+methods = ["greet"]
+
+[permissions]
+# this module requests nothing; it runs in the default deny state
+```
+
+Two things matter here:
+
+- `methods` declares that the module exposes a `greet` method.
+- `permissions` is empty, which is the honest default: this module needs no
+  capabilities, so it requests none.
+
+See [Module Manifest](/docs/developers/module-manifest) for every field.
+
+## The implementation
+
+`src/index.ts` implements the method:
+
+```ts
+export function greet(input: {name: string}): {message: string} {
+  return {message: `Hello, ${input.name}!`};
+}
+```
+
+The runtime calls methods with an input object and expects a return value.
+That is the whole request cycle for a pure module: in, out, no side effects.
+
+## Building and running
+
+```sh
+orivon build
+orivon run --call hello-world greet '{"name":"world"}'
+```
+
+```json
+{"message": "Hello, world!"}
+```
+
+## What this example teaches
+
+- A package is a manifest plus code.
+- Methods are the unit of work exposed to the runtime.
+- Default permissions mean no capabilities, which is safe.
+
+<Callout type="info" title="Next">
+  The module is pure: it reads input and returns output. The next examples
+  add capabilities, starting with the
+  [wallet integration](/docs/developers/examples/wallet-integration), which
+  requests permissions and talks to services.
+</Callout>
+
+## Related pages
+
+- [Quick Start](/docs/developers/quick-start): the guided version of this flow.
+- [Module Manifest](/docs/developers/module-manifest): every manifest field.
+- [Examples](/docs/developers/examples): the example index.

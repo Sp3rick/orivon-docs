@@ -1,0 +1,76 @@
+---
+title: "Networking Research"
+description: "Active networking research: P2P networking, protocol design, distributed communication, scalability, latency, and future networking models."
+readingTime: 26
+lastUpdated: "July 31, 2026"
+order: 25
+tags: ["research", "networking-research"]
+keywords: "networking research, P2P, protocol design, distributed communication, scalability, latency, future networking models"
+---
+
+*Orivon Research Group · Networking Research · Status: Active Research*
+
+This area explores how decentralized networking can reach the reliability,
+latency, and scalability of the client–server web. The
+[Networking Layer](/docs/research/networking-layer) paper describes what is
+built today; this page records the open research.
+
+## P2P networking
+
+| Research topic | Question |
+| --- | --- |
+| Peer selection | Which heuristics minimize latency and eclipse risk? |
+| Churn resilience | How does the overlay behave under extreme churn? |
+| Incentives | What motivates peers to relay and serve? |
+| Browsers as peers | Can a browser process be a first-class peer? |
+
+## Protocol design
+
+The protocol stack is HTTP + P2P (see [Networking Whitepaper](/docs/research/networking-whitepaper)).
+
+| Topic | Status |
+| --- | --- |
+| Envelope framing | Stabilized; versioned. |
+| End-to-end encryption | Specified; channel analysis pending. |
+| Multiplexing | Under evaluation (QUIC-style). |
+| Naming overlay | Draft; security analysis open. |
+
+## Distributed communication
+
+| Pattern | Research question |
+| --- | --- |
+| Direct messaging | Can messaging meet interactive latency over relays? |
+| Broadcast | Efficient verified broadcast in the overlay. |
+| Store-and-forward | Offline delivery without a central queue. |
+| Group communication | Scalable group channels with integrity. |
+
+## Scalability
+
+| Dimension | Challenge | Direction |
+| --- | --- | --- |
+| Peers | Overlay state growth | Hierarchical routing, DHT optimization. |
+| Streams | Multiplexing many streams | QUIC-based transport. |
+| Data | Replication cost | Content addressing + erasure coding. |
+| Names | DNS overlay load | Caching and delegation. |
+
+## Latency
+
+### Budgets and measurement
+
+| Operation | Target p95 |
+| --- | --- |
+| Decentralized DNS resolution | < 200 ms |
+| DHT lookup | < 1 s |
+| Direct peer connection | < 100 ms |
+| Relay fallback | < 500 ms |
+
+A public benchmark harness is planned; results will be published here.
+
+## Future networking models
+
+- **WebTransport-native P2P** — browsers as peers over HTTP/3.
+- **Autonomous-system-aware routing** — topology-informed peer choice.
+- **In-network caching** — content routing for decentralized delivery.
+- **Cross-protocol interop** — bridging IPFS, libp2p, and other networks.
+
+**Related:** [Networking Whitepaper](/docs/research/networking-whitepaper) · [Networking Layer](/docs/research/networking-layer) · [Decentralized Computing](/docs/research/decentralized-computing)

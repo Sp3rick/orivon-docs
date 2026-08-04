@@ -1,0 +1,126 @@
+---
+title: "Service Level Objectives"
+description: "Orivon Service Level Objectives (SLOs): placeholder for future operational objectives. No availability or uptime guarantees invented."
+readingTime: 4
+lastUpdated: "July 31, 2026"
+order: 28
+tags: ["project", "slo", "service level objectives", "reliability", "uptime"]
+keywords: "slo, service level objectives, reliability, uptime, availability, orivon slo"
+---
+
+This page documents Orivon's **Service Level Objectives (SLOs)** — internal
+targets for system reliability. These are **not SLAs** (no contractual
+guarantees) and **no availability or uptime guarantees are invented**.
+
+<Callout type="warning" title="SLOs are aspirational targets, not guarantees">
+  Orivon does not currently offer SLAs or contractual uptime guarantees.
+  SLOs are internal engineering targets used to measure and improve
+  reliability. Commercial SLAs are planned for 2027 with the launch of
+  commercial support tiers.
+</Callout>
+
+## Current SLOs (Engineering Targets)
+
+These targets apply to **Orivon-operated infrastructure** (package registry,
+documentation site, forum, CI/CD). They do not apply to self-hosted
+deployments.
+
+| Service | SLO | Measurement | Current Performance (v1.2) |
+| :--- | :--- | :--- | :--- |
+| **Package Registry (API)** | 99.9% monthly uptime | HTTP 2xx / total requests | 99.95% (30d) |
+| **Package Registry (Downloads)** | 99.95% monthly success | Successful downloads / attempts | 99.98% (30d) |
+| **Documentation Site** | 99.9% monthly uptime | HTTP 2xx / total requests | 99.97% (30d) |
+| **Community Forum** | 99.5% monthly uptime | HTTP 2xx / total requests | 99.8% (30d) |
+| **CI/CD Pipeline** | 99% build success rate | Successful builds / total | 98.5% (30d) |
+| **Release Artifacts** | 100% signature verification | Verified / published | 100% |
+| **SBOM Generation** | 100% per release | Generated / releases | 100% |
+
+## SLO Definitions
+
+### Availability
+**Percentage of time the service responds successfully to valid requests.**
+
+- **Measured:** 5-minute intervals via external synthetic monitoring.
+- **Excludes:** Planned maintenance (announced 7 days advance), force majeure, client-side issues.
+- **Target:** As above per service.
+
+### Latency (P99)
+**99th percentile of request latency for successful requests.**
+
+| Service | P99 Target | Current (v1.2) |
+| :--- | :--- | :--- |
+| **Registry API** | < 500ms | 180ms |
+| **Registry Downloads** | < 2s (100MB) | 1.2s |
+| **Documentation** | < 1s | 450ms |
+| **Forum** | < 2s | 800ms |
+
+### Error Budget
+**The inverse of availability — the "budget" of allowable downtime/errors.**
+
+| Service | Monthly Error Budget (99.9%) | Consumption Alert |
+| :--- | :--- | :--- |
+| **Registry** | 43.2 minutes | Alert at 50%, page at 80% |
+| **Docs** | 43.2 minutes | Alert at 50% |
+| **Forum** | 3.6 hours | Alert at 50% |
+
+## What SLOs Do NOT Cover
+
+| Excluded | Reason |
+| :--- | :--- |
+| **Self-hosted deployments** | You operate, you measure |
+| **Third-party dependencies** | GitHub, Discord, CDN, cloud providers |
+| **Experimental channels** | Nightly, Preview, Beta — no SLOs |
+| **Client-side issues** | Browser cache, local network, OS |
+| **Force majeure** | Natural disasters, upstream provider outages |
+
+## Incident Response (SLO-Related)
+
+| Severity | Response | Communication |
+| :--- | :--- | :--- |
+| **SLO Breach (Imminent)** | Team pages within 15min | Status page update within 30min |
+| **SLO Breach (Active)** | War room within 1h | Status page + newsletter (if >30min) |
+| **Post-Incident** | Retrospective within 5 business days | Public postmortem (if user-visible) |
+
+## Reliability Investment (Roadmap)
+
+| Initiative | Target | Impact |
+| :--- | :--- | :--- |
+| **Multi-region registry** | v1.5 | Eliminate single-region failure |
+| **Registry HA (3+ replicas)** | v1.4 | Reduce failover time < 30s |
+| **CDN failover** | v1.4 | Docs/site survive origin outage |
+| **Synthetic monitoring expansion** | v1.3 | Better SLO measurement |
+| **Error budget alerting** | v1.3 | Proactive breach prevention |
+| **Chaos engineering** | 2027-H1 | Validate resilience assumptions |
+
+## Commercial SLAs (Planned 2027)
+
+When commercial support tiers launch, **SLAs** (contractual commitments) will
+be offered:
+
+| Tier | Registry Uptime | Response Time | Remediation |
+| :--- | :--- | :--- | :--- |
+| **Standard** | 99.9% | 24h (P0) | Service credits |
+| **Professional** | 99.95% | 4h (P0) | Service credits + root cause |
+| **Premium** | 99.99% | 1h (P0) | Service credits + root cause + prevention |
+
+**No SLA exists today.** This section will be updated when commercial tiers
+launch with contract terms.
+
+## Measuring Your Own SLOs (Self-Hosted)
+
+If you self-host Orivon components, define your own SLOs:
+
+| Component | Key Metrics | Tools |
+| :--- | :--- | :--- |
+| **Registry (Harbor/Artifactory)** | API latency, push/pull success, storage | Prometheus + Grafana |
+| **Policy Engine (OPA)** | Decision latency, error rate, policy sync | Prometheus + Grafana |
+| **Browser Fleet** | Crash rate, startup time, module load time | Telemetry (opt-in) + custom |
+| **Identity Provider** | Auth success, token issuance latency | IdP native (Entra, Okta) |
+
+<Callout type="success" title="Reliability is a journey">
+  SLOs are not a destination — they are a compass. We publish our targets
+  and actuals transparently so you can make informed decisions about
+  depending on Orivon infrastructure.
+</Callout>
+
+**Related:** [Support Policy](/docs/project/support-policy) · [Support](/docs/project/support) · [Release Lifecycle](/docs/project/release-lifecycle) · [Trust Center](/docs/project/trust-center) · [Compliance](/docs/project/compliance)

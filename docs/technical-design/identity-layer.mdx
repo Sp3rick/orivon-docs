@@ -1,0 +1,238 @@
+---
+title: "Identity Layer"
+description: "The internal design of the Orivon identity layer: the DDoc model, authentication, authorization, sessions, providers, privacy and the identity lifecycle."
+readingTime: 14
+lastUpdated: "July 31, 2026"
+order: 14
+tags: ["technical-design", "identity"]
+keywords: "identity, DDoc, authentication, authorization, sessions, providers, privacy, lifecycle"
+---
+
+Identity is the foundation everything else builds on: permissions are granted
+to identities, data is scoped to identities, and signatures are made by
+identities. This page documents the identity layer's internal design: the DDoc
+model, how authentication and authorization work, sessions, providers, privacy
+and the lifecycle of an identity.
+
+## The identity model
+
+An identity is expressed as a **DDoc**: a signed JSON document that binds an
+address to the keys and services the identity controls. The DDoc lives in the
+storage service, so it is always retrievable and always verifiable.
+
+```json
+{
+  "id": "did:orivon:QmV1n2...",
+  "controllers": ["did:orivon:QmV1n2..."],
+  "verification_methods": [
+    {
+      "id": "key-1",
+      "type": "ed25519",
+      "public_key": "z6Mkf..."
+    }
+  ],
+  "services": [
+    { "type": "ddoc.storage", "address": "QmStR7..." }
+  ],
+  "meta": {
+    "created": "2026-04-02T10:00:00Z",
+    "updated": "2026-07-15T09:30:00Z"
+  }
+}
+```
+
+<Diagram caption="A DDoc binds an address to keys and services.">
+  <Flow column>
+    <DiagramNode accent>Identity (address)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>DDoc (signed)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Keys + services + metadata</DiagramNode>
+  </Flow>
+</Diagram>
+
+The DDoc is the single source of truth for what an identity controls. It is the
+document behind the ecosystem's [Identity](/docs/ecosystem/identity) story.
+
+## Verification
+
+Every use of an identity starts with verification: proving that the DDoc is
+authentic and current.
+
+<Steps>
+  <Step title="Fetch">
+    The DDoc is fetched by address from the storage service.
+  </Step>
+  <Step title="Verify integrity">
+    The address is checked against the content hash, so the DDoc is exactly
+    what was published.
+  </Step>
+  <Step title="Verify signature">
+    The DDoc's signature is checked against its controllers' public keys.
+  </Step>
+  <Step title="Use">
+    Only after verification is the identity's key material trusted.
+  </Step>
+</Steps>
+
+Verification precedes every authentication and authorization decision in the
+system.
+
+## Authentication
+
+Authentication is proving you control an identity. The system uses challenge
+signatures: a verifier sends a challenge, the identity signs it, and the
+signature is checked against the DDoc.
+
+<Diagram caption="The authentication flow.">
+  <Flow column>
+    <DiagramNode>Verifier sends challenge</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Wallet service signs</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Verifier checks signature</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Session created</DiagramNode>
+  </Flow>
+</Diagram>
+
+Authentication never involves moving keys. The wallet service signs on behalf of
+the identity, and the private key never leaves the wallet's protection. See
+[Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+## Authorization
+
+Authorization is deciding what an authenticated identity may do. In Orivon,
+authorization is capability based and lives in the policy service:
+
+- An identity's permissions are recorded as grants in the permission store.
+- Every privileged action checks the caller's identity and its grants.
+- Identity and permissions are separate concerns: the identity layer proves who
+  you are; the [Permission System](/docs/technical-design/permission-system)
+  decides what you may do.
+
+## Sessions
+
+Sessions are the practical bridge between authentication and ongoing use. A
+session is a short lived, revocable credential:
+
+<CardGrid columns={2}>
+  <Card title="Session key">
+    A short lived key derived after authentication, used for the session's
+    signatures.
+  </Card>
+  <Card title="Session scope">
+    The capabilities the session holds, drawn from the identity's grants.
+  </Card>
+  <Card title="Session lifetime">
+    An explicit lifetime; sessions expire and are renewed only by re
+    authentication.
+  </Card>
+  <Card title="Revocation">
+    A session can be revoked immediately, independent of the underlying
+    identity.
+  </Card>
+</CardGrid>
+
+The SessionManager owns sessions in the core. A revoked session fails every
+subsequent check, even if the caller holds a stale session token.
+
+## Provider integration
+
+The identity layer integrates providers for credentials and keys:
+
+| Provider | Role |
+| --- | --- |
+| **Key providers** | Back the identity's keys (software vault, OS keychain, hardware) |
+| **Credential providers** | Issue and verify credentials against the identity |
+| **Naming providers** | Resolve the identity's names through the naming stack |
+
+Providers implement interfaces; the identity layer never hardcodes a provider.
+This is what allows new wallets, credentials and naming systems to plug in
+without changes to the core model.
+
+## Privacy
+
+Privacy is designed into the identity layer, not bolted on:
+
+<CheckList
+  items={[
+    'Verification reveals only the minimal facts needed for the interaction.',
+    'The DDoc is public by design, but nothing else about the identity is exposed by the layer.',
+    'Sessions are per context; one session does not reveal another.',
+    'The identity layer does not log full identity material; only structured, consented events.',
+  ]}
+/>
+
+The identity layer answers "are you in control of this address?", not "what is
+your life story?". Everything else is the application's business and the
+user's choice.
+
+## Identity lifecycle
+
+Identities have a lifecycle, owned by the core:
+
+| Phase | What happens |
+| --- | --- |
+| **Create** | Keys are generated in the wallet; the DDoc is published |
+| **Use** | The identity authenticates, holds sessions and signs |
+| **Recover** | New keys are derived and the DDoc is updated |
+| **Deactivate** | The identity is marked inactive; controllers can reactivate |
+| **Revoke** | The DDoc is superseded; old keys stop verifying |
+
+Recovery is the critical phase: it must restore access without allowing an
+attacker to steal the identity. The recovery model is documented in
+[Wallet Architecture](/docs/technical-design/wallet-architecture).
+
+<Diagram caption="The identity lifecycle.">
+  <Flow column>
+    <DiagramNode>Create</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Active</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Recover / Rotate keys</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Deactivated</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Revoked</DiagramNode>
+  </Flow>
+</Diagram>
+
+## Security notes
+
+- All identity use begins with verification; there is no trusted path that skips
+  it.
+- Keys never move; the wallet service signs in place.
+- Sessions are short lived, scoped and revocable.
+
+## Performance notes
+
+- DDoc verification is cached per identity; repeated checks are a cache hit.
+- Session checks are reads against the session table; they do not re-verify the
+  DDoc on every call.
+- Key rotation is off the hot path; it does not affect active verification
+  until the DDoc is updated.
+
+<Callout type="success" title="Best practice">
+  Treat every call that asserts an identity as needing verification. Never cache
+  an authentication decision past the session's lifetime, and never build
+  "trusted" paths that skip the challenge.
+</Callout>
+
+<Callout type="info" title="Future direction">
+  Planned work includes selective disclosure credentials, cross provider key
+  migration, and identity namespacing for organizations. See
+  [Future Improvements](/docs/technical-design/future-improvements).
+</Callout>
+
+## Related pages
+
+- [Wallet Architecture](/docs/technical-design/wallet-architecture): the keys behind identity.
+- [Permission System](/docs/technical-design/permission-system): what identities may do.
+- [DNS Architecture](/docs/technical-design/dns-architecture): how identity names resolve.
+
+## Further reading
+
+- [Core Architecture](/docs/technical-design/core-architecture): where sessions live.
+- [Storage Engine](/docs/technical-design/storage-engine): where DDocs are stored.
+- [Security Architecture](/docs/technical-design/security-architecture): identity protection.

@@ -1,0 +1,159 @@
+---
+title: "Networking APIs"
+description: "The networking APIs your code uses for requests, peer communication, custom transports and blockchain RPC through the network service."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 19
+tags: ["developers", "networking-apis"]
+keywords: "networking APIs, network service, requests, HTTP, P2P, custom transports, blockchain RPC"
+---
+
+Every byte your code sends crosses the network service. The networking APIs
+are how you make requests, talk to peers and integrate external services,
+safely and uniformly. This page explains the model.
+
+## What the networking APIs are
+
+The networking APIs provide:
+
+<CheckList
+  items={[
+    'HTTP requests through the network service.',
+    'Peer to peer communication for decentralized features.',
+    'WebSocket streams for live data.',
+    'Blockchain RPC adapters.',
+    'Custom transport registration.',
+  ]}
+/>
+
+The network service owns every socket; your code never touches a raw
+connection. The design is documented in
+[Networking Stack](/docs/technical-design/networking-stack).
+
+## Why they exist
+
+Centralizing networking means privacy, integrity and policy are applied in one
+place. A single service means nothing talks to the network untracked, and
+every connection is pooled, governed and observable.
+
+## HTTP requests
+
+The basic operation:
+
+```ts
+const response = await app.network.fetch('https://api.example.com/data', {
+  method: 'GET',
+  headers: {accept: 'application/json'},
+});
+
+const data = await response.json();
+```
+
+Requests flow through the unified lifecycle: connection, request, response,
+completion. The network service handles pooling, retries and TLS.
+
+## Peer communication
+
+For decentralized features, talk directly to peers:
+
+```ts
+const peer = await app.network.peer.connect({address: addr});
+await peer.send({type: 'hello'});
+
+const message = await peer.receive();
+```
+
+Peer connections are content addressed and authenticated. See the
+[networking specification](/docs/standards/osp-009-networking) for the
+protocol details.
+
+## Streams
+
+For live data, use streams:
+
+```ts
+const stream = await app.network.stream.open(url);
+for await (const chunk of stream) {
+  handle(chunk);
+}
+```
+
+Streams are appropriate for feeds, live updates and long running exchanges.
+For one shot data, prefer a plain request.
+
+## Blockchain RPC
+
+To interact with chains, use the RPC adapters:
+
+```ts
+const balance = await app.network.rpc.call('ethereum', 'eth_getBalance', [
+  address,
+  'latest',
+]);
+```
+
+The adapters normalize chain access behind one interface, so your application
+does not depend on a specific chain's transport quirks.
+
+## Custom transports
+
+Providers can register custom transports:
+
+```ts
+app.network.registerTransport({
+  name: 'orivon-mesh',
+  connect: async (target) => meshSession,
+});
+```
+
+Custom transports are the extension point for the ecosystem. See
+[Building a Network Provider](/docs/developers/tutorials/building-a-network-provider)
+for a full tutorial.
+
+## When to use the networking APIs
+
+| You need to | Use |
+| --- | --- |
+| Call an HTTP API | `app.network.fetch(...)` |
+| Talk to peers | `app.network.peer.*` |
+| Stream live data | `app.network.stream.open(...)` |
+| Talk to a chain | `app.network.rpc.call(...)` |
+| Add a transport | `app.network.registerTransport(...)` |
+
+If your module is purely local (no network), you do not need these APIs, and
+you should not request network permissions.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Blocking on network calls">
+    All networking is async. Never block the runtime thread waiting for a
+    response.
+  </Card>
+  <Card title="Trusting unverified peer data">
+    Peer data is untrusted until verified. Apply the same integrity checks as
+    storage.
+  </Card>
+  <Card title="Bypassing the network service">
+    Never reach for raw sockets; they do not exist in the runtime. The network
+    service is the only path.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Treat network errors as expected, not exceptional. Timeouts, retries and
+  fallbacks are part of the contract; see
+  [Error Handling](/docs/developers/troubleshooting).
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The networking APIs are specified in the
+  [Networking draft](/docs/standards/osp-009-networking) and defined by
+  [Networking Stack](/docs/technical-design/networking-stack).
+</Callout>
+
+## Related pages
+
+- [Storage APIs](/docs/developers/storage-apis): data transport for storage.
+- [DNS APIs](/docs/developers/dns-apis): resolving the targets you connect to.
+- [Networking Example](/docs/developers/examples/networking-example): a complete example.

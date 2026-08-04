@@ -1,0 +1,156 @@
+---
+title: "Runtime APIs"
+description: "The APIs modules and applications use to run inside the runtime: lifecycle, messaging, and the Orivon object model."
+readingTime: 10
+lastUpdated: "July 31, 2026"
+order: 13
+tags: ["developers", "runtime-apis"]
+keywords: "runtime APIs, Orivon object, lifecycle, messaging, module API, application API"
+---
+
+The runtime APIs are what your code sees when it runs. They are the bridge
+between your module or application and the runtime host that executes it. This
+page explains the model, not a full reference, so you know which API to reach
+for and why.
+
+## What the runtime APIs are
+
+The runtime exposes the execution environment to your code. It provides:
+
+<CheckList
+  items={[
+    'The `Orivon` object, the entry point for every runtime program.',
+    'Lifecycle registration for hooks like activate and deactivate.',
+    'Request and response messaging between packages.',
+    'Access to the service APIs through typed facades.',
+    'Logging and diagnostics.',
+  ]}
+/>
+
+The runtime APIs are the same for modules and applications. The difference is
+configuration: what a package is allowed to access, declared in the
+[manifest](/docs/developers/module-manifest).
+
+## Why they exist
+
+Your code never talks to the operating system directly. It runs inside a
+sandboxed runtime host, so every interaction goes through the runtime APIs.
+This is what makes modules safe to run and safe to grant capabilities to. The
+architecture is documented in
+[Runtime Architecture](/docs/technical-design/runtime-architecture).
+
+## The Orivon object
+
+Every runtime program starts with the `Orivon` object:
+
+```ts
+import {Orivon} from '@orivon/sdk';
+
+const app = new Orivon();
+
+app.on('ready', () => {
+  app.log.info('ready');
+});
+```
+
+The object is the hub your code attaches to. It is also how you reach the
+other APIs, through facades:
+
+```ts
+await app.identity.read();
+await app.storage.put(bytes);
+await app.wallet.sign(payload);
+```
+
+Each facade is authorized by the runtime against your grants, so an API call
+you are not permitted to make fails with a denial, not with access.
+
+## Lifecycle
+
+The runtime drives your package through its lifecycle, and the APIs let you
+hook in:
+
+```ts
+export function activate() {
+  // called when the package is activated
+}
+
+export function deactivate() {
+  // called when the package is deactivated
+}
+```
+
+The hooks are declared in the manifest. See
+[Module Manifest](/docs/developers/module-manifest) and the
+[Application Lifecycle](/docs/technical-design/application-lifecycle) design.
+
+<Callout type="success" title="Best practice">
+  Do all setup in `activate` and release all resources in `deactivate`. The
+  runtime recycles suspended packages, and a package that cleans up after
+  itself is reliably restartable.
+</Callout>
+
+## Messaging
+
+Packages communicate through the runtime with typed messages:
+
+```ts
+// receive a request and respond
+module.on('request', (req) => {
+  module.respond(req, {ok: true});
+});
+
+// call another package
+const result = await greeting.call('greet', {name: 'world'});
+```
+
+Requests are request/response; events are one way. The full message model is
+on the [Events](/docs/developers/events) page and in the
+[Communication Bus](/docs/technical-design/communication-bus) design.
+
+## When to use which API
+
+| You need to | Use |
+| --- | --- |
+| Run code at startup | `on('ready')` or the `on_activate` hook |
+| Handle a request | `on('request')` + `respond` |
+| Call a module | `app.use(name).call(...)` |
+| Read configuration | `app.config.get(...)` |
+| Log | `app.log.info(...)` |
+| Reach a service | The corresponding facade |
+
+If you are reaching for a service, start at that API page instead: identity,
+storage, wallet, and so on.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Blocking the main thread">
+    Never block the runtime's main thread. Use async APIs; the runtime is
+    event driven.
+  </Card>
+  <Card title="Calling APIs without permission">
+    The runtime denies unpermitted calls. Request the permission in the
+    manifest first. See [Permissions](/docs/developers/permissions).
+  </Card>
+  <Card title="Ignoring deactivate">
+    Leaking resources in `deactivate` breaks suspend and resume.
+  </Card>
+  <Card title="Caching the Orivon object incorrectly">
+    The object is per package instance. Do not share instances across
+    packages; they have different grants.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Relation to the rest">
+  The runtime APIs sit on top of the [Communication Bus](/docs/technical-design/communication-bus)
+  and are defined by the [Runtime Architecture](/docs/technical-design/runtime-architecture).
+  The specification is the
+  [Runtime Architecture draft](/docs/standards/osp-001-runtime-architecture).
+</Callout>
+
+## Related pages
+
+- [Module Manifest](/docs/developers/module-manifest): how runtime behavior is configured.
+- [Core APIs](/docs/developers/core-apis): the services behind the facades.
+- [Events](/docs/developers/events): the message model.

@@ -1,0 +1,257 @@
+---
+title: "Specification Lifecycle"
+description: "How an Orivon specification moves from idea to archive: every stage, the proposal workflow, and the gates that guard it."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 3
+tags: ["standards", "lifecycle"]
+keywords: "lifecycle, draft, discussion, review, accepted, implemented, deprecated, archived, proposal workflow"
+---
+
+Every specification in the Orivon series travels the same road. The lifecycle
+turns an idea into a reviewable document, a reviewed document into an accepted
+standard, and an accepted standard into a maintained or retired one. This page
+documents each stage and the gates between them.
+
+## The lifecycle
+
+<Diagram caption="The full specification lifecycle.">
+  <Flow column>
+    <DiagramNode accent>Idea</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Draft</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Discussion</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Review</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Accepted</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Implemented</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Deprecated</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Archived</DiagramNode>
+  </Flow>
+</Diagram>
+
+A stage is not a label you apply; it is a gate you pass. Each arrow above has
+criteria. The rest of this page defines them.
+
+## Idea
+
+Every specification starts as a problem looking for a solution. An idea records:
+
+<CheckList
+  items={[
+    'The problem being solved, with a concrete motivation.',
+    'The proposed scope and the explicitly out of scope items.',
+    'The rough shape of the solution.',
+    'Who is affected and which existing specifications would change.',
+  ]}
+/>
+
+Ideas do not need to be formal. They need to be specific enough that someone
+else can understand the problem and react. Most ideas are raised as proposals
+in the ecosystem repositories or in the
+[specification registry](/docs/standards/specification-registry) discussions.
+
+## Draft
+
+A draft is the first written version of the specification. It is created from
+the official [template](/docs/standards/specification-template) and assigned an
+identifier in the OSP series.
+
+<CardGrid columns={2}>
+  <Card title="What a draft contains">
+    The full template: motivation, goals, non-goals, architecture, detailed
+    specification, examples and considerations.
+  </Card>
+  <Card title="What a draft is not">
+    Not implemented, not normative, not guaranteed. It is a proposal in
+    document form.
+  </Card>
+</CardGrid>
+
+Every draft carries the **Draft** status label on its page. The fifteen current
+drafts are listed on the [Draft Specifications](/docs/standards/draft-specifications)
+page.
+
+## Discussion
+
+Discussion is where the draft gets challenged. The discussion phase is open to
+anyone and covers:
+
+- Whether the goals are the right goals.
+- Whether the design achieves the goals.
+- Whether the non-goals are actually excluded.
+- Whether existing specifications need to change.
+- Whether the security and privacy analysis holds.
+
+Discussion is recorded against the draft, so the rationale for every decision
+is traceable later. This is the phase where most drafts change significantly or
+fail, which is a success, not a loss: failing here is cheaper than failing after
+implementation.
+
+## Review
+
+Review is the formal gate before acceptance. A draft enters review when:
+
+<CheckList
+  items={[
+    'Discussion is resolved, with no open blocking objections.',
+    'The document follows the template and the writing rules.',
+    'Security, privacy, performance and accessibility considerations are complete.',
+    'The reference implementation has validated the design end to end.',
+  ]}
+/>
+
+Review is conducted by the specification editors and the affected implementers.
+The outcome is one of:
+
+- **Approved**: the draft moves to Accepted.
+- **Changes requested**: the draft returns to Discussion with a list of issues.
+- **Rejected**: the draft is withdrawn and archived.
+
+## Accepted
+
+Acceptance is the moment a specification stops being a proposal and becomes a
+promise. An **Accepted** specification:
+
+- Is immutable in its published form, identified by its version.
+- Is the normative reference that implementations are measured against.
+- Is what conformance testing certifies against. See
+  [Conformance Testing](/docs/standards/conformance-testing).
+
+Acceptance does not mean the reference implementation is perfect; it means the
+contract is fixed and the work of conforming begins.
+
+<Callout type="warning" title="Accepted is the only promise">
+  Only an Accepted specification is normative. Drafts and even implemented
+  drafts describe direction, not contract. Check the status before relying on
+  any document.
+</Callout>
+
+## Implemented
+
+Implementation is the phase where the reference implementation and the wider
+ecosystem catch up with the accepted contract:
+
+<Steps>
+  <Step title="Reference implementation">
+    The Orivon codebase implements the accepted specification.
+  </Step>
+  <Step title="Conformance suite">
+    Automated tests verify behavior against the normative text.
+  </Step>
+  <Step title="Ecosystem adoption">
+    Third party implementations follow, verified by the same suite.
+  </Step>
+</Steps>
+
+A specification is considered fully Implemented when the reference
+implementation ships it and the conformance suite passes against it.
+
+## Deprecated
+
+Deprecation is the honest retirement of a specification. A specification is
+deprecated when it is superseded or no longer recommended, but still in use:
+
+- It is **not** deleted; the content remains readable for migration.
+- It is **not** broken silently; consumers are told it will change.
+- A migration path to a replacement is always documented.
+
+The [Deprecated Specifications](/docs/standards/deprecated-specifications)
+page tracks retired documents and their replacements.
+
+## Archived
+
+Archival is the final state. An archived specification is one that has been
+deprecated long enough that nothing should build on it, or that never reached
+acceptance. Archived documents stay in the registry for reference but are
+clearly labeled and out of the compliance scope.
+
+<Diagram caption="From promise to archive: deprecation and archival.">
+  <Flow column>
+    <DiagramNode>Accepted (normative)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode accent>Deprecated (superseded, migration path)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Archived (reference only)</DiagramNode>
+  </Flow>
+</Diagram>
+
+## The proposal workflow
+
+Putting the lifecycle together with the people involved, the workflow is:
+
+<Diagram caption="The proposal workflow from issue to registry.">
+  <Flow column>
+    <DiagramNode accent>Proposal (issue or discussion)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Authors draft (OSP document)</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Public discussion</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Editors review</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Registry entry (status recorded)</DiagramNode>
+  </Flow>
+</Diagram>
+
+Authors write, the community discusses, editors gate, and the registry records.
+Each role has its own responsibility, and no single person controls all of
+them. The [Writing Specifications](/docs/standards/writing-specifications)
+page covers the author side of this workflow.
+
+## Timeline example
+
+A realistic path for a new specification:
+
+<Timeline
+  phases={[
+    {
+      period: 'Week 0',
+      title: 'Idea',
+      status: 'done',
+      children: 'The problem is proposed and discussed informally.',
+    },
+    {
+      period: 'Week 2',
+      title: 'Draft published',
+      status: 'done',
+      children: 'The document is written from the template and assigned an OSP number.',
+    },
+    {
+      period: 'Week 3-6',
+      title: 'Discussion',
+      status: 'current',
+      children: 'Open review, revisions, and resolution of objections.',
+    },
+    {
+      period: 'Week 6-8',
+      title: 'Formal review',
+      status: 'future',
+      children: 'Editors approve or request changes.',
+    },
+    {
+      period: 'After review',
+      title: 'Accepted',
+      status: 'future',
+      children: 'The version is frozen and conformance work begins.',
+    },
+  ]}
+/>
+
+Timing varies widely; the gates matter more than the dates.
+
+<Callout type="success" title="Best practice">
+  Move fast on ideas and slow on acceptance. The lifecycle is cheap to enter and
+  expensive to leave, so the pressure belongs on the review gates.
+</Callout>
+
+## Related pages
+
+- [Versioning](/docs/standards/versioning): what changes between accepted versions.
+- [Writing Specifications](/docs/standards/writing-specifications): how the document is written.
+- [Draft Specifications](/docs/standards/draft-specifications): documents currently in this lifecycle.

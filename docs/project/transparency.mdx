@@ -1,0 +1,184 @@
+---
+title: "Transparency Reports"
+description: "Orivon transparency reports: quarterly financial, operational, and governance transparency. Templates and archive structure."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 35
+tags: ["project", "transparency", "reports", "financial", "governance"]
+keywords: "transparency reports, quarterly, financial, governance, orivon transparency"
+---
+
+Quarterly transparency reports provide the community, sponsors, and stakeholders
+with a clear view of Orivon's financial health, operational metrics, governance
+activity, and progress toward sustainability.
+
+<Callout type="info" title="Reports beginning Q3 2026">
+  The first transparency report will be published for Q3 2026 (July–September).
+  This page defines the template and archive structure.
+</Callout>
+
+## Report schedule
+
+| Report | Period | Publication Target |
+| :--- | :--- | :--- |
+| **Q3 2026** | Jul–Sep 2026 | October 15, 2026 |
+| **Q4 2026** | Oct–Dec 2026 | January 15, 2027 |
+| **Q1 2027** | Jan–Mar 2027 | April 15, 2027 |
+| **Q2 2027** | Apr–Jun 2027 | July 15, 2027 |
+| **Annual 2026** | Jan–Dec 2026 | February 15, 2027 |
+
+Reports published within 45 days of period end.
+
+## Report template
+
+Each report contains:
+
+### 1. Executive Summary (1 page)
+- Key metrics dashboard.
+- Major achievements.
+- Top risks/concerns.
+- Outlook for next quarter.
+
+### 2. Financials
+| Section | Content |
+| :--- | :--- |
+| **Revenue** | By source (sponsors, grants, services, other) |
+| **Expenses** | By category (infra, security, grants, community, docs, ops, reserves) |
+| **Cash Position** | Opening, closing, runway (months) |
+| **Reserves** | Emergency fund, endowment progress |
+| **Grant Disbursements** | By cycle, category, recipient |
+| **Sponsor Contributions** | By tier (anonymized if requested) |
+
+### 3. Operational Metrics
+| Area | Metrics |
+| :--- | :--- |
+| **Platform** | Releases, downloads, registry modules, active versions |
+| **Community** | Contributors (30d), maintainers, WG activity, events |
+| **Ecosystem** | Projects listed, grants awarded, partners, integrations |
+| **Infrastructure** | Uptime, latency, error budgets, incidents |
+| **Security** | Advisories, disclosures, audit status, bug bounty |
+| **Documentation** | Pages, translations, search queries, feedback |
+
+### 4. Governance
+| Area | Metrics |
+| :--- | :--- |
+| **TSC** | Meetings, decisions, votes, elections |
+| **Working Groups** | Charters, meetings, outputs, recommendations |
+| **Maintainers** | Appointments, emeritus, scope changes |
+| **Decisions** | Proposals submitted/accepted/rejected/deferred |
+| **Code of Conduct** | Incidents, resolutions (anonymized) |
+
+### 5. Risk & Compliance
+| Area | Content |
+| :--- | :--- |
+| **Top Risks** | Likelihood × impact, mitigation status |
+| **Compliance** | Certification progress, audit findings, gaps |
+| **Legal** | Trademarks, contracts, disputes (high-level) |
+| **Security** | Open advisories, supply chain incidents |
+
+### 6. Outlook
+- Next quarter priorities.
+- Upcoming milestones.
+- Resource needs.
+- Community asks.
+
+## Archive structure
+
+```
+transparency/
+├── 2026/
+│   ├── Q3-2026/
+│   │   ├── report.md
+│   │   ├── financials.csv
+│   │   ├── metrics.json
+│   │   └── appendix/
+│   ├── Q4-2026/
+│   └── Annual-2026/
+├── 2027/
+│   ├── Q1-2027/
+│   └── ...
+└── templates/
+    ├── quarterly-template.md
+    ├── annual-template.md
+    └── metrics-schema.json
+```
+
+## Machine-readable data
+
+Each report includes:
+- **`metrics.json`** — Structured data for dashboards/analysis.
+- **`financials.csv`** — Line-item revenue/expenses (redacted for privacy).
+- **Schema versioning** — `metrics-schema.json` for compatibility.
+
+Example `metrics.json`:
+```json
+{
+  "period": "2026-Q3",
+  "generated": "2026-10-10T12:00:00Z",
+  "schemaVersion": "1.0",
+  "financials": {
+    "revenue": {"sponsors": 150000, "grants": 75000, "services": 0},
+    "expenses": {"infrastructure": 25000, "security": 18000, "grants": 60000, "community": 12000, "documentation": 8000, "operations": 15000},
+    "cashPosition": {"opening": 200000, "closing": 305000, "runwayMonths": 18}
+  },
+  "community": {
+    "contributors30d": 120,
+    "maintainers": 25,
+    "workingGroupsActive": 9,
+    "eventsHosted": 8
+  },
+  "platform": {
+    "releases": 3,
+    "downloads": 45000,
+    "registryModules": 120,
+    "activeVersions": 3
+  }
+}
+```
+
+## Publication process
+
+<Steps>
+  <Step title="Data collection">
+    Finance, infra, community, security leads compile metrics (weeks 1–2 post-quarter).
+  </Step>
+  <Step title="Draft">
+    Transparency lead authors report using template (weeks 2–3).
+  </Step>
+  <Step title="Review">
+    TSC + Foundation (when formed) review for accuracy, completeness (week 4).
+  </Step>
+  <Step title="Publish">
+    Report + data files committed to `orivon-transparency` repo; announced via newsletter, blog, social.
+  </Step>
+  <Step title="Discussion">
+    Forum thread for community questions (2 weeks).
+  </Step>
+</Steps>
+
+## Historical reports
+
+| Period | Report | Data | Status |
+| :--- | :--- | :--- | :--- |
+| Q3 2026 | [Report](To Be Announced) | [JSON](To Be Announced) | Planned |
+| Q4 2026 | — | — | — |
+| Annual 2026 | — | — | — |
+
+## Related transparency
+
+| Resource | Frequency | Location |
+| :--- | :--- | :--- |
+| **TSC Meeting Minutes** | Bi-weekly | Governance repo |
+| **Working Group Updates** | Monthly | Forum + Newsletter |
+| **Grant Decisions** | Per cycle | Grants repo + Transparency Report |
+| **Security Advisories** | Per incident | GitHub Advisories + Newsletter |
+| **Release Notes** | Per release | Release Archive |
+| **Incident Postmortems** | Per incident | Status page + Governance repo |
+
+<Callout type="success" title="Transparency builds trust">
+  Open finances, open metrics, open governance — this is how a community-
+  governed project stays accountable. If something is unclear, ask in the
+  forum or email transparency@orivon.dev.
+</Callout>
+
+**Related:** [Funding & Sustainability](/docs/project/funding) · [Governance](/docs/community/governance) · [Trust Center](/docs/project/trust-center) · [Security Policy](/docs/project/security-policy) · [Compliance](/docs/project/compliance)

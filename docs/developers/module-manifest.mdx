@@ -1,0 +1,193 @@
+---
+title: "Module Manifest"
+description: "Every field in orivon.toml, the manifest that defines an Orivon project: package, interface, permissions, hooks, dependencies and configuration."
+readingTime: 12
+lastUpdated: "July 31, 2026"
+order: 12
+tags: ["developers", "module-manifest"]
+keywords: "module manifest, orivon.toml, package, interface, permissions, hooks, dependencies, config"
+---
+
+The manifest (`orivon.toml`) is the identity of every Orivon project. The
+runtime, the CLI and every tool read it first, and the user's consent is
+derived from it. This page documents every field.
+
+## The manifest sections
+
+A manifest is organized into sections. This is the full shape:
+
+```toml
+[package]
+name = "my-app"
+version = "0.1.0"
+authors = ["alice.orivon"]
+description = "An example project"
+
+[interface]
+methods = ["greet"]
+
+[permissions]
+allow = ["identity.read"]
+defaults = { "identity.read" = "always" }
+
+[hooks]
+on_install = "install"
+on_activate = "activate"
+
+[dependencies]
+"core-utils" = "0.1.0"
+
+[config]
+max_results = 10
+```
+
+Each section is described below.
+
+## [package]
+
+The package section identifies the project.
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `name` | Yes | The package name; also the package identity |
+| `version` | Yes | The package version, semantic |
+| `authors` | No | Author identities |
+| `description` | No | A short human description |
+| `license` | No | The license identifier |
+| `repository` | No | The source repository URL |
+
+<Callout type="warning" title="Name is identity">
+  The `name` in the manifest is the package identity used by the registry and
+  by dependency resolution. Changing it later is a breaking change for
+  consumers. Choose carefully.
+</Callout>
+
+## [interface]
+
+The interface section declares what the package exposes.
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `methods` | No | The methods the module handles |
+| `events` | No | The events the module emits |
+| `provides` | No | The provider types the package implements |
+
+The interface is documentation and tooling data. It does not enforce
+behavior, but it drives discovery, validation and generated consumers.
+
+## [permissions]
+
+The permissions section declares what the package may do.
+
+| Field | Meaning |
+| --- | --- |
+| `allow` | The list of granted capabilities, for example `identity.read` |
+| `defaults` | Per capability default decisions, for example `"identity.read" = "always"` |
+
+Permissions start empty and grow on demand. Every entry is part of the user's
+consent surface. See [Permissions](/docs/developers/permissions) for the full
+model and the [Permission Model](/docs/standards/osp-006-permission-model)
+specification draft.
+
+## [hooks]
+
+The hooks section wires lifecycle events to code.
+
+| Hook | Runs when |
+| --- | --- |
+| `on_install` | The package is installed |
+| `on_activate` | The package is activated at runtime |
+| `on_deactivate` | The package is deactivated |
+| `on_uninstall` | The package is removed |
+
+Hooks point at functions exported by the entry point. They let your code
+participate in the [application lifecycle](/docs/technical-design/application-lifecycle).
+
+## [dependencies]
+
+The dependencies section declares what the package depends on.
+
+| Field | Meaning |
+| --- | --- |
+| `"<name>" = "<version>"` | A dependency and its version requirement |
+
+```toml
+[dependencies]
+"core-utils" = "0.1.0"
+"greeting-module" = "0.1.0"
+```
+
+Dependencies are resolved to content addressed pins at build time, and the
+lockfile is verified at every load. See
+[Module Architecture](/docs/technical-design/module-architecture) for the
+security model behind this.
+
+<Callout type="success" title="Best practice">
+  Pin exact versions for dependencies in published packages. A floating
+  requirement is a supply chain risk; see
+  [Security](/docs/developers/best-practices).
+</Callout>
+
+## [config]
+
+The config section declares typed default configuration.
+
+```toml
+[config]
+max_results = 10
+greeting = "hello"
+```
+
+Configuration is validated against a schema at load time and can be overridden
+at runtime. See [Configuration](/docs/developers/configuration).
+
+## Validation rules
+
+The manifest is validated before anything trusts it:
+
+<CheckList
+  items={[
+    'The file parses as TOML and is a valid table structure.',
+    'Required fields are present and typed correctly.',
+    'Names and versions are valid identifiers.',
+    'Permission names are valid capability names.',
+    'Hook targets exist in the declared interface.',
+    'Dependencies are well formed and resolvable.',
+  ]}
+/>
+
+A manifest that fails validation is rejected by the CLI and the runtime. The
+error message names the offending field.
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Empty or guessed versions">
+    A version of `0.0.0` or a missing version breaks the registry. Start at
+    `0.1.0`.
+  </Card>
+  <Card title="Overbroad permissions">
+    `allow = ["*"]` is never acceptable. Grant the minimum set your code
+    actually calls.
+  </Card>
+  <Card title="Undefined hooks">
+    A hook pointing at a function that does not exist fails activation. Keep
+    hooks and exports in sync.
+  </Card>
+  <Card title="Case sensitive names">
+    Package names and permission names are case sensitive. `Identity.read` and
+    `identity.read` are different.
+  </Card>
+</CardGrid>
+
+<Callout type="info" title="Schema support">
+  The manifest schema is published with the SDK, and the editor extension
+  validates `orivon.toml` as you type. See
+  [Development Environment](/docs/developers/development-environment).
+</Callout>
+
+## Related pages
+
+- [Project Structure](/docs/developers/project-structure): where the manifest lives.
+- [Permissions](/docs/developers/permissions): what permission entries mean.
+- [Package Manifest draft](/docs/standards/osp-005-package-manifest): the specification behind the format.

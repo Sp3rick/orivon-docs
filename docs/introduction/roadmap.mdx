@@ -1,0 +1,122 @@
+---
+title: "Roadmap"
+description: "The Orivon development roadmap: current progress and future milestones across research, foundations, implementation and ecosystem phases."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["introduction", "roadmap"]
+keywords: "roadmap, milestones, phases, timeline, development, progress, web3"
+---
+
+Orivon is built in phases. Each phase delivers a foundation for the next, so that later
+levels plug into the architecture without redesigning it. This roadmap reflects where the
+project is today and where it is heading.
+
+## Current progress
+
+Orivon is in its **foundations** phase: the concept is defined, the information
+architecture is live, and the open specifications that everything else depends on are
+being written.
+
+## Development phases
+
+<Timeline
+  phases={[
+    {
+      period: 'Phase 0 · Foundations',
+      title: 'Concept & community',
+      status: 'done',
+      checks: [
+        {text: 'Define the vision and information architecture', done: true},
+        {text: 'Launch public documentation (this site)', done: true},
+        {text: 'Establish community channels', done: true},
+        {text: 'Draft the founding principles and governance', done: false},
+      ],
+    },
+    {
+      period: 'Phase 1 · Specifications',
+      title: 'Open standards & technical design',
+      status: 'current',
+      children: (
+        <p>
+          The heart of the project: publicly written specifications for the core, runtime,
+          modules, wallet system, Web3 Score and decentralized DNS. Everything else depends
+          on these documents being precise, testable and implementation-neutral.
+        </p>
+      ),
+      checks: [
+        {text: 'Publish Level 1: Introduction documentation', done: true},
+        {text: 'Draft the Core and Runtime specifications', done: false},
+        {text: 'Specify the Modules and Wallet systems', done: false},
+        {text: 'Define the Web3 Score and sandboxing model', done: false},
+      ],
+    },
+    {
+      period: 'Phase 2 · Reference implementation',
+      title: 'Orivon Browser',
+      status: 'future',
+      children: (
+        <p>
+          Build a reference browser that implements the standards. It starts from the
+          classic web platform and layers Web3 capabilities on top, such as wallets, DNS,
+          sandboxing and the Web3 Score, while preserving backward compatibility.
+        </p>
+      ),
+      checks: [
+        {text: 'Browser shell with the standard web stack', done: false},
+        {text: 'Native wallet and consent flow', done: false},
+        {text: 'Decentralized DNS resolution', done: false},
+        {text: 'Web3 Score and safety signals', done: false},
+      ],
+    },
+    {
+      period: 'Phase 3 · Ecosystem',
+      title: 'Modules, applications & networks',
+      status: 'future',
+      children: (
+        <p>
+          Open the platform to the community: module SDKs, third-party modules, and
+          support for a growing set of decentralized networks. Applications begin to ship
+          and update like websites.
+        </p>
+      ),
+      checks: [
+        {text: 'Module SDK and marketplace', done: false},
+        {text: 'Application runtime for install-less software', done: false},
+        {text: 'Multi-network support', done: false},
+        {text: 'Governance and DAO plan', done: false},
+      ],
+    },
+    {
+      period: 'Phase 4 · Mass adoption',
+      title: 'The next generation of the web',
+      status: 'future',
+      children: (
+        <p>
+          The long-term vision: decentralized computing as the default, software
+          distributed as websites, and an open ecosystem that no single entity controls.
+        </p>
+      ),
+      checks: [
+        {text: 'User-owned identity across the web', done: false},
+        {text: 'Decentralized storage and compute', done: false},
+        {text: 'Interoperable standards across browsers', done: false},
+      ],
+    },
+  ]}
+/>
+
+## How to read this roadmap
+
+- **Completed** milestones have shipped, like this documentation.
+- **In progress** milestones are being worked on right now.
+- **Planned** milestones are defined but not yet started.
+
+The roadmap is community-facing and will evolve. Detailed, lower-level planning lives in
+the [Vision](/docs/introduction/vision) and [Key Features](/docs/introduction/key-features)
+pages, and progress is announced in the community channels.
+
+<Callout type="info" title="Want to shape the roadmap?">
+  Orivon is community-driven. Join the discussion in the community channels or open an
+  issue on GitHub to propose changes.
+</Callout>

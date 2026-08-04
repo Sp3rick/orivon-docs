@@ -1,0 +1,157 @@
+---
+title: "Security API"
+description: "Reference for the Security API: cryptographic primitives, key management and secure storage."
+readingTime: 9
+lastUpdated: "July 31, 2026"
+order: 16
+tags: ["api-reference", "security-api"]
+keywords: "security api, crypto, random bytes, digest, key pair, derive key, sign, verify, secret storage, keychain"
+---
+
+The Security API provides the cryptographic primitives and secret storage used
+by the platform. It is the only sanctioned path for key material and secrets
+in a package; raw keys must not be managed elsewhere.
+
+**Introduced:** 1.0 · **Status:** Stable
+
+## Facade: SecurityFacade
+
+### `security.randomBytes(length)`
+
+Returns cryptographically secure random bytes.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `length` | `number` | Byte count, 1–65536. |
+
+**Returns:** `Promise<Uint8Array>`
+
+**Throws:** `ERR_INVALID_ARGUMENT` outside the length range.
+
+### `security.digest(algorithm, data)`
+
+Computes a message digest.
+
+```ts
+const hash = await app.security.digest('sha256', payload);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `algorithm` | `"sha256" \| "sha384" \| "sha512"` | Digest algorithm. |
+| `data` | `Uint8Array` | Input. |
+
+**Returns:** `Promise<Uint8Array>`
+
+**Throws:** `ERR_UNSUPPORTED_ALGORITHM`
+
+### `security.deriveKey(password, salt, options?)`
+
+Derives a key from a password using PBKDF2.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `password` | `Uint8Array` | Password bytes. |
+| `salt` | `Uint8Array` | Salt bytes. |
+| `options.iterations` | `number \| undefined` | Iteration count. Default `210000`. |
+| `options.length` | `number \| undefined` | Output length in bytes. Default `32`. |
+
+**Returns:** `Promise<Uint8Array>`
+
+### `security.generateKeyPair(algorithm)`
+
+Generates a key pair in hardware-backed storage.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `algorithm` | `"ed25519" \| "secp256k1" \| "rsa-2048"` | Key algorithm. |
+
+**Returns:** `Promise<KeyPair>` — `{id, algorithm, publicKey}`. The private key
+never leaves secure storage.
+
+**Throws:** `ERR_UNSUPPORTED_ALGORITHM`
+
+### `security.importKey(algorithm, keyData, options?)`
+
+Imports a key from bytes. Supports `"pkcs8"` and `"raw"` formats where the
+algorithm permits.
+
+**Returns:** `Promise<KeyPair>`
+
+### `security.exportPublicKey(id)`
+
+Exports only the public part of a stored key.
+
+**Returns:** `Promise<Uint8Array>`
+
+**Throws:** `ERR_KEY_NOT_FOUND`
+
+### `security.deleteKey(id)`
+
+Permanently deletes a stored key.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_KEY_NOT_FOUND`
+
+### `security.sign(id, data)`
+
+Signs data with a stored key.
+
+**Returns:** `Promise<Uint8Array>`
+
+**Throws:** `ERR_KEY_NOT_FOUND` · `ERR_USER_DENIED`
+
+### `security.verify(algorithm, publicKey, signature, data)`
+
+Verifies a signature against a public key. Pure function.
+
+**Returns:** `Promise<boolean>`
+
+### `security.secretSet(name, value)`
+
+Stores a secret in the OS keychain scoped to this package.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Secret name. |
+| `value` | `Uint8Array` | Secret bytes. |
+
+**Returns:** `Promise<void>`
+
+**Throws:** `ERR_KEYCHAIN_UNAVAILABLE`
+
+### `security.secretGet(name)`
+
+Reads a secret.
+
+**Returns:** `Promise<Uint8Array \| undefined>` — `undefined` when absent.
+
+### `security.secretDelete(name)`
+
+Deletes a secret.
+
+**Returns:** `Promise<void>`
+
+## Supported algorithms
+
+| Algorithm | Sign | Verify | Notes |
+| --- | --- | --- | --- |
+| `ed25519` | yes | yes | Default. |
+| `secp256k1` | yes | yes | Compatible with Web3 tooling. |
+| `rsa-2048` | yes | yes | Legacy/interop only. |
+
+## Security considerations
+
+- Prefer `security.sign`/`security.verify` over hand-rolled signature code.
+- Use `security.randomBytes` for all nonces and salts; do not seed from time.
+- Do not log key ids or secret names that reveal sensitive material.
+- Handle `ERR_KEYCHAIN_UNAVAILABLE` by degrading gracefully (e.g. refusing to
+  start rather than caching the secret in plain memory).
+
+<Warning title="Unsupported algorithms">
+  Passing any other algorithm string rejects with `ERR_UNSUPPORTED_ALGORITHM`.
+  The set is deliberately small and audited.
+</Warning>
+
+**Related:** [Wallet API](/docs/api-reference/wallet-api) · [Identity API](/docs/api-reference/identity-api) · [Error Codes](/docs/api-reference/error-codes)

@@ -1,0 +1,385 @@
+---
+title: "CLI Reference"
+description: "Every Orivon CLI command: purpose, syntax, arguments, options, examples, expected output and common mistakes."
+readingTime: 18
+lastUpdated: "July 31, 2026"
+order: 8
+tags: ["developers", "cli"]
+keywords: "CLI, commands, orivon new, orivon build, orivon test, orivon run, orivon publish, options"
+---
+
+The Orivon CLI (`orivon`) is the command line interface to everything you do
+as a developer: scaffold, build, test, run, publish and maintain projects.
+This page documents every command. Run `orivon help` at any time for the
+built in reference.
+
+## Command overview
+
+| Command | Purpose |
+| --- | --- |
+| `orivon new` | Scaffold a new project |
+| `orivon init` | Turn the current directory into a project |
+| `orivon add` | Add a dependency or provider |
+| `orivon build` | Compile to the package format |
+| `orivon test` | Run the test suite |
+| `orivon run` | Run the project in a local runtime |
+| `orivon dev` | Run with automatic rebuild on change |
+| `orivon publish` | Publish the package to the registry |
+| `orivon install` | Install a published package |
+| `orivon login` | Sign in to the registry |
+| `orivon logout` | Sign out |
+| `orivon doctor` | Verify the development environment |
+| `orivon upgrade` | Update the CLI |
+| `orivon uninstall` | Remove the CLI |
+| `orivon info` | Show project and environment information |
+
+## Global options
+
+These options work on every command:
+
+| Option | Meaning |
+| --- | --- |
+| `--help` | Print help for the command |
+| `--version` | Print the CLI version |
+| `--json` | Emit machine readable output |
+| `--quiet` | Suppress non error output |
+| `--verbose` | Increase log detail |
+| `-C <dir>` | Run as if started in `<dir>` |
+
+---
+
+## orivon new
+
+**Purpose**: scaffold a new project from a template.
+
+**Syntax**
+
+```sh
+orivon new <name> [--module] [--template <template>] [--language <lang>] [--no-install]
+```
+
+**Arguments and options**
+
+| Argument / option | Meaning |
+| --- | --- |
+| `<name>` | Project name; also the directory name |
+| `--module` | Scaffold a module instead of an application |
+| `--template <template>` | Choose a template, for example `app`, `module`, `provider` |
+| `--language <lang>` | Choose the source language, `ts`, `js` or `rust` |
+| `--no-install` | Skip installing default dependencies |
+
+**Examples**
+
+```sh
+orivon new my-app
+orivon new my-module --module
+orivon new provider-dns --template provider --language rust
+```
+
+**Expected output**
+
+```text
+Created project my-app
+Run 'cd my-app && orivon run' to get started
+```
+
+**Common mistakes**
+
+- Providing a name with spaces or invalid characters.
+- Running `orivon new` inside an existing project directory, which nests
+  projects. Use `orivon init` for that case.
+
+---
+
+## orivon init
+
+**Purpose**: turn the current directory into an Orivon project.
+
+**Syntax**
+
+```sh
+orivon init [--module] [--language <lang>]
+```
+
+**Examples**
+
+```sh
+mkdir my-app && cd my-app
+orivon init
+```
+
+**Common mistakes**
+
+- Running `init` in a directory that already has a manifest; the command will
+  refuse rather than overwrite.
+
+---
+
+## orivon add
+
+**Purpose**: add a dependency or provider to the project.
+
+**Syntax**
+
+```sh
+orivon add <package>[@version] [--provider <type>]
+```
+
+**Examples**
+
+```sh
+orivon add core-utils
+orivon add core-utils@0.2.0
+orivon add orivon-storage --provider storage
+```
+
+**Common mistakes**
+
+- Adding a package without the `@version` when a later breaking change ships.
+  Pin explicit versions for stable projects. See
+  [Versioning](/docs/standards/versioning).
+
+---
+
+## orivon build
+
+**Purpose**: compile the project into the package format.
+
+**Syntax**
+
+```sh
+orivon build [--release] [--out <dir>]
+```
+
+**Options**
+
+| Option | Meaning |
+| --- | --- |
+| `--release` | Build with optimizations enabled |
+| `--out <dir>` | Output directory, default `dist` |
+
+**Expected output**
+
+```text
+Building hello-world 0.1.0
+Compiled in 1.2s
+Package ready: dist/hello-world.omp
+```
+
+**Common mistakes**
+
+- Editing `dist/` directly; it is replaced on every build.
+- Forgetting `--release` when benchmarking; debug builds are slower.
+
+---
+
+## orivon test
+
+**Purpose**: run the project test suite.
+
+**Syntax**
+
+```sh
+orivon test [<test-name>] [--coverage] [--watch]
+```
+
+**Examples**
+
+```sh
+orivon test
+orivon test wallet
+orivon test --coverage
+```
+
+**Common mistakes**
+
+- Expecting tests to find network services; tests run in a local runtime with
+  no external access by default. Use mocks. See
+  [Testing](/docs/developers/testing).
+
+---
+
+## orivon run
+
+**Purpose**: run the project in a local runtime.
+
+**Syntax**
+
+```sh
+orivon run [--profile <name>] [--config <file>]
+```
+
+**Expected output**
+
+```text
+Starting runtime
+Loading hello-world 0.1.0
+Hello from Orivon!
+```
+
+**Common mistakes**
+
+- Running from outside the project directory; the command needs the manifest.
+- Expecting the run to fail loudly on permission issues; denied operations
+  are logged as denials. See [Permissions](/docs/developers/permissions).
+
+---
+
+## orivon dev
+
+**Purpose**: run with automatic rebuild and restart on source changes.
+
+**Syntax**
+
+```sh
+orivon dev [--port <port>] [--config <file>]
+```
+
+**Common mistakes**
+
+- Leaving `orivon dev` running while committing large source changes; each
+  change triggers a rebuild.
+
+---
+
+## orivon publish
+
+**Purpose**: publish the built package to the registry.
+
+**Syntax**
+
+```sh
+orivon publish [--dry-run] [--tag <tag>]
+```
+
+**Common mistakes**
+
+- Publishing without a build; publish uses `dist/`, so run `orivon build`
+  first.
+- Publishing a package with a version that already exists; the registry
+  rejects it. See [Versioning](/docs/standards/versioning).
+
+---
+
+## orivon install
+
+**Purpose**: install a published package for local use.
+
+**Syntax**
+
+```sh
+orivon install <package>[@version]
+```
+
+**Common mistakes**
+
+- Confusing `orivon install` with adding a project dependency. Use
+  `orivon add` inside a project; `install` is for standalone packages.
+
+---
+
+## orivon login / orivon logout
+
+**Purpose**: sign in to, or out of, the package registry with your Orivon
+identity.
+
+**Syntax**
+
+```sh
+orivon login [--registry <url>]
+orivon logout
+```
+
+The login flow signs a challenge with your identity key; the CLI never sees
+your private key. See [Identity APIs](/docs/developers/identity-apis).
+
+**Common mistakes**
+
+- Storing credentials manually; the login flow handles sessions for you.
+
+---
+
+## orivon doctor
+
+**Purpose**: verify the development environment.
+
+**Syntax**
+
+```sh
+orivon doctor [--check <name>]
+```
+
+**Expected output**
+
+```text
+[ok] orivon 0.1.0
+[ok] git 2.39
+[ok] config directory
+[ok] network reachable
+```
+
+**Common mistakes**
+
+- Ignoring warnings; `doctor` passes with warnings, but they usually point at
+  future failures.
+
+---
+
+## orivon upgrade / orivon uninstall
+
+**Purpose**: update or remove the CLI.
+
+**Syntax**
+
+```sh
+orivon upgrade
+orivon uninstall
+```
+
+See [Installation](/docs/developers/installation) for details.
+
+---
+
+## orivon info
+
+**Purpose**: show project and environment information.
+
+**Syntax**
+
+```sh
+orivon info
+```
+
+Prints the project name and version, the manifest path, the SDK version and
+the environment summary. Useful for bug reports.
+
+## Command output format
+
+Text output is for humans. For scripts, `--json` emits structured output:
+
+```sh
+orivon info --json
+```
+
+```json
+{
+  "name": "hello-world",
+  "version": "0.1.0",
+  "sdkVersion": "0.1.0",
+  "manifest": "orivon.toml"
+}
+```
+
+The JSON output is stable per command and versioned with the CLI.
+
+<Callout type="success" title="Best practice">
+  Use `orivon help <command>` before reaching for the docs. The built in help
+  is always the current version, and it documents every option the command
+  accepts.
+</Callout>
+
+## Related pages
+
+- [Quick Start](/docs/developers/quick-start): the CLI in action.
+- [Installation](/docs/developers/installation): installing and updating the CLI.
+- [Project Structure](/docs/developers/project-structure): the files the CLI manages.

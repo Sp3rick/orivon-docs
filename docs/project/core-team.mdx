@@ -1,0 +1,165 @@
+---
+title: "Core Team"
+description: "The structure of the Orivon core engineering team: roles, focus areas, and how the team operates."
+readingTime: 6
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["project", "core team", "engineering", "team structure"]
+keywords: "orivon core team, engineering team, team structure, roles, focus areas"
+---
+
+The **core team** is the group of engineers who work on Orivon as their
+primary focus — whether employed by sponsors, funded by grants, or
+volunteering significant time. This page describes the team structure, focus
+areas, and operating model.
+
+<Callout type="info" title="Core team vs. maintainers">
+  The **core team** are engineers focused on Orivon full-time or near-full-time.
+  **Maintainers** are the merge authorities for specific repositories. There is
+  significant overlap, but the roles are distinct: core team describes *focus*;
+  maintainer describes *authority*.
+</Callout>
+
+## Core team structure
+
+The core team is organized into **focus areas** aligned with the platform
+architecture:
+
+| Focus Area | Scope | Typical Roles |
+| --- | --- | --- |
+| **Runtime** | WASM execution, capability sandbox, module loader, performance | Runtime engineers, security engineers |
+| **Browser** | Rendering engine, UI framework, platform integration, accessibility | Browser engineers, UI engineers |
+| **Core Platform** | Networking, storage, identity, permissions, shared libraries | Systems engineers, platform engineers |
+| **SDK & Tooling** | TypeScript/Rust SDKs, CLI, scaffolding, debugging, CI/CD | Developer experience engineers |
+| **Security** | Threat modeling, audits, cryptography, disclosure coordination | Security engineers, cryptographers |
+| **Documentation** | Docs site, guides, standards docs, research library | Technical writers, doc engineers |
+| **Infrastructure** | Build systems, release automation, testing, observability | Build/release engineers, DevOps |
+| **Research** | Whitepapers, architecture papers, exploratory prototypes | Research engineers, applied researchers |
+
+## Team composition
+
+| Category | Count (Approx.) | Notes |
+| --- | --- | --- |
+| **Full-time sponsored** | To Be Announced | Employed by sponsor organizations |
+| **Grant-funded** | To Be Announced | Funded via [Grants Program](/docs/community/grants-program) |
+| **Volunteer contributors** | ~120 active | Part-time, merit-based recognition |
+| **Total active (30-day)** | ~120 | Across all categories |
+
+<Callout type="note" title="Numbers are approximate">
+  Exact headcount fluctuates. The project does not publish a fixed "core team
+  roster" because the boundary between core team and active contributors is
+  fluid. What matters is contribution, not title.
+</Callout>
+
+## How the core team operates
+
+### Planning cycles
+- **Quarterly planning** — Align with [Project Roadmap](/docs/project/roadmap) and [Community Roadmap](/docs/community/community-roadmap).
+- **Sprint cadence** — 2-week sprints; planning, review, retrospective public.
+- **Work assignment** — Pull-based: engineers pick up issues from public backlogs.
+
+### Communication
+- **Daily standups** — Per focus area (optional, async-friendly).
+- **Weekly sync** — Cross-team coordination; open to observers.
+- **Monthly all-hands** — Project updates, demos, Q&A; recorded and published.
+- **Async default** — GitHub issues, forum threads, Discord for quick questions.
+
+### Decision-making
+- **Local decisions** — Within focus area: team consensus.
+- **Cross-cutting decisions** — [Decision proposal](/docs/community/decision-making) process.
+- **Architecture decisions** — Working group recommendation → TSC ratification.
+
+### Quality practices
+- **Code review required** — All changes reviewed by at least one maintainer.
+- **Testing gates** — Unit, integration, and end-to-end tests in CI.
+- **Security review** — Security WG reviews sensitive changes.
+- **Documentation updates** — Required for user-facing changes.
+- **Performance benchmarks** — Tracked per release for critical paths.
+
+## Focus area details
+
+### Runtime Team
+- WASM runtime optimization (startup, throughput, memory).
+- Capability system: design, enforcement, auditing.
+- Module loader: resolution, caching, hot reload.
+- Sandbox hardening: isolation, syscall filtering, side-channel mitigation.
+
+### Browser Team
+- Rendering pipeline: layout, paint, compositing.
+- UI framework: components, theming, accessibility (WCAG 2.1 AA).
+- Platform integration: OS APIs, notifications, media, printing.
+- Extension API: compatibility layer design.
+
+### Core Platform Team
+- Networking stack: HTTP/3, QUIC, P2P, DNS-over-HTTPS.
+- Storage engine: local-first, encrypted, sync protocols.
+- Identity layer: DID methods, verifiable credentials, key management.
+- Permissions: capability model, delegation, revocation.
+
+### SDK & Tooling Team
+- TypeScript SDK: types, utilities, React integration.
+- Rust SDK: core bindings, async runtime integration.
+- CLI: project scaffolding, build, test, deploy commands.
+- Debugging: source maps, inspector protocol, profiling.
+
+### Security Team
+- Threat modeling for new features (STRIDE-based).
+- Cryptographic primitive selection and review.
+- Third-party audit coordination.
+- Responsible disclosure response.
+- Dependency scanning and supply chain security.
+
+### Documentation Team
+- Docs site architecture and content strategy.
+- Developer guides, tutorials, API reference maintenance.
+- Standards documentation publishing.
+- Research library curation.
+- Localization coordination.
+
+### Infrastructure Team
+- Build system: Bazel/Cargo/npm orchestration.
+- Release automation: signing, publishing, attestation.
+- CI/CD: test matrix, performance benchmarks, release gates.
+- Observability: metrics, logging, tracing, alerting.
+
+### Research Team
+- Whitepaper authorship and peer review.
+- Architecture paper maintenance.
+- Exploratory prototypes: new WASM features, cryptographic schemes, P2P protocols.
+- Standards track participation (W3C, IETF, TC39).
+
+## Joining the core team
+
+There is no formal "hiring" process for the core team. Engineers become core
+team members by:
+
+1. **Contributing consistently** in a focus area (code, review, design).
+2. **Demonstrating ownership** of significant features or subsystems.
+3. **Being recognized** by existing core team members and maintainers.
+4. **Securing sustainable funding** (sponsor employment, grant, or volunteer capacity).
+
+<Callout type="success" title="The core team is open">
+  If you are interested in working on Orivon as a primary focus, start by
+  contributing in a focus area. The community will notice sustained,
+  high-quality work. Funding paths include sponsor employment, grants, and
+  fellowship programs (planned).
+</Callout>
+
+## Current focus area leads
+
+Each focus area has a **lead** (or co-leads) who coordinates planning and
+represents the area in cross-team syncs. Leads are senior engineers selected
+by the area's contributors and ratified by the TSC.
+
+| Focus Area | Lead(s) | Since |
+| --- | --- | --- |
+| Runtime | To Be Announced | — |
+| Browser | To Be Announced | — |
+| Core Platform | To Be Announced | — |
+| SDK & Tooling | To Be Announced | — |
+| Security | To Be Announced | — |
+| Documentation | To Be Announced | — |
+| Infrastructure | To Be Announced | — |
+| Research | To Be Announced | — |
+
+**Related:** [Leadership](/docs/project/leadership) · [Maintainers](/docs/project/maintainers) · [Organization](/docs/project/organization) · [Working Groups](/docs/community/working-groups)

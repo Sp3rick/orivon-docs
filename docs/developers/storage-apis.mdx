@@ -1,0 +1,153 @@
+---
+title: "Storage APIs"
+description: "The storage APIs your code uses for content addressed data: storing, retrieving, metadata, synchronization and durable versus reconstructible data."
+readingTime: 11
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["developers", "storage-apis"]
+keywords: "storage APIs, content addressing, storage, blobs, metadata, synchronization, durable data"
+---
+
+Storage is where data outlives your code. The storage APIs give your
+application a safe, content addressed way to persist and share data. This page
+explains the model and how to use it.
+
+## What the storage APIs are
+
+The storage APIs provide:
+
+<CheckList
+  items={[
+    'Content addressed blob storage, addressed by hash.',
+    'A metadata store for structured data.',
+    'A key store for small values and secrets.',
+    'Identity scoped storage and encryption.',
+    'Synchronization between devices.',
+  ]}
+/>
+
+The design is documented in [Storage Engine](/docs/technical-design/storage-engine).
+
+## Why they exist
+
+Storage must be safe from substitution and safe from loss. Content addressing
+gives integrity by construction: the address is the integrity claim, and a
+tampered byte is a different address. The storage APIs expose that guarantee
+without making every developer reimplement it.
+
+## Content addressed storage
+
+The core operation is put and get by content address:
+
+```ts
+const address = await app.storage.put(bytes);
+
+const read = await app.storage.get(address);
+```
+
+The address is derived from the content, so the same content always produces
+the same address. Retrieval verifies the bytes against the address before
+returning them.
+
+<Diagram caption="Content addressing ties the address to the bytes.">
+  <Flow column>
+    <DiagramNode accent>Content</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode>Hash</DiagramNode>
+    <FlowArrowDown />
+    <DiagramNode dim>Address</DiagramNode>
+  </Flow>
+</Diagram>
+
+Because the address is the content, storage is naturally deduplicated and
+naturally verifiable. This is the same model the
+[storage specification](/docs/standards/osp-010-storage) describes.
+
+## Metadata and keys
+
+For structured data, use the metadata store:
+
+```ts
+await app.storage.metadata.set('preferences', {theme: 'dark'});
+const prefs = await app.storage.metadata.get('preferences');
+```
+
+For small sensitive values, use the key store:
+
+```ts
+await app.storage.keys.set('apiToken', token, {encrypted: true});
+```
+
+<Callout type="warning" title="Secrets belong in the key store">
+  Do not put secrets in content addressed storage; blobs may be replicated and
+  are not encrypted by default. The key store is identity scoped and encrypted.
+  See [Security](/docs/developers/best-practices).
+</Callout>
+
+## Durable versus reconstructible
+
+The storage engine distinguishes durable from reconstructible data:
+
+| Kind | Example | What happens under pressure |
+| --- | --- | --- |
+| **Durable** | User preferences, identity data | Never evicted without consent |
+| **Reconstructible** | Cache, derived data | Can be recreated from a source |
+
+Your application should classify what it stores. See
+[Memory Management](/docs/technical-design/memory-management) for how the
+system uses this distinction.
+
+## Synchronization
+
+Storage synchronizes across devices through the network provider:
+
+```ts
+await app.storage.sync({scope: 'profile'});
+```
+
+Synchronization resolves conflicts deterministically and keeps data portable.
+See [Networking APIs](/docs/developers/networking-apis) for the transport and
+[Storage Engine](/docs/technical-design/storage-engine) for conflict handling.
+
+## When to use the storage APIs
+
+| You need to | Use |
+| --- | --- |
+| Persist immutable data | `app.storage.put(...)` / `get(...)` |
+| Store structured state | `app.storage.metadata.set(...)` |
+| Store a secret | `app.storage.keys.set(..., {encrypted: true})` |
+| Share across devices | `app.storage.sync(...)` |
+| Cache something | Blob storage with a TTL policy |
+
+## Common mistakes
+
+<CardGrid columns={2}>
+  <Card title="Storing secrets as blobs">
+    Blobs are not encrypted. Use the key store for secrets.
+  </Card>
+  <Card title="Ignoring addresses">
+    Treat the returned address as opaque. Comparing addresses is safe;
+    deriving meaning from them is not guaranteed.
+  </Card>
+  <Card title="Skipping the durable/reconstructible split">
+    Everything marked durable increases eviction pressure. Mark caches as
+    reconstructible.
+  </Card>
+</CardGrid>
+
+<Callout type="success" title="Best practice">
+  Use content addressing as your cache key. It gives you deduplication,
+  integrity and offline correctness for free, because the address never goes
+  stale.
+</Callout>
+
+<Callout type="info" title="Relation to the rest">
+  The storage APIs are specified in the [Storage draft](/docs/standards/osp-010-storage)
+  and defined by [Storage Engine](/docs/technical-design/storage-engine).
+</Callout>
+
+## Related pages
+
+- [Networking APIs](/docs/developers/networking-apis): how data moves between devices.
+- [Identity APIs](/docs/developers/identity-apis): identity scoped encryption.
+- [Storage Example](/docs/developers/examples/storage-example): a complete example.

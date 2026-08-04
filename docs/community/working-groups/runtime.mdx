@@ -1,0 +1,49 @@
+---
+title: "Runtime Working Group"
+description: "The Runtime working group coordinates the execution engine: performance, security, and WebAssembly integration."
+readingTime: 4
+lastUpdated: "July 31, 2026"
+order: 7
+tags: ["community", "working groups", "runtime"]
+keywords: "runtime working group, execution engine, performance, wasm, webassembly"
+---
+
+The **Runtime working group** coordinates the execution engine at the heart of
+Orivon: the runtime that loads modules, enforces capabilities, and executes
+WebAssembly.
+
+## Mission
+
+Make the runtime fast, secure, and predictable — the foundation every other
+layer builds on.
+
+## Scope
+
+<CheckList
+  items={[
+    'Execution engine architecture and performance.',
+    'WebAssembly integration and module execution.',
+    'Capability enforcement and sandboxing behavior.',
+    'Runtime stability, observability, and error handling.',
+    'Coordination with the Security and Core working groups.',
+  ]}
+/>
+
+## Typical work
+
+- Benchmarking and profiling the execution pipeline.
+- Improving module startup time and memory usage.
+- Hardening the sandbox against escape attempts.
+- Maintaining runtime design documents (see
+  [Runtime Architecture](/docs/research/runtime-architecture)).
+
+<Card to="/docs/research/runtime-architecture">
+  Read the Runtime Architecture design document for the current design.
+</Card>
+
+## Current status
+
+The group is **seeding**: the charter is public and the backlog is being
+formed. Join the discussion to help shape the first work items.
+
+**Related:** [Working Groups](/docs/community/working-groups) · [Core Working Group](/docs/community/working-groups/core) · [Security Working Group](/docs/community/working-groups/security)

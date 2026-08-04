@@ -1,0 +1,149 @@
+---
+title: "Release Archive"
+description: "Archive of all historical Orivon releases with download links, release notes, and verification information."
+readingTime: 5
+lastUpdated: "July 31, 2026"
+order: 43
+tags: ["project", "release archive", "releases", "history", "changelog"]
+keywords: "release archive, historical releases, download links, release notes, orivon releases"
+---
+
+Complete archive of all Orivon platform releases.
+
+## Release History
+
+| Version | Date | Channel | Codename | Highlights |
+| :--- | :--- | :--- | :--- | :--- |
+| **v1.2.0** | 2026-07-15 | Stable | Community | Community/Governance docs, Working Groups, Grants framework |
+| **v1.1.0** | 2026-04-20 | Stable | Developer | SDK v1.1, Developer Documentation complete |
+| **v1.0.0** | 2026-01-10 | **LTS** | Ecosystem | First stable, ecosystem launch, grants v1 |
+| **v0.9.0** | 2025-10-05 | Beta | Standards | Standards v1, API Reference complete |
+| **v0.8.0** | 2025-07-15 | Beta | Architecture | Technical Design, Research library |
+| **v0.5.0** | 2025-01-20 | Preview | Browser MVP | First browser, rendering pipeline |
+| **v0.1.0** | 2024-09-10 | Alpha | Foundation | Runtime, module system, capability sandbox |
+
+## Release Details
+
+### v1.2.0 (2026-07-15) — Community
+**Channel:** Stable | **Support:** Active until v1.3
+
+| Artifact | Download | SHA256 | Signature |
+| :--- | :--- | :--- | :--- |
+| Browser (Win x64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Browser (Win ARM64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Browser (macOS x64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Browser (macOS ARM64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Browser (Linux x64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Browser (Linux ARM64) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Runtime (Source) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Runtime (Binaries) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| CLI | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| **Release Notes** | [View](/docs/project/changelog-archive#v120) | — | — |
+| **SBOM** | [CycloneDX](To Be Announced) | [SPDX](To Be Announced) | — |
+
+**Key Features:**
+- Community, Governance & Ecosystem documentation (39 pages)
+- Project, Organization & Enterprise documentation (this section)
+- 9 Working Group charters published
+- Grants Program framework
+- TSC election process documented
+
+### v1.1.0 (2026-04-20) — Developer
+**Channel:** Stable | **Support:** Maintenance (security only)
+
+| Artifact | Download | SHA256 | Signature |
+| :--- | :--- | :--- | :--- |
+| Browser (All Platforms) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Runtime | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| CLI | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| **Release Notes** | [View](/docs/project/changelog-archive#v110) | — | — |
+
+**Key Features:**
+- TypeScript SDK v1.1
+- Rust SDK v1.1
+- Developer Documentation complete (10 levels)
+- Improved CLI scaffolding
+- Module hot reload (preview)
+
+### v1.0.0 (2026-01-10) — Ecosystem (LTS)
+**Channel:** LTS | **Support:** Active until 2028-01-10
+
+| Artifact | Download | SHA256 | Signature |
+| :--- | :--- | :--- | :--- |
+| Browser (All Platforms) | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| Runtime | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| CLI | [Link](To Be Announced) | [Link](To Be Announced) | [Link](To Be Announced) |
+| **Release Notes** | [View](/docs/project/changelog-archive#v100) | — | — |
+
+**Key Features:**
+- First stable release
+- Module system, capability sandbox stable
+- Developer SDK v1.0
+- Standards v1 published (12 specs)
+- Grants Program v1
+- Project Directory launch
+
+### v0.x Releases (Archived)
+
+<Accordion
+  items={[
+    {
+      q: "v0.9.0 (2025-10-05) — Standards",
+      a: "Beta. Standards v1 complete (12 specifications). API Reference complete (34 entries). Research library 39 publications. Security model documented."
+    },
+    {
+      q: "v0.8.0 (2025-07-15) — Architecture",
+      a: "Beta. Technical Design level complete. Research library launched. Module architecture stabilized. Permission system v1."
+    },
+    {
+      q: "v0.5.0 (2025-01-20) — Browser MVP",
+      a: "Preview. First functional browser build. Rendering pipeline working. Basic UI. TypeScript SDK v0.1."
+    },
+    {
+      q: "v0.1.0 (2024-09-10) — Foundation",
+      a: "Alpha. Core runtime operational. Module system loading. Capability sandbox enforcing. First external contributors."
+    },
+  ]}
+/>
+
+## Release Channels
+
+| Channel | Description | Updates |
+| :--- | :--- | :--- |
+| **Stable** | Production-ready, full QA | Every 8–12 weeks |
+| **LTS** | Extended support (24 months) | Annual selection from Stable |
+| **Beta** | Feature-complete, testing | Every 4–6 weeks |
+| **Preview** | Weekly snapshots | Weekly |
+| **Nightly** | Every commit | Daily |
+
+## Verification
+
+Every release includes:
+- **Cosign/Sigstore signatures** (keyless, transparency log)
+- **SHA256 checksums** (published with release)
+- **SBOM** (CycloneDX + SPDX)
+- **Provenance attestation** (SLSA Level 3 target)
+- **GitHub Attestations** (for npm/crates.io packages)
+
+See [Downloads](/docs/project/downloads#verification) for verification instructions.
+
+## Release Notes by Version
+
+See [Changelog Archive](/docs/project/changelog-archive) for detailed,
+searchable changelogs for every version.
+
+## Support Status
+
+| Version | Status | Security Fixes | Bug Fixes | EOL |
+| :--- | :--- | :--- | :--- | :--- |
+| v1.2.x | **Active** | ✅ | ✅ | v1.3 release |
+| v1.1.x | **Maintenance** | ✅ (P0/P1) | ❌ | v1.2 release |
+| v1.0.x | **Active LTS** | ✅ | ✅ | 2028-01-10 |
+| v0.x | **EOL** | ❌ | ❌ | 2026-01-10 |
+
+<Callout type="success" title="Stay current, stay secure">
+  The shortest path to security is staying on a supported version. LTS gives
+  you 24 months of stability; Stable gives you the latest features.
+</Callout>
+
+**Related:** [Changelog Archive](/docs/project/changelog-archive) · [Documentation Archive](/docs/project/doc-archive) · [Downloads](/docs/project/downloads) · [Version Support Policy](/docs/project/version-support) · [Release Lifecycle](/docs/project/release-lifecycle)

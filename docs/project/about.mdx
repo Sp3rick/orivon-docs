@@ -1,0 +1,123 @@
+---
+title: "About Orivon"
+description: "What Orivon is, its long-term vision, project goals, technology focus, open-source philosophy, and community-first development approach."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 2
+tags: ["project", "about", "vision", "goals"]
+keywords: "orivon, about orivon, project vision, technology focus, open source philosophy"
+---
+
+Orivon is an **open-source browser and platform** that returns control of the
+web to its users. It is built on WebAssembly, capability-based security, and
+open standards — enabling user-owned identity, private data, and a
+programmable web where participants are rewarded for the value they create.
+
+## What Orivon is
+
+Orivon is not just a browser. It is a **platform** consisting of:
+
+- **Orivon Browser** — the flagship user agent: private, capable, extensible.
+- **Orivon Runtime** — the WebAssembly runtime powering the platform with capability-based sandboxing.
+- **Orivon Core** — the shared platform libraries: networking, storage, identity, permissions.
+- **Orivon SDK** — TypeScript and Rust SDKs for building modules and applications.
+- **Orivon Standards** — open specifications for naming, identity, Web3 Score, module format, and more.
+
+The browser is one client on this platform. The platform itself is designed to
+be embedded, extended, and integrated by other applications and services.
+
+<Callout type="info" title="Platform vs. Browser">
+  The **platform** (runtime, core, SDK, standards) is the foundation. The
+  **browser** is the flagship application built on that foundation. Other
+  applications — wallets, identity providers, decentralized apps — can be
+  built on the same platform without using the browser.
+</Callout>
+
+## Long-term vision
+
+> **A web where users control their data, identity, and attention — and where
+> developers build without asking permission from a platform.**
+
+The current web is dominated by a handful of platforms that mediate every
+interaction, extract value from users, and set rules unilaterally. Orivon's
+vision is to invert this model:
+
+| Current Web | Orivon Vision |
+| --- | --- |
+| Platforms own user data | Users own their data |
+| Platforms control identity | Users control their identity (DIDs) |
+| Platforms monetize attention | Participants are rewarded for value created |
+| Closed, proprietary APIs | Open standards, capability-based permissions |
+| Single points of failure | Decentralized, resilient infrastructure |
+
+## Project goals
+
+| Goal | Description |
+| --- | --- |
+| **User sovereignty** | Users control identity, data, and attention by default. |
+| **Developer freedom** | Build and distribute without platform gatekeepers. |
+| **Open standards** | Every protocol, format, and API is an open specification. |
+| **Community governance** | The project is governed by contributors, not a single company. |
+| **Technical excellence** | Capability-based security, WebAssembly performance, rigorous engineering. |
+| **Ecosystem growth** | A thriving ecosystem of modules, applications, and services. |
+| **Long-term sustainability** | Funding, governance, and legal structures that outlast any individual. |
+
+## Technology focus
+
+Orivon's technical architecture is built on three pillars:
+
+<CardGrid columns={3}>
+  <Card title="WebAssembly Runtime" to="/docs/ecosystem/runtime">
+    Secure, fast, portable execution. Modules run in a capability-based sandbox with fine-grained permissions.
+  </Card>
+  <Card title="Capability-Based Security" to="/docs/ecosystem/security-model">
+    No ambient authority. Every action requires an explicit capability. Principle of least privilege by default.
+  </Card>
+  <Card title="Open Standards" to="/docs/standards/overview">
+    Naming, identity, Web3 Score, module format, and more — all specified openly and governed by the community.
+  </Card>
+</CardGrid>
+
+Additional technology areas:
+- **User-owned identity** — DIDs, verifiable credentials, decentralized identifiers.
+- **Reputation layer** — Web3 Score: portable, privacy-preserving reputation.
+- **Naming system** — Human-readable names backed by decentralized resolution.
+- **Module ecosystem** — Composable, sandboxed WebAssembly modules.
+- **Privacy by design** — No telemetry by default, local-first architecture.
+
+## Open-source philosophy
+
+Orivon is licensed under the **Apache License 2.0** — a permissive license that
+grants patent rights, allows commercial use, and requires attribution.
+
+<Callout type="note" title="License stability">
+  The Apache 2.0 license is used by the Apache Software Foundation, Kubernetes,
+  and many other successful open-source projects. It provides legal clarity for
+  enterprises and protects contributors with an explicit patent grant.
+</Callout>
+
+Our open-source commitments:
+
+- **Source open by default** — All code, documentation, standards, and research developed in public.
+- **Process open by default** — Discussions, decisions, roadmaps, and meetings are public.
+- **Governance community-owned** — Apache-style meritocratic governance; no single vendor controls the project.
+- **No open core** — The entire platform is Apache 2.0; no proprietary modules in the core.
+- **Contributor-friendly** — DCO (Developer Certificate of Origin) instead of CLA; no copyright assignment.
+
+## Community-first development
+
+Orivon is built by its community. The project's success is measured not by
+market share captured, but by:
+
+- **Contributor growth** — Active contributors, maintainers, and leaders.
+- **Ecosystem health** — Projects built on Orivon, modules published, standards adopted.
+- **User agency** — Real control exercised by users over their data and identity.
+- **Trust** — Transparency of governance, security, and financial stewardship.
+
+<Callout type="success" title="The project belongs to the community">
+  Orivon is not a product you consume — it is a project you can shape. Whether
+  you write code, write docs, organize events, or simply use the browser, you
+  are part of what makes Orivon what it is.
+</Callout>
+
+**Related:** [Mission & Vision](/docs/project/mission-vision) · [Project History](/docs/project/history) · [Open Source Licenses](/docs/project/open-source-licenses)

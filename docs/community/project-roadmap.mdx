@@ -1,0 +1,151 @@
+---
+title: "Project Roadmap"
+description: "The Orivon project roadmap: completed milestones, current work, upcoming releases, and future vision."
+readingTime: 8
+lastUpdated: "July 31, 2026"
+order: 18
+tags: ["community", "roadmap", "releases", "milestones"]
+keywords: "project roadmap, milestones, releases, orivon roadmap, upcoming features"
+---
+
+The project roadmap tracks what the engineering teams and community are
+building, when it is expected, and how it connects to the long-term vision.
+It is a living document updated each release cycle.
+
+## Roadmap philosophy
+
+- **Timeboxes, not dates.** We commit to scope within a release window, not to
+  calendar dates. Quality and security come first.
+- **Public and accountable.** The roadmap is public; progress is reported in
+  release notes and TSC minutes.
+- **Community-shaped.** Priorities are discussed in the open; anyone can
+  propose work through the [decision process](/docs/community/decision-making).
+
+<Callout type="info" title="Roadmap vs. Research Roadmap">
+  This page covers the *product* roadmap: features, releases, and platform
+  capabilities. The [Research Roadmap](/docs/research/research-roadmap) covers
+  the long-form research program and exploratory work.
+</Callout>
+
+## Release trains
+
+Orivon releases on a regular cadence with three tracks:
+
+| Track | Cadence | Purpose |
+| --- | --- | --- |
+| **Stable** | Every 8–12 weeks | Production-ready releases with full QA. |
+| **Beta** | Every 2–4 weeks | Feature-complete previews for testing. |
+| **Nightly** | Continuous | Latest changes for early adopters and CI. |
+
+Release notes for every version are published in the
+[API Reference Changelog](/docs/api-reference/changelog).
+
+## Completed milestones
+
+| Milestone | Release | Highlights |
+| --- | --- | --- |
+| **M1: Foundation** | v0.1 (2024-Q3) | Core runtime, module system, capability sandbox. |
+| **M2: Browser MVP** | v0.5 (2025-Q1) | First browser build, rendering pipeline, basic UI. |
+| **M3: Standards v1** | v0.8 (2025-Q3) | Naming system, identity, Web3 Score specs published. |
+| **M4: Ecosystem Launch** | v1.0 (2026-Q1) | Developer docs, SDK, contributor guide, first grants. |
+| **M5: Governance & Community** | v1.2 (2026-Q3) | This section published: governance, programs, partnerships. |
+
+## Current work (v1.3 – v1.5)
+
+The following are the active priorities for the next release cycles. Items are
+grouped by subsystem and tracked as decision proposals.
+
+### Runtime & Core
+
+| Item | Status | Target |
+| --- | --- | --- |
+| Module hot reload for development | Design | v1.3 |
+| Performance baseline: startup < 200ms | In progress | v1.3 |
+| Capability inheritance model | Proposal | v1.4 |
+| Cross-module memory sharing (zero-copy) | Research | v1.5 |
+
+### Browser
+
+| Item | Status | Target |
+| --- | --- | --- |
+| Privacy-preserving permission UI | Design | v1.3 |
+| Web3 Score display in address bar | Prototype | v1.4 |
+| Extension API compatibility layer | Proposal | v1.5 |
+| Accessibility audit and fixes | In progress | v1.3 |
+
+### SDK & Developer Experience
+
+| Item | Status | Target |
+| --- | --- | --- |
+| Type-safe capability declarations | In progress | v1.3 |
+| Project scaffolding CLI improvements | In progress | v1.3 |
+| Debugger integration for modules | Design | v1.4 |
+| Migration tooling for v1.x → v2.0 | Proposal | v1.5 |
+
+### Standards & Governance
+
+| Item | Status | Target |
+| --- | --- | --- |
+| Naming system dispute resolution v2 | Proposal | v1.3 |
+| Web3 Score algorithm v2 | In progress | v1.4 |
+| TSC election process documentation | Complete | v1.2 |
+| Grants program launch | In progress | v1.3 |
+
+## Upcoming releases (v1.6 – v2.0)
+
+These are directionally committed but not yet scheduled:
+
+| Theme | Description |
+| --- | --- |
+| **Platform maturity** | Hardening, observability, operational tooling. |
+| **Ecosystem scale** | Package registry, module marketplace, CI/CD templates. |
+| **Identity & privacy** | DID-based identity, verifiable credentials, private compute. |
+| **Networking** | P2P transport, relay mesh, latency optimization. |
+| **AI integration** | Local inference, agent protocols, privacy-preserving ML. |
+
+## Future vision (post v2.0)
+
+The long-term vision guides the roadmap but is not a commitment:
+
+<CardGrid columns={2}>
+  <Card title="User-owned web">
+    Every user controls their identity, data, and attention — no platform
+    intermediaries.
+  </Card>
+  <Card title="Programmable value">
+    The Web3 Score and module economy make contribution directly valuable.
+  </Card>
+  <Card title="Decentralized infrastructure">
+    The browser runs on a network of user-operated nodes, not centralized
+    servers.
+  </Card>
+  <Card title="Open standards by default">
+    Every protocol, format, and API is an open standard governed by the
+    community.
+  </Card>
+</CardGrid>
+
+## How to influence the roadmap
+
+<Steps>
+  <Step title="Read the roadmap">
+    Start here. Understand what is planned and why.
+  </Step>
+  <Step title="Join the discussion">
+    Active roadmap discussions happen in the forum under the `roadmap` tag.
+  </Step>
+  <Step title="Propose work">
+    Use the [decision proposal](/docs/community/decision-making) process to
+    propose new work or reprioritize.
+  </Step>
+  <Step title="Contribute">
+    Pick up an item from the current work tables and start contributing.
+  </Step>
+</Steps>
+
+<Callout type="success" title="The roadmap is a conversation">
+  The roadmap is not a promise from a company — it is a shared plan from the
+  community. If something matters to you, the path to influence it is open.
+</Callout>
+
+**Related:** [Community Roadmap](/docs/community/community-roadmap) · [Research Roadmap](/docs/research/research-roadmap) · [Decision Making](/docs/community/decision-making)
