@@ -6,7 +6,7 @@ interface LogoProps {
 }
 
 /**
- * Orivon mark: an orbit rendered as a split ring with a companion body.
+ * Orivon mark: a paper-plane (messaging/send glyph) inside a ring.
  * Pure monochrome so it inherits the current text color in any theme.
  */
 export function Logo({size = 24, className}: LogoProps) {
@@ -22,14 +22,22 @@ export function Logo({size = 24, className}: LogoProps) {
       <circle
         cx="16"
         cy="16"
-        r="11.2"
+        r="12.4"
         stroke="currentColor"
-        strokeWidth="2.6"
+        strokeWidth="2.4"
         strokeLinecap="round"
-        strokeDasharray="60 10.3"
       />
-      <circle cx="25.1" cy="9.1" r="3" fill="currentColor" />
-      <circle cx="8.6" cy="23.4" r="1.6" fill="currentColor" opacity="0.55" />
+      <path
+        d="M22.6 8 9.4 14.6 14.3 16.4 16.6 22.2 19.6 11.9 Z"
+        fill="currentColor"
+      />
+      <path
+        d="M9.4 14.6 16.6 22.2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0"
+      />
     </svg>
   );
 }
